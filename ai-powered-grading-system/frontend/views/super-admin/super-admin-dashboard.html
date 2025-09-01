@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PLMUN Portal</title>
+    <link rel="stylesheet" href="../../assets/css/superadmin.css" />
+    <!-- PLMUN Logo -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../../assets/images/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="../../assets/images/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="../../assets/images/favicon-16x16.png"
+    />
+    <link rel="manifest" href="../../assets/images/site.webmanifest" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <span class="plmun">PLMUN</span><span class="portal">Portal</span>
+          <p class="role-label">Super Admin</p>
+        </div>
+        <nav class="sidebar-nav">
+          <span class="nav-section-title">General</span>
+          <ul>
+            <li class="active"><a href="#dashboard">System Dashboard</a></li>
+            <li><a href="#user-roles">User Role Management</a></li>
+            <li><a href="#database">Database Management</a></li>
+            <li><a href="#audit-logs">Audit Logs</a></li>
+            <li><a href="#ai-config">AI Module Config</a></li>
+            <li><a href="#settings">System Settings</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-footer">
+          <a href="../login.html" class="logout">Log Out</a>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <header class="main-header">
+          <h1>System Dashboard</h1>
+          <div class="user-profile">
+            <span>Developer Name</span>
+            <img src="../../assets/images/avatar.png" alt="User Avatar" />
+          </div>
+        </header>
+
+        <div class="content-body">
+          <!-- Dashboard Cards -->
+          <div class="cards-container">
+            <div class="card">
+              <h4>Server Status</h4>
+              <p class="status-online">Online</p>
+              <span>Uptime: 99.98%</span>
+            </div>
+            <div class="card">
+              <h4>Active Users</h4>
+              <p class="metric">1,204</p>
+              <span>Across all roles</span>
+            </div>
+            <div class="card">
+              <h4>Error Logs (24h)</h4>
+              <p class="metric error">5</p>
+              <span>Critical errors need attention</span>
+            </div>
+            <div class="card">
+              <h4>Database Health</h4>
+              <p class="status-healthy">Healthy</p>
+              <span>Last Backup: 1h ago</span>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="activity-log-widget">
+            <h3>Recent System Activity</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2025-09-01 19:50:12</td>
+                  <td>admin_mis@plmun.edu</td>
+                  <td>Generated department report</td>
+                  <td><span class="status-tag success">Success</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- User Management Toolbar + Table -->
+          <div class="toolbar">
+            <input type="text" placeholder="Search by name, email, or ID..." />
+            <select>
+              <option>Filter by Role</option>
+              <option>Super Admin</option>
+              <option>Admin</option>
+              <option>Professor</option>
+              <option>Student</option>
+            </select>
+            <select>
+              <option>Sort by</option>
+              <option>Name (A-Z)</option>
+              <option>Date Created</option>
+            </select>
+            <button class="btn-primary">Add New User</button>
+          </div>
+
+          <div class="user-table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Date Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Jose Rivas</td>
+                  <td>joserivas@gmail.com</td>
+                  <td>Student</td>
+                  <td><span class="status-tag active">Active</span></td>
+                  <td>2025-08-15</td>
+                  <td>
+                    <button class="btn-icon">Edit</button>
+                    <button class="btn-icon danger">Deactivate</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
