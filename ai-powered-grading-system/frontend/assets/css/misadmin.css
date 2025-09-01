@@ -258,6 +258,7 @@ body {
 
 .user-table-container {
   background: #ffffff;
+  height: 150px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
@@ -374,4 +375,13 @@ form input[type="checkbox"] {
 .cards-container,
 .tab-section {
   margin-bottom: 30px;
+}
+
+/* MIS Admin specific overrides */
+.role-label {
+  color: #217589; /* emphasize MIS Admin */
+}
+
+.tab-section h2 {
+  color: #217589; /* MIS blue tone for headings */
 }
