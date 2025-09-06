@@ -45,7 +45,7 @@
           </ul>
         </nav>
         <div class="sidebar-footer">
-          <a href="../login.html" class="logout">Log Out</a>
+          <a href="../login.php" class="logout">Log Out</a>
         </div>
       </aside>
 
@@ -272,51 +272,6 @@
         </div>
       </main>
     </div>
-    <script>
-      // Sidebar tab highlighting
-      const navLinks = document.querySelectorAll(".sidebar-nav ul li a");
-
-      navLinks.forEach((link) => {
-        link.addEventListener("click", () => {
-          // Remove active from all
-          navLinks.forEach((l) => l.parentElement.classList.remove("active"));
-          // Add active to clicked one
-          link.parentElement.classList.add("active");
-        });
-      });
-    </script>
-    <script>
-      const sections = document.querySelectorAll(".tab-section");
-      const navItems = document.querySelectorAll(".sidebar-nav ul li");
-
-      window.addEventListener("scroll", () => {
-        let current = "";
-        const scrollY = window.pageYOffset;
-
-        sections.forEach((section, index) => {
-          const sectionTop = section.offsetTop - 100; // offset for header
-          const sectionHeight = section.offsetHeight;
-
-          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
-            current = section.getAttribute("id");
-          }
-
-          // special case: when you're near the bottom of the page
-          if (
-            index === sections.length - 1 &&
-            window.innerHeight + scrollY >= document.body.offsetHeight - 50
-          ) {
-            current = section.getAttribute("id");
-          }
-        });
-
-        navItems.forEach((li) => {
-          li.classList.remove("active");
-          if (li.querySelector("a").getAttribute("href") === "#" + current) {
-            li.classList.add("active");
-          }
-        });
-      });
-    </script>
+    <?php include '../../components/scroll.php'; ?>
   </body>
 </html>
