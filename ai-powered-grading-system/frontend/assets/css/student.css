@@ -375,3 +375,17 @@ form input[type="checkbox"] {
 .tab-section {
   margin-bottom: 30px;
 }
+
+.notifications-list {
+  list-style: none;
+  padding: 0;
+}
+
+/* Student-specific tweaks */
+.role-label {
+  color: #10b981; /* yellow accent */
+}
+
+.tab-section h2 {
+  color: #217589; /* PLMUN blue for consistency */
+}

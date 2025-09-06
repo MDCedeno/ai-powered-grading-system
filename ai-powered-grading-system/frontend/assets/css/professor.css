@@ -321,7 +321,7 @@ body {
 /* Headings inside sections */
 .tab-section h2 {
   font-size: 18px;
-  color: #217589;
+  color: #4d808d;
   margin-bottom: 20px;
   border-bottom: 2px solid #f3f4f6;
   padding-bottom: 8px;
@@ -374,4 +374,13 @@ form input[type="checkbox"] {
 .cards-container,
 .tab-section {
   margin-bottom: 30px;
+}
+
+/* Professor-specific tweaks */
+.role-label {
+  color: #f3b642; /* yellow accent */
+}
+
+.tab-section h2 {
+  color: #217589; /* PLMUN blue for consistency */
 }
