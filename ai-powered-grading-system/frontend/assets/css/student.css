@@ -224,6 +224,7 @@ table th {
   cursor: pointer;
   font-weight: 600;
   transition: 0.2s ease;
+  text-decoration: none;
 }
 
 .btn-primary:hover {
@@ -267,4 +268,122 @@ table th {
 
 .tab-section h2 {
   color: #217589; /* PLMUN blue for consistency */
+}
+
+#quizzes button {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* ========= Quiz Page ========= */
+.quiz-container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.quiz-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.quiz-question {
+  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.quiz-question h3 {
+  margin-bottom: 10px;
+  color: #4d808d;
+}
+
+.quiz-question label {
+  display: block;
+  margin: 5px 0;
+  cursor: pointer;
+}
+
+.quiz-actions {
+  text-align: right;
+}
+
+/* ========= Status Tags ========= */
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;   /* consistent width */
+  height: 32px;       /* consistent height */
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+  border: none;       /* clean, no borders */
+}
+
+/* Specific status colors */
+.status-tag.done {
+  background: #d1fae5;   /* light green */
+  color: #065f46;
+}
+
+.status-tag.late {
+  background: #fee2e2;   /* light red */
+  color: #991b1b;
+}
+
+.status-tag.pending {
+  background: #dbeafe;   /* light blue */
+  color: #1e40af;
+}
+
+.status-tag.active {
+  background: #fef9c3;   /* soft yellow */
+  color: #92400e;
+}
+
+/* ========= Buttons ========= */
+.btn-primary,
+.btn-primary.disabled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;   /* same width as status */
+  height: 32px;       /* same height as status */
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.btn-primary {
+  background: #fbbf24;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #f59e0b;
+}
+
+.btn-primary.disabled {
+  background: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+  pointer-events: none;
 }

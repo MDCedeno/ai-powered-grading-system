@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -179,7 +180,7 @@
         </main>
     </div>
     <!-- Tab Highlighting & Smooth Scroll -->
-    <?php include '../../components/navbar-scroll.php'; ?>
+    <?php include '../../components/scroll.php'; ?>
 </body>
 
 </html>
