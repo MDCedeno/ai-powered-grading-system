@@ -169,116 +169,49 @@ body {
   font-weight: bold;
 }
 
-/* ========= Activity Log ========= */
-.activity-log-widget {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.activity-log-widget h3 {
-  margin-bottom: 12px;
-  font-size: 16px;
-  color: #4d808d;
-}
-
-.activity-log-widget table {
+/* ========= Tables ========= */
+table {
   width: 100%;
   border-collapse: collapse;
   background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
+  margin-top: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-.activity-log-widget th,
-.activity-log-widget td {
-  padding: 10px 14px;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.activity-log-widget th {
-  background: #4d808d;
-  font-weight: 600;
-  color: #fff;
-}
-
-.activity-log-widget .note {
-  margin-top: 10px;
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.activity-log-widget .note a {
-  color: #0056b3;
-  text-decoration: none;
-}
-
-/* ========= Status Tags ========= */
-.status-tag {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.status-tag.success {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.status-tag.error {
-  background: #fee2e2; /* Light Red */
-  color: #991b1b; /* Dark Red */
-}
-
-.status-tag.active {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-/* ========= Toolbar & User Management ========= */
-.toolbar {
-  display: flex;
-  gap: 12px;
-  margin: 20px 0;
-  align-items: center;
-}
-
-.toolbar input,
-.toolbar select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #4d808d;
-}
-
-.user-table-container {
-  background: #ffffff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.user-table-container table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.user-table-container th,
-.user-table-container td {
+table th,
+table td {
   padding: 12px 16px;
   text-align: center;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.user-table-container th {
+table th {
   background: #4d808d;
-  color: #fff;
   font-weight: 600;
+  color: #fff;
+}
+
+/* ========= Notifications ========= */
+.notifications-list {
+  list-style: none;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.notifications-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #374151;
+}
+
+.notifications-list li:last-child {
+  border-bottom: none;
 }
 
 /* ========= Buttons ========= */
@@ -295,18 +228,6 @@ body {
 
 .btn-primary:hover {
   background: #f59e0b;
-}
-
-.btn-icon {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  color: #374151;
-}
-
-.btn-icon.danger {
-  color: #ef4444;
 }
 
 /* ========= Tab Sections ========= */
@@ -327,63 +248,21 @@ body {
   padding-bottom: 8px;
 }
 
-/* ========= Forms (AI Config & Settings) ========= */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-form label {
-  display: flex;
-  flex-direction: column;
-  font-weight: 500;
-  color: #374151;
-  font-size: 14px;
-}
-
-form input[type="text"],
-form input[type="color"],
-form select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  margin-top: 6px;
-  color: #4d808d;
-}
-
-form input[type="checkbox"] {
-  margin-right: 8px;
-  accent-color: #217589; /* PLMUN Blue */
-}
-
-/* ========= AI Config Form ========= */
-.ai-config-form label {
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  font-weight: 500;
-  color: #4d808d;
-}
-
 /* ========= Section Distance ========= */
-.activity-log-widget,
-.toolbar,
-.user-table-container,
+.tab-section,
 .cards-container,
-.tab-section {
+.notifications-list {
   margin-bottom: 30px;
 }
 
 .notifications-list {
   list-style: none;
-  padding: 0;
+  padding: 20px;
 }
 
 /* Student-specific tweaks */
 .role-label {
-  color: #10b981; /* yellow accent */
+  color: #10b981; /* green accent */
 }
 
 .tab-section h2 {
