@@ -6,6 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PLMUN Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="../../assets/css/professor.css" />
     <!-- PLMUN Logo -->
     <link
@@ -126,9 +127,89 @@
                 <!-- ================= STUDENT PERFORMANCE ================= -->
                 <section id="student-performance" class="tab-section hidden">
                     <h2>Student Performance</h2>
-                    <p>Upload and manage grades, or view student progress analytics.</p>
-                    <button class="btn-primary">Upload Grades</button>
+
+                    <!-- ======== GRADE ENTRY ======== -->
+                    <div class="sub-section grade-entry">
+                        <h3>Grade Entry</h3>
+                        <div class="toolbar">
+                            <input type="text" placeholder="Search student..." />
+                            <select>
+                                <option>Filter by Section</option>
+                                <option>BSIT 4A</option>
+                                <option>BSIT 4B</option>
+                            </select>
+                            <button class="btn-primary">Load Class</button>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Quiz</th>
+                                    <th>Exam</th>
+                                    <th>Project</th>
+                                    <th>Final Grade</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025-001</td>
+                                    <td>Maria Santos</td>
+                                    <td><input type="number" value="85" /></td>
+                                    <td><input type="number" value="90" /></td>
+                                    <td><input type="number" value="88" /></td>
+                                    <td>88</td>
+                                    <td><span class="status-tag pending">Pending</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2025-002</td>
+                                    <td>Jose Cruz</td>
+                                    <td><input type="number" value="92" /></td>
+                                    <td><input type="number" value="89" /></td>
+                                    <td><input type="number" value="95" /></td>
+                                    <td>92</td>
+                                    <td><span class="status-tag done">Done</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="btn-group">
+                            <button class="btn-primary">Save Draft</button>
+                            <button class="btn-primary">Submit Grades</button>
+                        </div>
+                    </div>
+
+                    <!-- ======== PERFORMANCE ANALYTICS ======== -->
+                    <div class="sub-section performance-analytics">
+                        <h3>Performance Analytics</h3>
+                        <canvas id="performanceChart" width="400" height="150"></canvas>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Average</th>
+                                    <th>Pass Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Web Systems</td>
+                                    <td>89%</td>
+                                    <td><span class="status-tag done">92%</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Database</td>
+                                    <td>82%</td>
+                                    <td><span class="status-tag pending">78%</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
+
 
                 <!-- ================= AI QUIZZES ================= -->
                 <section id="ai-quizzes" class="tab-section hidden">
@@ -179,6 +260,36 @@
             </div>
         </main>
     </div>
+    <!-- Chart.js Script for Analytics -->
+    <script>
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Prelim', 'Midterm', 'Final'],
+                datasets: [{
+                    label: 'Class Average',
+                    data: [82, 85, 88],
+                    backgroundColor: ['#217589', '#f3b642', '#4d808d'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    </script>
     <!-- Tab Highlighting & Smooth Scroll -->
     <?php include '../../components/scroll.php'; ?>
 </body>

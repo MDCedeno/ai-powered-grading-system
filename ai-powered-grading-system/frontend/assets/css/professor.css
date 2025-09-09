@@ -376,6 +376,168 @@ form input[type="checkbox"] {
   margin-bottom: 30px;
 }
 
+/* ========= Sub-Sections (Inside Student Performance) ========= */
+.sub-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 0; /* make them connect seamlessly */
+  box-shadow: none; /* remove extra shadow between blocks */
+  border-bottom: 1px solid #e5e7eb; /* subtle divider line */
+}
+
+.sub-section:first-of-type {
+  border-radius: 12px 12px 0 0; /* round top corners */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* apply shadow to the first block */
+}
+
+.sub-section:last-of-type {
+  border-radius: 0 0 12px 12px; /* round bottom corners */
+  border-bottom: none; /* remove divider at the end */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* apply shadow only at bottom */
+}
+
+.sub-section h3 {
+  font-size: 16px;
+  margin-bottom: 16px;
+  color: #217589; /* PLMUN Blue */
+  border-bottom: 2px solid #f3f4f6;
+  padding-bottom: 6px;
+}
+
+/* ========= Grade Entry Table ========= */
+.grade-entry table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.grade-entry th,
+.grade-entry td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.grade-entry th {
+  background: #4d808d;
+  color: #fff;
+  font-weight: 600;
+}
+
+.grade-entry input[type="number"] {
+  width: 60px;
+  padding: 6px;
+  text-align: center;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+/* Align buttons in Grade Entry */
+.grade-entry .btn-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* ========= Performance Analytics ========= */
+.performance-analytics {
+  padding-top: 10px;
+}
+
+.performance-analytics canvas {
+  margin-bottom: 20px;
+  max-width: 100%;
+}
+
+.performance-analytics table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.performance-analytics th,
+.performance-analytics td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.performance-analytics th {
+  background: #4d808d;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ========= Status Tags (Improved) ========= */
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px; /* consistent width */
+  height: 32px; /* match button height */
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff; /* text always white for clarity */
+  text-align: center;
+  padding: 0 10px;
+  border: none; /* clean look */
+}
+
+/* Status colors */
+.status-tag.done {
+  background: #16a34a; /* green */
+}
+
+.status-tag.pending {
+  background: #2563eb; /* blue */
+}
+
+.status-tag.late {
+  background: #dc2626; /* red */
+}
+
+.status-tag.in-progress {
+  background: #f59e0b; /* amber */
+}
+
+/* ========= Student Performance Tables ========= */
+.performance-analytics table,
+.grade-entry table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 10px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.performance-analytics th,
+.performance-analytics td,
+.grade-entry th,
+.grade-entry td {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.performance-analytics th,
+.grade-entry th {
+  background: #4d808d;
+  color: #fff;
+  font-weight: 600;
+}
+
+.performance-analytics tr:last-child td,
+.grade-entry tr:last-child td {
+  border-bottom: none; /* remove extra border at end */
+}
+
 /* Professor-specific tweaks */
 .role-label {
   color: #f3b642; /* yellow accent */
