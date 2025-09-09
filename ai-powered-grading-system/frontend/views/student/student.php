@@ -88,38 +88,131 @@
         <!-- ================= GRADE BREAKDOWN ================= -->
         <section id="grades" class="tab-section hidden">
           <h2>Grade Breakdown</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Subject</th>
-                <th>Activity</th>
-                <th>Score</th>
-                <th>Weight</th>
-                <th>Final Grade</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>IT 101</td>
-                <td>Midterm Exam</td>
-                <td>85/100</td>
-                <td>40%</td>
-                <td>34/40</td>
-              </tr>
-            </tbody>
-          </table>
+
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <input type="text" placeholder="Search subject or activity..." />
+            <select>
+              <option>Filter by Subject</option>
+              <option>IT 101</option>
+              <option>CS 201</option>
+              <option>Math 201</option>
+            </select>
+            <button class="btn-primary">Apply</button>
+          </div>
+
+          <!-- Table -->
+          <div class="user-table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Activity</th>
+                  <th>Score</th>
+                  <th>Weight</th>
+                  <th>Final Grade</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>IT 101</td>
+                  <td>Midterm Exam</td>
+                  <td>85/100</td>
+                  <td>40%</td>
+                  <td>34/40</td>
+                  <td><span class="status-tag done">Done</span></td>
+                </tr>
+                <tr>
+                  <td>CS 201</td>
+                  <td>Programming Quiz</td>
+                  <td>18/25</td>
+                  <td>10%</td>
+                  <td>7/10</td>
+                  <td><span class="status-tag pending">Pending</span></td>
+                </tr>
+                <tr>
+                  <td>Math 201</td>
+                  <td>Assignment 2</td>
+                  <td>12/20</td>
+                  <td>5%</td>
+                  <td>3/5</td>
+                  <td><span class="status-tag late">Late</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <!-- ================= PERFORMANCE INSIGHTS ================= -->
         <section id="insights" class="tab-section hidden">
           <h2>Performance Insights</h2>
-          <p>AI recommends focusing on <strong>Mathematics</strong> and <strong>Programming Logic</strong> based on your recent results.</p>
+
+          <div class="insights-layout">
+            <!-- Insight Cards -->
+            <div class="insight-cards">
+              <div class="insight-card focus">
+                <h4>Focus Area</h4>
+                <p>Mathematics</p>
+              </div>
+              <div class="insight-card improve">
+                <h4>Needs Improvement</h4>
+                <p>Programming Logic</p>
+              </div>
+              <div class="insight-card strength">
+                <h4>Strength</h4>
+                <p>Database Systems</p>
+              </div>
+            </div>
+
+            <!-- Radar Chart -->
+            <div class="chart-container">
+              <canvas id="insightsChart"></canvas>
+            </div>
+          </div>
         </section>
 
         <!-- ================= PROGRESS TRACKER ================= -->
         <section id="progress" class="tab-section hidden">
           <h2>Progress Tracker</h2>
-          <p>Comparison charts and semester performance will be shown here.</p>
+
+          <!-- Chart Container -->
+          <div class="progress-chart">
+            <canvas id="progressChart" width="400" height="180"></canvas>
+          </div>
+
+          <!-- Summary Table -->
+          <table>
+            <thead>
+              <tr>
+                <th>Semester</th>
+                <th>Your GPA</th>
+                <th>Class Average</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1st Year - Sem 1</td>
+                <td>3.20</td>
+                <td>3.10</td>
+              </tr>
+              <tr>
+                <td>1st Year - Sem 2</td>
+                <td>3.35</td>
+                <td>3.18</td>
+              </tr>
+              <tr>
+                <td>2nd Year - Sem 1</td>
+                <td>3.40</td>
+                <td>3.22</td>
+              </tr>
+              <tr>
+                <td>2nd Year - Sem 2</td>
+                <td>3.45</td>
+                <td>3.25</td>
+              </tr>
+            </tbody>
+          </table>
         </section>
 
         <!-- ================= NOTIFICATIONS ================= -->
@@ -178,6 +271,103 @@
       </div>
     </main>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const insightsCtx = document.getElementById('insightsChart').getContext('2d');
+    new Chart(insightsCtx, {
+      type: 'radar',
+      data: {
+        labels: ['Math', 'Programming Logic', 'Database', 'Networking', 'Web Dev'],
+        datasets: [{
+          label: 'Your Performance',
+          data: [70, 65, 85, 75, 90],
+          backgroundColor: 'rgba(33, 117, 137, 0.2)', // PLMUN blue transparent
+          borderColor: '#217589',
+          pointBackgroundColor: '#f3b642', // Portal Yellow points
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          r: {
+            angleLines: {
+              color: '#e5e7eb'
+            },
+            suggestedMin: 0,
+            suggestedMax: 100,
+            ticks: {
+              stepSize: 20
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  </script>
+
+  <!-- Chart.js for Progress Tracker -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctxProgress = document.getElementById('progressChart').getContext('2d');
+    new Chart(ctxProgress, {
+      type: 'line',
+      data: {
+        labels: ['Y1-Sem1', 'Y1-Sem2', 'Y2-Sem1', 'Y2-Sem2'],
+        datasets: [{
+            label: 'Your GPA',
+            data: [3.20, 3.35, 3.40, 3.45],
+            borderColor: '#217589', // PLMUN Blue
+            backgroundColor: 'rgba(33,117,137,0.1)',
+            tension: 0.4,
+            fill: true,
+            borderWidth: 2
+          },
+          {
+            label: 'Class Average',
+            data: [3.10, 3.18, 3.22, 3.25],
+            borderColor: '#f3b642', // Portal Yellow
+            backgroundColor: 'rgba(243,182,66,0.1)',
+            tension: 0.4,
+            fill: true,
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#4d808d',
+              font: {
+                size: 13
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            min: 2.5,
+            max: 4.0,
+            ticks: {
+              color: '#4d808d'
+            }
+          },
+          x: {
+            ticks: {
+              color: '#4d808d'
+            }
+          }
+        }
+      }
+    });
+  </script>
   <!-- Tab Highlighting & Smooth Scroll -->
   <?php include '../../components/scroll.php'; ?>
 </body>

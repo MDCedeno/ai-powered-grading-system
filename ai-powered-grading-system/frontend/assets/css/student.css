@@ -324,34 +324,34 @@ table th {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 100px;   /* consistent width */
-  height: 32px;       /* consistent height */
+  min-width: 100px; /* consistent width */
+  height: 32px; /* consistent height */
   padding: 0 12px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
   text-transform: capitalize;
-  border: none;       /* clean, no borders */
+  border: none; /* clean, no borders */
 }
 
 /* Specific status colors */
 .status-tag.done {
-  background: #d1fae5;   /* light green */
+  background: #d1fae5; /* light green */
   color: #065f46;
 }
 
 .status-tag.late {
-  background: #fee2e2;   /* light red */
+  background: #fee2e2; /* light red */
   color: #991b1b;
 }
 
 .status-tag.pending {
-  background: #dbeafe;   /* light blue */
+  background: #dbeafe; /* light blue */
   color: #1e40af;
 }
 
 .status-tag.active {
-  background: #fef9c3;   /* soft yellow */
+  background: #fef9c3; /* soft yellow */
   color: #92400e;
 }
 
@@ -361,8 +361,8 @@ table th {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 100px;   /* same width as status */
-  height: 32px;       /* same height as status */
+  min-width: 100px; /* same width as status */
+  height: 32px; /* same height as status */
   padding: 0 12px;
   border-radius: 6px;
   font-size: 13px;
@@ -386,4 +386,111 @@ table th {
   color: #6b7280;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+/* ========= Toolbar & User Management ========= */
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+  align-items: center;
+}
+
+.toolbar input,
+.toolbar select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #4d808d;
+}
+
+/* ========= User Table Container ========= */
+.user-table-container {
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.user-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0px;
+}
+
+.user-table-container th,
+.user-table-container td {
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.user-table-container th {
+  background: #4d808d;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ========= Insights Layout ========= */
+.insights-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap; /* responsive */
+}
+
+/* Cards column */
+.insight-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex: 1; /* take smaller width */
+  max-width: 220px; /* keep it narrow */
+}
+
+.insight-card {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.insight-card h4 {
+  font-size: 14px;
+  color: #4d808d;
+  margin-bottom: 6px;
+}
+
+.insight-card p {
+  font-size: 15px;
+  font-weight: 600;
+  color: #217589;
+}
+
+/* Status-based colors */
+.insight-card.focus {
+  border-left: 4px solid #f59e0b; /* amber */
+}
+.insight-card.improve {
+  border-left: 4px solid #ef4444; /* red */
+}
+.insight-card.strength {
+  border-left: 4px solid #10b981; /* green */
+}
+
+/* Chart */
+.chart-container {
+  flex: 2;
+  max-width: max-content; /* make chart smaller */
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.chart-container canvas {
+  max-width: 100%;
+  height: 300px !important; /* force smaller chart */
 }
