@@ -33,12 +33,25 @@
         </h1>
         <p class="subtitle">Create your account</p>
 
-        <form>
+        <?php
+        session_start();
+        if (isset($_SESSION['error'])) {
+            echo '<p style="color: red;">' . $_SESSION['error'] . '</p>';
+            unset($_SESSION['error']);
+        }
+        if (isset($_SESSION['success'])) {
+            echo '<p style="color: green;">' . $_SESSION['success'] . '</p>';
+            unset($_SESSION['success']);
+        }
+        ?>
+
+        <form method="POST" action="../../backend/controllers/authController.php?action=signup">
           <div class="form-group">
-            <label for="fullname">Full Name</label>
+            <label for="name">Full Name</label>
             <input
               type="text"
-              id="fullname"
+              name="name"
+              id="name"
               placeholder="Juan Dela Cruz"
               required
             />
@@ -48,6 +61,7 @@
             <label for="email">Email Address</label>
             <input
               type="email"
+              name="email"
               id="email"
               placeholder="you@example.com"
               required
@@ -56,7 +70,7 @@
 
           <div class="form-group">
             <label for="role">Role</label>
-            <select id="role" required>
+            <select name="role" id="role" required>
               <option value="">Select Role</option>
               <option value="student">Student</option>
               <option value="professor">Professor</option>
@@ -67,6 +81,7 @@
             <label for="password">Password</label>
             <input
               type="password"
+              name="password"
               id="password"
               placeholder="********"
               required

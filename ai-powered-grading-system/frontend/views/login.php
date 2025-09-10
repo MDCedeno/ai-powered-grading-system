@@ -33,11 +33,24 @@
         </h1>
         <p class="subtitle">Login to continue</p>
 
-        <form>
+        <?php
+        session_start();
+        if (isset($_SESSION['error'])) {
+            echo '<p style="color: red;">' . $_SESSION['error'] . '</p>';
+            unset($_SESSION['error']);
+        }
+        if (isset($_SESSION['success'])) {
+            echo '<p style="color: green;">' . $_SESSION['success'] . '</p>';
+            unset($_SESSION['success']);
+        }
+        ?>
+
+        <form method="POST" action="../../backend/controllers/authController.php?action=login">
           <div class="form-group">
             <label for="email">Email Address</label>
             <input
               type="email"
+              name="email"
               id="email"
               placeholder="you@example.com"
               required
@@ -48,6 +61,7 @@
             <label for="password">Password</label>
             <input
               type="password"
+              name="password"
               id="password"
               placeholder="********"
               required
