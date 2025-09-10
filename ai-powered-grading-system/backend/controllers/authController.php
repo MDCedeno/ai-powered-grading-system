@@ -32,6 +32,7 @@ class AuthController {
                 $_SESSION['user_name'] = $user['name'];
                 $_SESSION['user_email'] = $user['email'];
                 $_SESSION['role_id'] = $user['role_id'];
+                $_SESSION['role'] = $this->getRoleName($user['role_id']);
 
                 // Redirect based on role
                 $this->redirectBasedOnRole($user['role_id']);
@@ -83,6 +84,21 @@ class AuthController {
             'professor' => 3 // Assuming Professor is id 3
         ];
         return $roles[$role] ?? null;
+    }
+
+    private function getRoleName($role_id) {
+        switch ($role_id) {
+            case 1:
+                return 'Super Admin';
+            case 2:
+                return 'MIS Admin';
+            case 3:
+                return 'Professor';
+            case 4:
+                return 'Student';
+            default:
+                return 'Unknown';
+        }
     }
 
     private function redirectBasedOnRole($role_id) {
