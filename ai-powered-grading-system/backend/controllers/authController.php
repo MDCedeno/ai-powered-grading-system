@@ -88,19 +88,19 @@ class AuthController {
     private function redirectBasedOnRole($role_id) {
         switch ($role_id) {
             case 1: // Super Admin
-                header('Location: ../frontend/views/super-admin/super-admin.php');
+                header('Location: ../../frontend/views/super-admin/super-admin.php');
                 break;
             case 2: // MIS Admin
-                header('Location: ../frontend/views/admin/mis-admin.php');
+                header('Location: ../../frontend/views/admin/mis-admin.php');
                 break;
             case 3: // Professor
-                header('Location: ../frontend/views/professor/professor.php');
+                header('Location: ../../frontend/views/professor/professor.php');
                 break;
             case 4: // Student
-                header('Location: ../frontend/views/student/student.php');
+                header('Location: ../../frontend/views/student/student.php');
                 break;
             default:
-                header('Location: ../frontend/views/login.php');
+                header('Location: ../../frontend/views/login.php');
         }
         exit;
     }
