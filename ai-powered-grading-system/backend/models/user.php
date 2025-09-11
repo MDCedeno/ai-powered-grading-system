@@ -32,5 +32,17 @@ class User {
         }
         return false;
     }
+
+    public function getStudents() {
+        $stmt = $this->pdo->prepare("SELECT u.*, s.program, s.year FROM users u LEFT JOIN students s ON u.id = s.user_id WHERE u.role_id = 4");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getProfessors() {
+        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE role_id = 3");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

@@ -1,8 +1,12 @@
-# TODO: Improve TODO - System Development.md
+# TODO: Align Database with Grading System References
 
-- [x] Analyze current content of TODO - System Development.md
-- [x] Review project structure and files for accuracy
-- [x] Restructure file into proper TODO format with checkboxes
-- [x] Add missing components (e.g., AI module, database setup)
-- [x] Ensure instructions are clear and actionable
-- [x] Edit the TODO - System Development.md file with improvements
+- [x] Analyze CSV files in system__database_references/
+- [x] Design database schema (users, students, courses, grades)
+- [x] Create migration files for new tables
+- [x] Update TODO - System Development.md with database changes
+- [x] Implement Student model in backend/models/student.php
+- [x] Implement Course model in backend/models/course.php
+- [x] Implement Grade model in backend/models/grade.php
+- [x] Update User model to link with students
+- [ ] Update controllers to use new models
+- [ ] Update seeders to populate new tables

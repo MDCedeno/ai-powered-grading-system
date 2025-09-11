@@ -1,7 +1,7 @@
 # TODO: AI-Powered Grading System Development
 
 ## System Setup
-- [ ] Set up database: Create migrations for users, courses, grades, logs (backend/database/migrations/)
+- [x] Set up database: Create migrations for users, courses, grades, logs (backend/database/migrations/)
 - [ ] Implement authentication: Develop login/signup in authController.php and frontend/views/login.php, signup.php
 - [ ] Seed database: Use UserSeeder.php to add dummy users for all roles
 - [ ] Configure routes: Set up API and web routes in backend/routes/
