@@ -9,4 +9,5 @@
 - [x] Implement Grade model in backend/models/grade.php
 - [x] Update User model to link with students
 - [x] Update controllers to use new models
+- [ ] Test throughly the API endpoints connection
 - [ ] Update seeders to populate new tables
