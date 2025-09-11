@@ -37,5 +37,10 @@ class Student {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function delete($id) {
+        $stmt = $this->pdo->prepare("DELETE FROM students WHERE id = :id");
+        return $stmt->execute(['id' => $id]);
+    }
 }
 ?>

@@ -44,6 +44,21 @@ class AuthController {
         }
     }
 
+    public function apiLogin($email, $password) {
+        $user = $this->userModel->verifyPassword($email, $password);
+        if ($user) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['role_id'] = $user['role_id'];
+            $_SESSION['role'] = $this->getRoleName($user['role_id']);
+
+            return ['success' => true, 'user' => $user, 'role' => $this->getRoleName($user['role_id'])];
+        } else {
+            return ['success' => false, 'message' => 'Invalid email or password'];
+        }
+    }
+
     public function signup() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'];
@@ -119,6 +134,33 @@ class AuthController {
                 header('Location: ../../frontend/views/login.php');
         }
         exit;
+    }
+
+    public function register($data) {
+        $name = $data['name'];
+        $email = $data['email'];
+        $password = $data['password'];
+        $role = $data['role'];
+
+        $role_id = $this->getRoleId($role);
+        if (!$role_id) {
+            return ['success' => false, 'message' => 'Invalid role selected'];
+        }
+
+        if ($this->userModel->findByEmail($email)) {
+            return ['success' => false, 'message' => 'Email already exists'];
+        }
+
+        if ($this->userModel->create($name, $email, $password, $role_id)) {
+            return ['success' => true, 'message' => 'Account created successfully'];
+        } else {
+            return ['success' => false, 'message' => 'Failed to create account'];
+        }
+    }
+
+    public function logout() {
+        session_destroy();
+        return true;
     }
 }
 ?>

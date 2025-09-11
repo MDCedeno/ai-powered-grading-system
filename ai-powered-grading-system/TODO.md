@@ -8,5 +8,5 @@
 - [x] Implement Course model in backend/models/course.php
 - [x] Implement Grade model in backend/models/grade.php
 - [x] Update User model to link with students
-- [ ] Update controllers to use new models
+- [x] Update controllers to use new models
 - [ ] Update seeders to populate new tables

@@ -57,5 +57,16 @@ class Grade {
         $stmt->execute(['course_id' => $course_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getAll() {
+        $stmt = $this->pdo->prepare("SELECT * FROM grades");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function delete($id) {
+        $stmt = $this->pdo->prepare("DELETE FROM grades WHERE id = :id");
+        return $stmt->execute(['id' => $id]);
+    }
 }
 ?>

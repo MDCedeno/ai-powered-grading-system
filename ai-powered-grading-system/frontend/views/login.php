@@ -45,7 +45,7 @@
         }
         ?>
 
-        <form method="POST" action="../../backend/controllers/authController.php?action=login">
+        <form id="loginForm">
           <div class="form-group">
             <label for="email">Email Address</label>
             <input
@@ -73,6 +73,43 @@
             Don’t have an account? <a href="signup.php">Sign Up</a>
           </p>
         </form>
+
+        <script>
+          document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            fetch('../../backend/routes/api.php/api/auth/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Redirect based on role
+                if (data.role === 'Super Admin') {
+                  window.location.href = 'super-admin/super-admin.php';
+                } else if (data.role === 'MIS Admin') {
+                  window.location.href = 'admin/mis-admin.php';
+                } else if (data.role === 'Professor') {
+                  window.location.href = 'professor/professor.php';
+                } else if (data.role === 'Student') {
+                  window.location.href = 'student/student.php';
+                }
+              } else {
+                alert(data.message || 'Login failed');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred. Please try again.');
+            });
+          });
+        </script>
       </div>
     </div>
   </body>

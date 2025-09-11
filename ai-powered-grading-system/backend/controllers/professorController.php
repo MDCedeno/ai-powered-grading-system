@@ -36,5 +36,29 @@ class ProfessorController {
     public function getGrades($course_id) {
         return $this->gradeModel->getByCourse($course_id);
     }
+
+    public function getMyStudents() {
+        return $this->studentModel->getAll();
+    }
+
+    public function getMyCourses() {
+        return $this->courseModel->getAll();
+    }
+
+    public function getMyGrades() {
+        return $this->gradeModel->getAll();
+    }
+
+    public function addGrade($data) {
+        return $this->gradeModel->create($data['student_id'], $data['course_id'], $data['midterm_quizzes'], $data['midterm_exam'], $data['midterm_grade'], $data['final_quizzes'], $data['final_exam'], $data['final_grade'], $data['gpa']);
+    }
+
+    public function updateGrade($id, $data) {
+        return $this->gradeModel->update($id, $data['midterm_quizzes'], $data['midterm_exam'], $data['midterm_grade'], $data['final_quizzes'], $data['final_exam'], $data['final_grade'], $data['gpa']);
+    }
+
+    public function deleteGrade($id) {
+        return $this->gradeModel->delete($id);
+    }
 }
 ?>

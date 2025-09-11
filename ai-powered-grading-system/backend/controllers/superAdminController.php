@@ -7,22 +7,24 @@ class SuperAdminController {
     private $userModel;
     private $courseModel;
     private $logModel;
+    private $pdo;
 
     public function __construct($pdo) {
         $this->userModel = new User($pdo);
         $this->courseModel = new Course($pdo);
         $this->logModel = new Log($pdo);
+        $this->pdo = $pdo;
     }
 
     public function getAllUsers() {
         // Get all users
-        $stmt = $pdo->prepare("SELECT * FROM users");
+        $stmt = $this->pdo->prepare("SELECT * FROM users");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function deactivateUser($user_id) {
-        $stmt = $pdo->prepare("UPDATE users SET active = 0 WHERE id = :id");
+        $stmt = $this->pdo->prepare("UPDATE users SET active = 0 WHERE id = :id");
         return $stmt->execute(['id' => $user_id]);
     }
 

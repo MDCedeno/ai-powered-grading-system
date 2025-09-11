@@ -18,7 +18,7 @@ class AdminController {
     }
 
     public function getStudents() {
-        return $this->userModel->getStudents();
+        return $this->studentModel->getAll();
     }
 
     public function getProfessors() {
@@ -43,6 +43,54 @@ class AdminController {
 
     public function getGradesByCourse($course_id) {
         return $this->gradeModel->getByCourse($course_id);
+    }
+
+    public function getAllStudents() {
+        return $this->studentModel->getAll();
+    }
+
+    public function getAllCourses() {
+        return $this->courseModel->getAll();
+    }
+
+    public function getAllGrades() {
+        return $this->gradeModel->getAll();
+    }
+
+    public function addStudent($data) {
+        return $this->studentModel->create($data['user_id'], $data['program'], $data['year']);
+    }
+
+    public function addCourse($data) {
+        return $this->courseModel->create($data['code'], $data['name'], $data['schedule'], $data['faculty_id']);
+    }
+
+    public function addGrade($data) {
+        return $this->gradeModel->create($data['student_id'], $data['course_id'], $data['midterm_quizzes'], $data['midterm_exam'], $data['midterm_grade'], $data['final_quizzes'], $data['final_exam'], $data['final_grade'], $data['gpa']);
+    }
+
+    public function updateStudent($id, $data) {
+        return $this->studentModel->update($id, $data['program'], $data['year']);
+    }
+
+    public function updateCourse($id, $data) {
+        return $this->courseModel->update($id, $data['code'], $data['name'], $data['schedule'], $data['faculty_id']);
+    }
+
+    public function updateGrade($id, $data) {
+        return $this->gradeModel->update($id, $data['midterm_quizzes'], $data['midterm_exam'], $data['midterm_grade'], $data['final_quizzes'], $data['final_exam'], $data['final_grade'], $data['gpa']);
+    }
+
+    public function deleteStudent($id) {
+        return $this->studentModel->delete($id);
+    }
+
+    public function deleteCourse($id) {
+        return $this->courseModel->delete($id);
+    }
+
+    public function deleteGrade($id) {
+        return $this->gradeModel->delete($id);
     }
 
     // Add more methods as needed for reports, etc.
