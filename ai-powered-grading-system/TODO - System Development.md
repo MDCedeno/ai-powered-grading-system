@@ -2,14 +2,14 @@
 
 ## System Setup
 - [x] Set up database: Create migrations for users, courses, grades, logs (backend/database/migrations/)
-- [ ] Implement authentication: Develop login/signup in authController.php and frontend/views/login.php, signup.php
-- [ ] Seed database: Use UserSeeder.php to add dummy users for all roles
-- [ ] Configure routes: Set up API and web routes in backend/routes/
+- [x] Implement authentication: Develop login/signup in authController.php and frontend/views/login.php, signup.php
+- [x] Seed database: Use UserSeeder.php to add dummy users for all roles
+- [x] Configure routes: Set up API and web routes in backend/routes/
 
 ## AI Module Development
-- [ ] Develop AI grading algorithms in ai-module/app.py
+- [x] Develop AI grading algorithms in ai-module/app.py
 - [ ] Train models: Use data in ai-module/data/ and models in ai-module/models/
-- [ ] Integrate AI with backend: Connect to grading logic in grade.php model
+- [x] Integrate AI with backend: Connect to grading logic in grade.php model
 
 ## User Roles Implementation
 

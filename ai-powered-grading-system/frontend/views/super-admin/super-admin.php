@@ -298,6 +298,19 @@
       });
     });
 
+    // Load system stats for dashboard
+    function loadStats() {
+      fetch('../../../backend/routes/api.php/api/superadmin/stats')
+        .then(response => response.json())
+        .then(data => {
+          // Update cards
+          const cards = document.querySelectorAll('.card .metric');
+          if (cards.length >= 1) cards[0].textContent = data.users; // Active Users
+          // Other cards are static for now
+        })
+        .catch(err => console.error('Failed to load stats:', err));
+    }
+
     // Load data for sections
     function loadUsers() {
       fetch('../../../backend/routes/api.php/api/superadmin/users')
@@ -306,16 +319,24 @@
           const tbody = document.querySelector('#user-roles table tbody');
           tbody.innerHTML = '';
           data.forEach(user => {
+            const roleName = getRoleName(user.role_id);
+            const status = user.active ? 'Active' : 'Inactive';
+            const statusClass = user.active ? 'active' : 'error';
             const row = `<tr>
-              <td>${user.id}</td>
               <td>${user.name}</td>
               <td>${user.email}</td>
-              <td>${user.role_id}</td>
-              <td><button onclick="deactivateUser(${user.id})">Deactivate</button></td>
+              <td>${roleName}</td>
+              <td><span class="status-tag ${statusClass}">${status}</span></td>
+              <td>${user.created_at || 'N/A'}</td>
+              <td>
+                <button class="btn-icon" onclick="editUser(${user.id})">Edit</button>
+                ${user.active ? `<button class="btn-icon danger" onclick="deactivateUser(${user.id})">Deactivate</button>` : `<button class="btn-icon" onclick="activateUser(${user.id})">Activate</button>`}
+              </td>
             </tr>`;
             tbody.innerHTML += row;
           });
-        });
+        })
+        .catch(err => console.error('Failed to load users:', err));
     }
 
     function loadLogs() {
@@ -329,11 +350,17 @@
               <td>${log.timestamp}</td>
               <td>${log.user_id}</td>
               <td>${log.action}</td>
-              <td>${log.details}</td>
+              <td><span class="status-tag ${log.status === 'success' ? 'success' : 'error'}">${log.status}</span></td>
             </tr>`;
             tbody.innerHTML += row;
           });
-        });
+        })
+        .catch(err => console.error('Failed to load logs:', err));
+    }
+
+    function getRoleName(role_id) {
+      const roles = {1: 'Super Admin', 2: 'MIS Admin', 3: 'Professor', 4: 'Student'};
+      return roles[role_id] || 'Unknown';
     }
 
     function deactivateUser(userId) {
@@ -349,22 +376,85 @@
       });
     }
 
+    function activateUser(userId) {
+      fetch('../../../backend/routes/api.php/api/superadmin/users/activate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.success ? 'User activated' : 'Failed');
+        loadUsers();
+      });
+    }
+
+    function editUser(userId) {
+      // Placeholder for edit functionality
+      alert('Edit user ' + userId);
+    }
+
+    // Load AI config
+    function loadAIConfig() {
+      fetch('../../../backend/routes/api.php/api/superadmin/ai-config')
+        .then(response => response.json())
+        .then(data => {
+          const form = document.querySelector('#ai-config form');
+          form.querySelector('input[type="checkbox"]:nth-of-type(1)').checked = data.enabled;
+          // Update other fields if needed
+        });
+    }
+
+    // Load system settings
+    function loadSystemSettings() {
+      fetch('../../../backend/routes/api.php/api/superadmin/settings')
+        .then(response => response.json())
+        .then(data => {
+          const form = document.querySelector('#settings form');
+          form.querySelector('input[type="text"]').value = data.site_name;
+          // Update other fields
+        });
+    }
+
     // Load data when sections are shown
     document.querySelector('a[href="#user-roles"]').addEventListener('click', loadUsers);
     document.querySelector('a[href="#audit-logs"]').addEventListener('click', loadLogs);
+    document.querySelector('a[href="#ai-config"]').addEventListener('click', loadAIConfig);
+    document.querySelector('a[href="#settings"]').addEventListener('click', loadSystemSettings);
+
+    // Load dashboard stats on page load
+    loadStats();
 
     // For AI config save
     document.querySelector('#ai-config form').addEventListener('submit', (e) => {
       e.preventDefault();
-      // Mock save
-      alert('AI config saved');
+      const formData = new FormData(e.target);
+      const config = {
+        enabled: formData.get('enable_ai') === 'on'
+      };
+      fetch('../../../backend/routes/api.php/api/superadmin/ai-config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      })
+      .then(response => response.json())
+      .then(data => alert(data.success ? 'AI config saved' : 'Failed'));
     });
 
     // For settings save
     document.querySelector('#settings form').addEventListener('submit', (e) => {
       e.preventDefault();
-      // Mock save
-      alert('Settings saved');
+      const formData = new FormData(e.target);
+      const settings = {
+        site_name: formData.get('site_name')
+      };
+      fetch('../../../backend/routes/api.php/api/superadmin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      })
+      .then(response => response.json())
+      .then(data => alert(data.success ? 'Settings saved' : 'Failed'));
     });
   </script>
 </body>

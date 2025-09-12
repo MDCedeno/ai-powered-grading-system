@@ -1,7 +1,8 @@
 <?php
 // Thorough testing script for all backend API endpoints
 
-function sendRequest($method, $url, $data = null) {
+function sendRequest($method, $url, $data = null)
+{
     $ch = curl_init();
 
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -90,4 +91,3 @@ $res = sendRequest('POST', $baseUrl . '/api/auth/logout');
 echo "POST /api/auth/logout: HTTP {$res['code']}\n";
 
 echo "Thorough API testing completed.\n";
-?>

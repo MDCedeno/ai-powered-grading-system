@@ -146,32 +146,17 @@
                                 <tr>
                                     <th>Student ID</th>
                                     <th>Name</th>
-                                    <th>Quiz</th>
-                                    <th>Exam</th>
-                                    <th>Project</th>
+                                    <th>Midterm Quiz</th>
+                                    <th>Midterm Exam</th>
+                                    <th>Final Quiz</th>
+                                    <th>Final Exam</th>
                                     <th>Final Grade</th>
+                                    <th>GPA</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>2025-001</td>
-                                    <td>Maria Santos</td>
-                                    <td><input type="number" value="85" /></td>
-                                    <td><input type="number" value="90" /></td>
-                                    <td><input type="number" value="88" /></td>
-                                    <td>88</td>
-                                    <td><span class="status-tag pending">Pending</span></td>
-                                </tr>
-                                <tr>
-                                    <td>2025-002</td>
-                                    <td>Jose Cruz</td>
-                                    <td><input type="number" value="92" /></td>
-                                    <td><input type="number" value="89" /></td>
-                                    <td><input type="number" value="95" /></td>
-                                    <td>92</td>
-                                    <td><span class="status-tag done">Done</span></td>
-                                </tr>
+                            <tbody id="grades-tbody">
+                                <!-- Grades will be loaded dynamically -->
                             </tbody>
                         </table>
 
@@ -342,22 +327,63 @@
             fetch('../../../backend/routes/api.php/api/professor/grades')
                 .then(response => response.json())
                 .then(data => {
-                    const tbody = document.querySelector('#student-performance .grade-entry table tbody');
+                    const tbody = document.getElementById('grades-tbody');
                     tbody.innerHTML = '';
                     data.forEach(grade => {
-                        const row = `<tr>
+                        const row = `<tr data-student-id="${grade.student_id}" data-course-id="${grade.course_id}">
                             <td>${grade.student_id}</td>
                             <td>${grade.student_name || 'N/A'}</td>
-                            <td><input type="number" value="${grade.midterm_quizzes}" /></td>
-                            <td><input type="number" value="${grade.midterm_exam}" /></td>
-                            <td><input type="number" value="${grade.final_quizzes}" /></td>
-                            <td>${grade.final_grade}</td>
-                            <td><span class="status-tag done">Done</span></td>
+                            <td><input type="number" class="midterm-quiz" value="${grade.midterm_quizzes || ''}" /></td>
+                            <td><input type="number" class="midterm-exam" value="${grade.midterm_exam || ''}" /></td>
+                            <td><input type="number" class="final-quiz" value="${grade.final_quizzes || ''}" /></td>
+                            <td><input type="number" class="final-exam" value="${grade.final_exam || ''}" /></td>
+                            <td>${grade.final_grade || ''}</td>
+                            <td>${grade.gpa || ''}</td>
+                            <td><span class="status-tag ${grade.final_grade ? 'done' : 'pending'}">${grade.final_grade ? 'Done' : 'Pending'}</span></td>
                         </tr>`;
                         tbody.innerHTML += row;
                     });
-                });
+                })
+                .catch(error => console.error('Error loading grades:', error));
         }
+
+        // Submit grades
+        document.querySelector('.btn-group .btn-primary:last-child').addEventListener('click', () => {
+            const rows = document.querySelectorAll('#grades-tbody tr');
+            rows.forEach(row => {
+                const studentId = row.dataset.studentId;
+                const courseId = row.dataset.courseId;
+                const midtermQuiz = row.querySelector('.midterm-quiz').value;
+                const midtermExam = row.querySelector('.midterm-exam').value;
+                const finalQuiz = row.querySelector('.final-quiz').value;
+                const finalExam = row.querySelector('.final-exam').value;
+
+                if (midtermQuiz && midtermExam && finalQuiz && finalExam) {
+                    fetch('../../../backend/routes/api.php/api/professor/grades', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            student_id: studentId,
+                            course_id: courseId,
+                            midterm_quizzes: parseFloat(midtermQuiz),
+                            midterm_exam: parseFloat(midtermExam),
+                            final_quizzes: parseFloat(finalQuiz),
+                            final_exam: parseFloat(finalExam)
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Grade submitted successfully');
+                            loadGrades(); // Reload to show computed grades
+                        } else {
+                            alert('Error submitting grade');
+                        }
+                    })
+                    .catch(error => console.error('Error submitting grade:', error));
+                }
+            });
+        });
 
         // AI Quiz generation
         document.querySelector('#ai-quizzes form').addEventListener('submit', (e) => {

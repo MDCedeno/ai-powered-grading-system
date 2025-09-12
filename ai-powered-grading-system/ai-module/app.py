@@ -58,5 +58,27 @@ def analyze_grades():
         'ai_used': 'Mock AI'
     })
 
+@app.route('/compute_grade', methods=['POST'])
+def compute_grade():
+    data = request.json
+    midterm_quizzes = data.get('midterm_quizzes', 0)
+    midterm_exam = data.get('midterm_exam', 0)
+    final_quizzes = data.get('final_quizzes', 0)
+    final_exam = data.get('final_exam', 0)
+
+    # Mock AI computation
+    midterm_grade = (midterm_quizzes + midterm_exam) / 2
+    final_grade = (final_quizzes + final_exam) / 2
+    overall = (midterm_grade + final_grade) / 2
+    gpa = min(4.0, overall / 25)  # Assuming 100 scale to 4.0 GPA
+
+    return jsonify({
+        'midterm_grade': midterm_grade,
+        'final_grade': final_grade,
+        'overall': overall,
+        'gpa': gpa,
+        'ai_used': 'Mock AI'
+    })
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
