@@ -10,13 +10,19 @@ require_once __DIR__ . '/../controllers/superAdminController.php';
 $request = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Remove query string
-$request = strtok($request, '?');
+// Check if path is provided in query
+$path = $_GET['path'] ?? '';
 
-// Extract path after /routes/api.php
-$path = strstr($request, '/routes/api.php');
-if ($path) {
-    $path = substr($path, strlen('/routes/api.php'));
+// If not in query, parse from URI
+if (!$path) {
+    // Remove query string
+    $request = strtok($request, '?');
+
+    // Extract path after /routes/api.php
+    $path_part = strstr($request, '/routes/api.php');
+    if ($path_part) {
+        $path = substr($path_part, strlen('/routes/api.php'));
+    }
 }
 
 // SuperAdmin routes

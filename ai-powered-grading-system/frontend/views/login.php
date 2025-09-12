@@ -80,7 +80,7 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            fetch('../../backend/routes/api.php/api/auth/login', {
+            fetch('../../backend/routes/api.php?path=/api/auth/login', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'

@@ -1,7 +1,8 @@
 <?php
 // Thorough testing script for all backend API endpoints
 
-function sendRequest($method, $url, $data = null) {
+function sendRequest($method, $url, $data = null)
+{
     $ch = curl_init();
 
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -21,39 +22,44 @@ function sendRequest($method, $url, $data = null) {
     return ['code' => $httpcode, 'response' => $response];
 }
 
-$baseUrl = 'http://localhost:3000/api.php';
+function buildUrl($baseUrl, $path)
+{
+    return $baseUrl . '?path=' . urlencode($path);
+}
+
+$baseUrl = 'http://localhost:3000/ai-powered-grading-system/backend/routes/api.php';
 
 // SuperAdmin tests
 echo "Testing SuperAdmin endpoints...\n";
-$res = sendRequest('GET', $baseUrl . '/api/superadmin/users');
-echo "GET /api/superadmin/users: HTTP {$res['code']}\n";
+$res = sendRequest('GET', buildUrl($baseUrl, '/api/superadmin/users'));
+echo "GET /api/superadmin/users: HTTP {$res['code']} - Response: {$res['response']}\n";
 
-$res = sendRequest('POST', $baseUrl . '/api/superadmin/users/deactivate', ['user_id' => 1]);
-echo "POST /api/superadmin/users/deactivate: HTTP {$res['code']}\n";
+$res = sendRequest('POST', buildUrl($baseUrl, '/api/superadmin/users/deactivate'), ['user_id' => 1]);
+echo "POST /api/superadmin/users/deactivate: HTTP {$res['code']} - Response: {$res['response']}\n";
 
-$res = sendRequest('GET', $baseUrl . '/api/superadmin/logs');
-echo "GET /api/superadmin/logs: HTTP {$res['code']}\n";
+$res = sendRequest('GET', buildUrl($baseUrl, '/api/superadmin/logs'));
+echo "GET /api/superadmin/logs: HTTP {$res['code']} - Response: {$res['response']}\n";
 
 // Admin tests
 echo "Testing Admin endpoints...\n";
-$res = sendRequest('GET', $baseUrl . '/api/admin/students');
-echo "GET /api/admin/students: HTTP {$res['code']}\n";
+$res = sendRequest('GET', buildUrl($baseUrl, '/api/admin/students'));
+echo "GET /api/admin/students: HTTP {$res['code']} - Response: {$res['response']}\n";
 
-$res = sendRequest('POST', $baseUrl . '/api/admin/students', ['user_id' => 1, 'program' => 'CS', 'year' => 3]);
-echo "POST /api/admin/students: HTTP {$res['code']}\n";
+$res = sendRequest('POST', buildUrl($baseUrl, '/api/admin/students'), ['user_id' => 1, 'program' => 'CS', 'year' => 3]);
+echo "POST /api/admin/students: HTTP {$res['code']} - Response: {$res['response']}\n";
 
-$res = sendRequest('PUT', $baseUrl . '/api/admin/students/1', ['program' => 'IT', 'year' => 4]);
-echo "PUT /api/admin/students/1: HTTP {$res['code']}\n";
+$res = sendRequest('PUT', buildUrl($baseUrl, '/api/admin/students/1'), ['program' => 'IT', 'year' => 4]);
+echo "PUT /api/admin/students/1: HTTP {$res['code']} - Response: {$res['response']}\n";
 
-$res = sendRequest('DELETE', $baseUrl . '/api/admin/students/1');
-echo "DELETE /api/admin/students/1: HTTP {$res['code']}\n";
+$res = sendRequest('DELETE', buildUrl($baseUrl, '/api/admin/students/1'));
+echo "DELETE /api/admin/students/1: HTTP {$res['code']} - Response: {$res['response']}\n";
 
 // Professor tests
 echo "Testing Professor endpoints...\n";
-$res = sendRequest('GET', $baseUrl . '/api/professor/students');
-echo "GET /api/professor/students: HTTP {$res['code']}\n";
+$res = sendRequest('GET', buildUrl($baseUrl, '/api/professor/students'));
+echo "GET /api/professor/students: HTTP {$res['code']} - Response: {$res['response']}\n";
 
-$res = sendRequest('POST', $baseUrl . '/api/professor/grades', [
+$res = sendRequest('POST', buildUrl($baseUrl, '/api/professor/grades'), [
     'student_id' => 1,
     'course_id' => 1,
     'midterm_quizzes' => 10,
@@ -64,26 +70,25 @@ $res = sendRequest('POST', $baseUrl . '/api/professor/grades', [
     'final_grade' => 30,
     'gpa' => 3.5
 ]);
-echo "POST /api/professor/grades: HTTP {$res['code']}\n";
+echo "POST /api/professor/grades: HTTP {$res['code']} - Response: {$res['response']}\n";
 
 // Student tests
 echo "Testing Student endpoints...\n";
-$res = sendRequest('GET', $baseUrl . '/api/student/grades');
-echo "GET /api/student/grades: HTTP {$res['code']}\n";
+$res = sendRequest('GET', buildUrl($baseUrl, '/api/student/grades'));
+echo "GET /api/student/grades: HTTP {$res['code']} - Response: {$res['response']}\n";
 
-$res = sendRequest('GET', $baseUrl . '/api/student/courses');
-echo "GET /api/student/courses: HTTP {$res['code']}\n";
+$res = sendRequest('GET', buildUrl($baseUrl, '/api/student/courses'));
+echo "GET /api/student/courses: HTTP {$res['code']} - Response: {$res['response']}\n";
 
 // Auth tests
 echo "Testing Auth endpoints...\n";
-$res = sendRequest('POST', $baseUrl . '/api/auth/login', ['email' => 'test@example.com', 'password' => 'password']);
-echo "POST /api/auth/login: HTTP {$res['code']}\n";
+$res = sendRequest('POST', buildUrl($baseUrl, '/api/auth/login'), ['email' => 'test@example.com', 'password' => 'password']);
+echo "POST /api/auth/login: HTTP {$res['code']} - Response: {$res['response']}\n";
 
-$res = sendRequest('POST', $baseUrl . '/api/auth/register', ['name' => 'Test User', 'email' => 'test2@example.com', 'password' => 'password', 'role' => 'student']);
-echo "POST /api/auth/register: HTTP {$res['code']}\n";
+$res = sendRequest('POST', buildUrl($baseUrl, '/api/auth/register'), ['name' => 'Test User', 'email' => 'test2@example.com', 'password' => 'password', 'role' => 'student']);
+echo "POST /api/auth/register: HTTP {$res['code']} - Response: {$res['response']}\n";
 
-$res = sendRequest('POST', $baseUrl . '/api/auth/logout');
-echo "POST /api/auth/logout: HTTP {$res['code']}\n";
+$res = sendRequest('POST', buildUrl($baseUrl, '/api/auth/logout'));
+echo "POST /api/auth/logout: HTTP {$res['code']} - Response: {$res['response']}\n";
 
 echo "Thorough API testing completed.\n";
-?>

@@ -50,7 +50,12 @@ class ProfessorController {
     }
 
     public function addGrade($data) {
-        return $this->gradeModel->create($data['student_id'], $data['course_id'], $data['midterm_quizzes'], $data['midterm_exam'], $data['midterm_grade'], $data['final_quizzes'], $data['final_exam'], $data['final_grade'], $data['gpa']);
+        try {
+            return $this->gradeModel->create($data['student_id'], $data['course_id'], $data['midterm_quizzes'], $data['midterm_exam'], $data['midterm_grade'], $data['final_quizzes'], $data['final_exam'], $data['final_grade'], $data['gpa']);
+        } catch (Exception $e) {
+            error_log('Error in addGrade: ' . $e->getMessage());
+            return false;
+        }
     }
 
     public function updateGrade($id, $data) {

@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../models/user.php';
 require_once __DIR__ . '/../models/course.php';
-require_once __DIR__ . '/../models/log.php';
+require_once __DIR__ . '/../models/log.php'; 
 
 class SuperAdminController {
     private $userModel;
