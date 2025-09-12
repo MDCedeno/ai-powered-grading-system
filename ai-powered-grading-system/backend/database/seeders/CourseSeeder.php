@@ -14,47 +14,52 @@ class CourseSeeder {
     public function run() {
         $dummyCourses = [
             [
-                'code' => 'PROFDEV8-CS4A',
-                'name' => 'Professional Development 8',
-                'schedule' => '1:00PM-2:00PM/SUN',
-                'faculty_id' => 3
+                'course_code' => 'CS101',
+                'course_name' => 'Introduction to Computer Science',
+                'professor_id' => 3, // Assuming Alice Johnson is professor
+                'semester' => 'Fall 2024',
+                'year' => 2024
             ],
             [
-                'code' => 'PROFDEV8-CS4B',
-                'name' => 'Professional Development 8',
-                'schedule' => '2:00PM-3:00PM/SUN',
-                'faculty_id' => 3
+                'course_code' => 'IT201',
+                'course_name' => 'Database Management Systems',
+                'professor_id' => 4, // Bob Wilson
+                'semester' => 'Fall 2024',
+                'year' => 2024
             ],
             [
-                'code' => 'PROFDEV8-CS4C',
-                'name' => 'Professional Development 8',
-                'schedule' => '3:00PM-4:00PM/SUN',
-                'faculty_id' => 3
+                'course_code' => 'CS301',
+                'course_name' => 'Data Structures and Algorithms',
+                'professor_id' => 5, // Carol Davis
+                'semester' => 'Spring 2024',
+                'year' => 2024
             ],
             [
-                'code' => 'PROFDEV8-IT4A',
-                'name' => 'Professional Development 8',
-                'schedule' => '4:00PM-5:00PM/SUN',
-                'faculty_id' => 4
+                'course_code' => 'IT401',
+                'course_name' => 'Web Development',
+                'professor_id' => 3,
+                'semester' => 'Spring 2024',
+                'year' => 2024
             ],
             [
-                'code' => 'PROFDEV8-IT4B',
-                'name' => 'Professional Development 8',
-                'schedule' => '5:00PM-6:00PM/SUN',
-                'faculty_id' => 4
+                'course_code' => 'CS501',
+                'course_name' => 'Artificial Intelligence',
+                'professor_id' => 4,
+                'semester' => 'Fall 2024',
+                'year' => 2024
             ]
         ];
 
         foreach ($dummyCourses as $courseData) {
             // Check if course already exists
-            if (!$this->courseModel->findByCode($courseData['code'])) {
-                if ($this->courseModel->create($courseData['code'], $courseData['name'], $courseData['schedule'], $courseData['faculty_id'])) {
-                    echo "Course {$courseData['code']} created successfully.\n";
+            if (!$this->courseModel->findByCode($courseData['course_code'])) {
+                if ($this->courseModel->create($courseData['course_code'], $courseData['course_name'], $courseData['professor_id'], $courseData['semester'], $courseData['year'])) {
+                    echo "Course {$courseData['course_name']} created successfully.\n";
                 } else {
-                    echo "Failed to create course {$courseData['code']}.\n";
+                    echo "Failed to create course {$courseData['course_name']}.\n";
                 }
             } else {
-                echo "Course {$courseData['code']} already exists.\n";
+                echo "Course {$courseData['course_code']} already exists.\n";
             }
         }
     }

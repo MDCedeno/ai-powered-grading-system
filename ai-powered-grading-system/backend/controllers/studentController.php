@@ -49,6 +49,24 @@ class StudentController {
         return $this->courseModel->getAll();
     }
 
+    public function getNotifications() {
+        // Mock notifications for now
+        return [
+            ['id' => 1, 'message' => 'New grade posted for CS101', 'date' => '2024-01-15'],
+            ['id' => 2, 'message' => 'Assignment due tomorrow', 'date' => '2024-01-14'],
+            ['id' => 3, 'message' => 'Welcome to the new semester!', 'date' => '2024-01-10']
+        ];
+    }
+
+    public function getQuizzes() {
+        // Mock quizzes for now
+        return [
+            ['id' => 1, 'title' => 'Midterm Quiz CS101', 'subject' => 'Computer Science', 'status' => 'available', 'action' => 'Take Quiz'],
+            ['id' => 2, 'title' => 'Final Quiz IT201', 'subject' => 'Information Technology', 'status' => 'completed', 'action' => 'View Results'],
+            ['id' => 3, 'title' => 'Practice Quiz MATH101', 'subject' => 'Mathematics', 'status' => 'upcoming', 'action' => 'Preview']
+        ];
+    }
+
     // Add methods for performance insights, etc.
 }
 ?>

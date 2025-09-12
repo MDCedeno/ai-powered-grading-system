@@ -9,12 +9,15 @@ class AdminController {
     private $studentModel;
     private $courseModel;
     private $gradeModel;
+    private $logModel;
 
     public function __construct($pdo) {
         $this->userModel = new User($pdo);
         $this->studentModel = new Student($pdo);
         $this->courseModel = new Course($pdo);
         $this->gradeModel = new Grade($pdo);
+        require_once __DIR__ . '/../models/log.php';
+        $this->logModel = new Log($pdo);
     }
 
     public function getStudents() {
@@ -47,6 +50,10 @@ class AdminController {
 
     public function getAllStudents() {
         return $this->studentModel->getAll();
+    }
+
+    public function getAllProfessors() {
+        return $this->userModel->getProfessors();
     }
 
     public function getAllCourses() {
@@ -93,6 +100,13 @@ class AdminController {
         return $this->gradeModel->delete($id);
     }
 
-    // Add more methods as needed for reports, etc.
+    public function generateReports() {
+        // Placeholder for report generation logic
+        return ['message' => 'Report generation not yet implemented'];
+    }
+
+    public function getAuditLogs() {
+        return $this->logModel->getAll();
+    }
 }
 ?>

@@ -25,7 +25,7 @@
   <link rel="manifest" href="../../assets/images/site.webmanifest" />
 </head>
 
-<body>
+<body data-role="admin">
   <div class="dashboard-container">
     <!-- Sidebar -->
     <aside class="sidebar">

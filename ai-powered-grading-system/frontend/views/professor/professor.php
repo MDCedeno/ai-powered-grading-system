@@ -26,7 +26,7 @@
     <link rel="manifest" href="../../assets/images/site.webmanifest" />
 </head>
 
-<body>
+<body data-role="professor">
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar">
@@ -278,6 +278,7 @@
     <!-- Tab Highlighting & Smooth Scroll -->
     <?php include '../../components/scroll.php'; ?>
 
+    <script src="../../js/main.js"></script>
     <script>
         // Tab switching
         const navLinks = document.querySelectorAll('.sidebar-nav a');
@@ -301,7 +302,7 @@
 
         // Load courses for class management
         function loadCourses() {
-            fetch('../../../backend/routes/api.php/api/professor/courses')
+            fetch('../../backend/routes/api.php/api/professor/courses')
                 .then(response => response.json())
                 .then(data => {
                     const tbody = document.querySelector('#class-management table tbody');
@@ -324,7 +325,7 @@
 
         // Load grades for student performance
         function loadGrades() {
-            fetch('../../../backend/routes/api.php/api/professor/grades')
+            fetch('../../backend/routes/api.php/api/professor/grades')
                 .then(response => response.json())
                 .then(data => {
                     const tbody = document.getElementById('grades-tbody');
@@ -359,7 +360,7 @@
                 const finalExam = row.querySelector('.final-exam').value;
 
                 if (midtermQuiz && midtermExam && finalQuiz && finalExam) {
-                    fetch('../../../backend/routes/api.php/api/professor/grades', {
+                    fetch('../../backend/routes/api.php/api/professor/grades', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

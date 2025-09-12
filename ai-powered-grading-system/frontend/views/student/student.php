@@ -25,7 +25,7 @@
   <link rel="manifest" href="../../assets/images/site.webmanifest" />
 </head>
 
-<body>
+<body data-role="student">
   <div class="dashboard-container">
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -371,6 +371,7 @@
   <!-- Tab Highlighting & Smooth Scroll -->
   <?php include '../../components/scroll.php'; ?>
 
+  <script src="../../js/main.js"></script>
   <script>
     // Tab switching
     const navLinks = document.querySelectorAll('.sidebar-nav a');
@@ -394,7 +395,7 @@
 
     // Load grades
     function loadGrades() {
-      fetch('../../../backend/routes/api.php/api/student/grades')
+      fetch('../../backend/routes/api.php/api/student/grades')
         .then(response => response.json())
         .then(data => {
           const tbody = document.querySelector('#grades table tbody');
@@ -415,7 +416,7 @@
 
     // Load quizzes
     function loadQuizzes() {
-      fetch('../../../backend/routes/api.php/api/student/quizzes')
+      fetch('../../backend/routes/api.php/api/student/quizzes')
         .then(response => response.json())
         .then(data => {
           const tbody = document.querySelector('#quizzes table tbody');
@@ -434,7 +435,7 @@
 
     // Load notifications
     function loadNotifications() {
-      fetch('../../../backend/routes/api.php/api/student/notifications')
+      fetch('../../backend/routes/api.php/api/student/notifications')
         .then(response => response.json())
         .then(data => {
           const ul = document.querySelector('#notifications ul');

@@ -18,35 +18,38 @@ class GradeSeeder {
     }
 
     public function run() {
-        // Get all students and courses
         $students = $this->studentModel->getAll();
         $courses = $this->courseModel->getAll();
 
-        if (empty($students) || empty($courses)) {
-            echo "No students or courses found. Please run StudentSeeder and CourseSeeder first.\n";
-            return;
-        }
-
         foreach ($students as $student) {
             foreach ($courses as $course) {
-                // Check if grade already exists
-                if (!$this->gradeModel->findByStudentAndCourse($student['id'], $course['id'])) {
-                    // Generate random grades
+                // Check if grade record already exists
+if (!$this->gradeModel->findByStudentAndCourse($student['id'], $course['id'])) {
                     $midterm_quizzes = rand(5, 10);
                     $midterm_exam = rand(10, 20);
                     $midterm_grade = $midterm_quizzes + $midterm_exam;
                     $final_quizzes = rand(5, 10);
                     $final_exam = rand(10, 20);
                     $final_grade = $final_quizzes + $final_exam;
-                    $gpa = round(($midterm_grade + $final_grade) / 100 * 4.0, 2);
+                    $gpa = rand(20, 40) / 10.0;
 
-                    if ($this->gradeModel->create($student['id'], $course['id'], $midterm_quizzes, $midterm_exam, $midterm_grade, $final_quizzes, $final_exam, $final_grade, $gpa)) {
-                        echo "Grade for student {$student['id']} in course {$course['code']} created successfully.\n";
+                    if ($this->gradeModel->create(
+                        $student['id'],
+                        $course['id'],
+                        $midterm_quizzes,
+                        $midterm_exam,
+                        $midterm_grade,
+                        $final_quizzes,
+                        $final_exam,
+                        $final_grade,
+                        $gpa
+                    )) {
+                        echo "Grade record for student {$student['id']} in course {$course['id']} created successfully.\n";
                     } else {
-                        echo "Failed to create grade for student {$student['id']} in course {$course['code']}.\n";
+                        echo "Failed to create grade record for student {$student['id']} in course {$course['id']}.\n";
                     }
                 } else {
-                    echo "Grade for student {$student['id']} in course {$course['code']} already exists.\n";
+                    echo "Grade record for student {$student['id']} in course {$course['id']} already exists.\n";
                 }
             }
         }

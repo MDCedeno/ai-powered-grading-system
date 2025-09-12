@@ -30,18 +30,29 @@ if (!$path) {
 if (strpos($path, '/api/superadmin') === 0) {
     $controller = new SuperAdminController($pdo);
     if ($path == '/api/superadmin/users' && $method == 'GET') {
-        $users = $controller->getAllUsers();
+        $search = $_GET['search'] ?? '';
+        $role = $_GET['role'] ?? '';
+        $sort = $_GET['sort'] ?? 'name';
+        $users = $controller->getAllUsers($search, $role, $sort);
         echo json_encode($users);
     } elseif ($path == '/api/superadmin/users/deactivate' && $method == 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
         $result = $controller->deactivateUser($data['user_id']);
         echo json_encode(['success' => $result]);
     } elseif ($path == '/api/superadmin/logs' && $method == 'GET') {
-        $logs = $controller->getSystemLogs();
+        $search = $_GET['search'] ?? '';
+        $status = $_GET['status'] ?? '';
+        $sort = $_GET['sort'] ?? 'newest';
+        $logs = $controller->getSystemLogs($search, $status, $sort);
         echo json_encode($logs);
     } elseif ($path == '/api/superadmin/users/activate' && $method == 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
         $result = $controller->activateUser($data['user_id']);
+        echo json_encode(['success' => $result]);
+    } elseif (preg_match('/\/api\/superadmin\/users\/(\d+)/', $path, $matches) && $method == 'PUT') {
+        $id = $matches[1];
+        $data = json_decode(file_get_contents('php://input'), true);
+        $result = $controller->updateUser($id, $data);
         echo json_encode(['success' => $result]);
     } elseif (preg_match('/\/api\/superadmin\/users\/(\d+)/', $path, $matches) && $method == 'DELETE') {
         $id = $matches[1];
@@ -78,12 +89,21 @@ elseif (strpos($path, '/api/admin') === 0) {
     if ($path == '/api/admin/students' && $method == 'GET') {
         $students = $controller->getAllStudents();
         echo json_encode($students);
+    } elseif ($path == '/api/admin/professors' && $method == 'GET') {
+        $professors = $controller->getProfessors();
+        echo json_encode($professors);
     } elseif ($path == '/api/admin/courses' && $method == 'GET') {
         $courses = $controller->getAllCourses();
         echo json_encode($courses);
     } elseif ($path == '/api/admin/grades' && $method == 'GET') {
         $grades = $controller->getAllGrades();
         echo json_encode($grades);
+    } elseif ($path == '/api/admin/reports' && $method == 'GET') {
+        $reports = $controller->generateReports();
+        echo json_encode($reports);
+    } elseif ($path == '/api/admin/audit-logs' && $method == 'GET') {
+        $logs = $controller->getAuditLogs();
+        echo json_encode($logs);
     } elseif ($path == '/api/admin/students' && $method == 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
         $result = $controller->addStudent($data);
@@ -167,6 +187,12 @@ elseif (strpos($path, '/api/student') === 0) {
     } elseif ($path == '/api/student/courses' && $method == 'GET') {
         $courses = $controller->getMyCourses();
         echo json_encode($courses);
+    } elseif ($path == '/api/student/notifications' && $method == 'GET') {
+        $notifications = $controller->getNotifications();
+        echo json_encode($notifications);
+    } elseif ($path == '/api/student/quizzes' && $method == 'GET') {
+        $quizzes = $controller->getQuizzes();
+        echo json_encode($quizzes);
     } else {
         http_response_code(404);
         echo json_encode(['error' => 'Student endpoint not found']);

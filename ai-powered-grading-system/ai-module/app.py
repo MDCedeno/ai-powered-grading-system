@@ -1,84 +1,86 @@
 from flask import Flask, request, jsonify
-import random
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+import joblib
+import os
 
 app = Flask(__name__)
 
-@app.route('/grade', methods=['POST'])
-def grade_essay():
+# Load or train model
+MODEL_PATH = 'models/grading_model.pkl'
+DATA_PATH = 'data/grading_data.csv'
+
+def load_or_train_model():
+    if os.path.exists(MODEL_PATH):
+        model = joblib.load(MODEL_PATH)
+        print("Model loaded from file.")
+    else:
+        # Load training data
+        if os.path.exists(DATA_PATH):
+            data = pd.read_csv(DATA_PATH)
+            X = data[['midterm_quizzes', 'midterm_exam', 'final_quizzes', 'final_exam']]
+            y = data['final_gpa']
+
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+            model = RandomForestRegressor(n_estimators=100, random_state=42)
+            model.fit(X_train, y_train)
+
+            # Evaluate
+            predictions = model.predict(X_test)
+            mse = mean_squared_error(y_test, predictions)
+            print(f"Model trained. MSE: {mse}")
+
+            # Save model
+            joblib.dump(model, MODEL_PATH)
+        else:
+            print("No training data found. Using dummy model.")
+            model = RandomForestRegressor(n_estimators=100, random_state=42)
+            # Dummy training
+            X_dummy = np.random.rand(100, 4)
+            y_dummy = np.random.rand(100)
+            model.fit(X_dummy, y_dummy)
+
+    return model
+
+model = load_or_train_model()
+
+@app.route('/predict_gpa', methods=['POST'])
+def predict_gpa():
     data = request.json
-    essay = data.get('essay', '')
-    if not essay:
-        return jsonify({'error': 'No essay provided'}), 400
+    midterm_quizzes = data['midterm_quizzes']
+    midterm_exam = data['midterm_exam']
+    final_quizzes = data['final_quizzes']
+    final_exam = data['final_exam']
 
-    # Mock AI grading
-    grade = random.randint(70, 100)
-    feedback = f"This is a mock feedback for the essay. Grade: {grade}/100. Strengths: Good structure. Areas for improvement: More details needed."
+    features = np.array([[midterm_quizzes, midterm_exam, final_quizzes, final_exam]])
+    predicted_gpa = model.predict(features)[0]
 
-    return jsonify({
-        'grade': grade,
-        'feedback': feedback,
-        'ai_used': 'Mock AI'
-    })
+    return jsonify({'predicted_gpa': round(predicted_gpa, 2)})
 
-@app.route('/quiz', methods=['POST'])
+@app.route('/generate_quiz', methods=['POST'])
 def generate_quiz():
     data = request.json
-    topic = data.get('topic', 'General')
-    num_questions = data.get('num_questions', 5)
+    subject = data['subject']
+    difficulty = data['difficulty']
 
-    # Mock quiz generation
-    questions = []
-    for i in range(num_questions):
-        questions.append({
-            'question': f"What is the capital of France? (Mock question {i+1} on {topic})",
-            'options': ['Paris', 'London', 'Berlin', 'Madrid'],
-            'answer': 'Paris'
-        })
+    # Dummy quiz generation
+    questions = [
+        {
+            'question': f"What is the capital of {subject}?",
+            'options': ['Option A', 'Option B', 'Option C', 'Option D'],
+            'correct': 'Option A'
+        },
+        {
+            'question': f"Explain a key concept in {subject}.",
+            'type': 'essay'
+        }
+    ]
 
-    return jsonify({
-        'topic': topic,
-        'questions': questions,
-        'ai_used': 'Mock AI'
-    })
-
-@app.route('/analytics', methods=['POST'])
-def analyze_grades():
-    data = request.json
-    grades = data.get('grades', [])
-    if not grades:
-        return jsonify({'error': 'No grades provided'}), 400
-
-    # Mock analytics
-    avg_grade = sum(grades) / len(grades)
-    insights = f"Average grade: {avg_grade:.2f}. Distribution: Most students scored between 80-90. Recommendations: Focus on weak areas."
-
-    return jsonify({
-        'average': avg_grade,
-        'insights': insights,
-        'ai_used': 'Mock AI'
-    })
-
-@app.route('/compute_grade', methods=['POST'])
-def compute_grade():
-    data = request.json
-    midterm_quizzes = data.get('midterm_quizzes', 0)
-    midterm_exam = data.get('midterm_exam', 0)
-    final_quizzes = data.get('final_quizzes', 0)
-    final_exam = data.get('final_exam', 0)
-
-    # Mock AI computation
-    midterm_grade = (midterm_quizzes + midterm_exam) / 2
-    final_grade = (final_quizzes + final_exam) / 2
-    overall = (midterm_grade + final_grade) / 2
-    gpa = min(4.0, overall / 25)  # Assuming 100 scale to 4.0 GPA
-
-    return jsonify({
-        'midterm_grade': midterm_grade,
-        'final_grade': final_grade,
-        'overall': overall,
-        'gpa': gpa,
-        'ai_used': 'Mock AI'
-    })
+    return jsonify({'quiz': questions})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
