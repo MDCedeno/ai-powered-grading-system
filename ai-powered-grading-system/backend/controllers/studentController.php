@@ -23,14 +23,29 @@ class StudentController {
     }
 
     public function getMyGrades() {
-        // Assume user_id is passed or from session
-        // For now, return all grades
-        return $this->gradeModel->getAll();
+        // Get user_id from session
+        if (!isset($_SESSION['user_id'])) {
+            return ['error' => 'User not logged in'];
+        }
+        $user_id = $_SESSION['user_id'];
+        $student = $this->studentModel->findByUserId($user_id);
+        if (!$student) {
+            return ['error' => 'Student record not found'];
+        }
+        return $this->gradeModel->getByStudent($student['id']);
     }
 
     public function getMyCourses() {
-        // Assume user_id is passed or from session
-        // For now, return all courses
+        // Get user_id from session
+        if (!isset($_SESSION['user_id'])) {
+            return ['error' => 'User not logged in'];
+        }
+        $user_id = $_SESSION['user_id'];
+        $student = $this->studentModel->findByUserId($user_id);
+        if (!$student) {
+            return ['error' => 'Student record not found'];
+        }
+        // For now, return all courses, but ideally filter by enrolled courses
         return $this->courseModel->getAll();
     }
 

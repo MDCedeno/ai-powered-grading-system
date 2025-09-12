@@ -16,8 +16,7 @@ class CreateCoursesTable {
             schedule VARCHAR(255),
             faculty_id INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (faculty_id) REFERENCES users(id) ON DELETE SET NULL
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB;";
         $this->pdo->exec($sql);
     }

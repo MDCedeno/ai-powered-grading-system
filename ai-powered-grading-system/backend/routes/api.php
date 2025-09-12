@@ -19,9 +19,10 @@ if (!$path) {
     $request = strtok($request, '?');
 
     // Extract path after /routes/api.php
-    $path_part = strstr($request, '/routes/api.php');
-    if ($path_part) {
-        $path = substr($path_part, strlen('/routes/api.php'));
+    if (strpos($request, '/routes/api.php') !== false) {
+        $path = substr($request, strpos($request, '/routes/api.php') + strlen('/routes/api.php'));
+    } else {
+        $path = $request;
     }
 }
 
