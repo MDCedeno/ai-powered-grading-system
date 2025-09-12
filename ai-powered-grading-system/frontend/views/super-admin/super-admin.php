@@ -52,7 +52,7 @@
     <!-- Main Content -->
     <main class="main-content">
       <header class="main-header">
-        <h1>User Role Management</h1>
+        <h1>System Dashboard</h1>
         <div class="user-profile">
           <span>
             <?php echo $_SESSION['user_name'] ?? 'Guest'; ?>
@@ -293,80 +293,90 @@
   <script src="../../js/main.js"></script>
   <script>
     // Tab switching
-    let navLinks = document.querySelectorAll('.sidebar-nav a');
-    let sections = document.querySelectorAll('.tab-section');
+    if (!window.navLinks) {
+      window.navLinks = document.querySelectorAll('.sidebar-nav a');
+      window.sections = document.querySelectorAll('.tab-section');
 
-    navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute('href').substring(1);
-        sections.forEach(section => {
-          section.classList.remove('active');
-          section.classList.add('hidden');
-        });
-        const targetSection = document.getElementById(targetId);
-        if (targetSection) {
-          targetSection.classList.remove('hidden');
-          targetSection.classList.add('active');
-        }
-        // Update nav active
-        navLinks.forEach((l) => l.parentElement.classList.remove("active"));
-        link.parentElement.classList.add("active");
-      });
-    });
-
-    // Load system stats for dashboard
-    function loadStats() {
-      fetch('http://localhost:8080/api.php?path=/api/superadmin/stats')
-        .then(response => response.json())
-        .then(data => {
-          // Update Server Status
-          const serverStatus = document.querySelector('.card:nth-child(1) p');
-          serverStatus.textContent = data.server_status;
-          serverStatus.className = data.server_status === 'Online' ? 'status-online' : 'status-offline';
-
-          // Update Active Users
-          const activeUsers = document.querySelector('.card:nth-child(2) .metric');
-          activeUsers.textContent = data.users;
-
-          // Update Error Logs (24h)
-          const errorLogs = document.querySelector('.card:nth-child(3) .metric');
-          errorLogs.textContent = data.error_logs_24h;
-
-          // Update Database Health
-          const dbHealth = document.querySelector('.card:nth-child(4) p');
-          dbHealth.textContent = data.db_health;
-          dbHealth.className = data.db_health === 'Healthy' ? 'status-healthy' : 'status-unhealthy';
-        })
-        .catch(err => console.error('Failed to load stats:', err));
-    }
-
-    function loadLogs() {
-      const search = document.querySelector('#audit-logs input[type="text"]').value;
-      const status = document.querySelector('#audit-logs select:nth-of-type(1)').value;
-      const sort = document.querySelector('#audit-logs select:nth-of-type(2)').value;
-      const params = new URLSearchParams({
-        search: search,
-        status: status !== 'Filter by Status' ? status.toLowerCase() : '',
-        sort: sort !== 'Sort by' ? sort.toLowerCase().replace(' first', '') : 'newest'
-      });
-      fetch(`http://localhost:8080/api.php?path=/api/superadmin/logs&${params}`)
-        .then(response => response.json())
-        .then(data => {
-          const tbody = document.querySelector('#audit-logs table tbody');
-          tbody.innerHTML = '';
-          data.forEach(log => {
-            const row = `<tr>
-              <td>${log.timestamp}</td>
-              <td>${log.user_id}</td>
-              <td>${log.action}</td>
-              <td><span class="status-tag ${log.status === 'success' ? 'success' : 'error'}">${log.status}</span></td>
-            </tr>`;
-            tbody.innerHTML += row;
+      window.navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetId = link.getAttribute('href').substring(1);
+          window.sections.forEach(section => {
+            section.classList.remove('active');
+            section.classList.add('hidden');
           });
-        })
-        .catch(err => console.error('Failed to load logs:', err));
+          const targetSection = document.getElementById(targetId);
+          if (targetSection) {
+            targetSection.classList.remove('hidden');
+            targetSection.classList.add('active');
+          }
+          // Update nav active
+          window.navLinks.forEach((l) => l.parentElement.classList.remove("active"));
+          link.parentElement.classList.add("active");
+        });
+      });
     }
+
+      // Load system stats for dashboard
+      function loadStats() {
+      fetch('/backend/routes/api.php?path=/api/superadmin/stats')
+          .then(response => response.json())
+          .then(data => {
+            // Update Server Status
+            const serverStatus = document.querySelector('.card:nth-child(1) p');
+            serverStatus.textContent = data.server_status;
+            serverStatus.className = data.server_status === 'Online' ? 'status-online' : 'status-offline';
+
+            // Update Uptime
+            const uptimeSpan = document.querySelector('.card:nth-child(1) span');
+            uptimeSpan.textContent = 'Uptime: ' + data.uptime;
+
+            // Update Active Users
+            const activeUsers = document.querySelector('.card:nth-child(2) .metric');
+            activeUsers.textContent = data.users;
+
+            // Update Error Logs (24h)
+            const errorLogs = document.querySelector('.card:nth-child(3) .metric');
+            errorLogs.textContent = data.error_logs_24h;
+
+            // Update Database Health
+            const dbHealth = document.querySelector('.card:nth-child(4) p');
+            dbHealth.textContent = data.db_health;
+            dbHealth.className = data.db_health === 'Healthy' ? 'status-healthy' : 'status-unhealthy';
+
+            // Update Last Backup
+            const lastBackupSpan = document.querySelector('.card:nth-child(4) span');
+            lastBackupSpan.textContent = 'Last Backup: ' + data.last_backup;
+          })
+          .catch(err => console.error('Failed to load stats:', err));
+      }
+
+      function loadLogs() {
+        const search = document.querySelector('#audit-logs input[type="text"]').value;
+        const status = document.querySelector('#audit-logs select:nth-of-type(1)').value;
+        const sort = document.querySelector('#audit-logs select:nth-of-type(2)').value;
+        const params = new URLSearchParams({
+          search: search,
+          status: status !== 'Filter by Status' ? status.toLowerCase() : '',
+          sort: sort !== 'Sort by' ? sort.toLowerCase().replace(' first', '') : 'newest'
+        });
+      fetch(`/backend/routes/api.php?path=/api/superadmin/logs&${params}`)
+          .then(response => response.json())
+          .then(data => {
+            const tbody = document.querySelector('#audit-logs table tbody');
+            tbody.innerHTML = '';
+            data.forEach(log => {
+              const row = `<tr>
+                <td>${log.timestamp}</td>
+                <td>${log.user_id}</td>
+                <td>${log.action}</td>
+                <td><span class="status-tag ${log.status === 'success' ? 'success' : 'error'}">${log.status}</span></td>
+              </tr>`;
+              tbody.innerHTML += row;
+            });
+          })
+          .catch(err => console.error('Failed to load logs:', err));
+      }
 
     function getRoleName(role_id) {
       const roles = {
@@ -378,55 +388,55 @@
       return roles[role_id] || 'Unknown';
     }
 
-    function deactivateUser(userId) {
-      fetch('http://localhost:8080/api.php?path=/api/superadmin/users/deactivate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            user_id: userId
+      function deactivateUser(userId) {
+        fetch('/backend/routes/api.php?path=/api/superadmin/users/deactivate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              user_id: userId
+            })
           })
-        })
-        .then(response => response.json())
-        .then(data => {
-          alert(data.success ? 'User deactivated' : 'Failed');
-          loadUsers();
-        });
-    }
+          .then(response => response.json())
+          .then(data => {
+            alert(data.success ? 'User deactivated' : 'Failed');
+            loadUsers();
+          });
+      }
 
-    function activateUser(userId) {
-      fetch('http://localhost:8080/api.php?path=/api/superadmin/users/activate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            user_id: userId
+      function activateUser(userId) {
+        fetch('/backend/routes/api.php?path=/api/superadmin/users/activate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              user_id: userId
+            })
           })
-        })
-        .then(response => response.json())
-        .then(data => {
-          alert(data.success ? 'User activated' : 'Failed');
-          loadUsers();
-        });
-    }
+          .then(response => response.json())
+          .then(data => {
+            alert(data.success ? 'User activated' : 'Failed');
+            loadUsers();
+          });
+      }
 
-    function editUser(userId) {
-      // Fetch user data and populate modal
-      fetch(`http://localhost:8080/api.php?path=/api/superadmin/users`)
-        .then(response => response.json())
-        .then(data => {
-          const user = data.find(u => u.id == userId);
-          if (user) {
-            document.getElementById('edit-user-id').value = user.id;
-            document.getElementById('edit-user-name').value = user.name;
-            document.getElementById('edit-user-email').value = user.email;
-            document.getElementById('edit-user-role').value = user.role_id;
-            document.getElementById('edit-user-modal').classList.remove('hidden');
-          }
-        });
-    }
+      function editUser(userId) {
+        // Fetch user data and populate modal
+        fetch(`/backend/routes/api.php?path=/api/superadmin/users`)
+          .then(response => response.json())
+          .then(data => {
+            const user = data.find(u => u.id == userId);
+            if (user) {
+              document.getElementById('edit-user-id').value = user.id;
+              document.getElementById('edit-user-name').value = user.name;
+              document.getElementById('edit-user-email').value = user.email;
+              document.getElementById('edit-user-role').value = user.role_id;
+              document.getElementById('edit-user-modal').classList.remove('hidden');
+            }
+          });
+      }
 
     // Close modal
     document.querySelector('.close-modal').addEventListener('click', () => {
@@ -440,7 +450,7 @@
       const name = document.getElementById('edit-user-name').value;
       const email = document.getElementById('edit-user-email').value;
       const role = document.getElementById('edit-user-role').value;
-      fetch(`http://localhost:8080/api.php?path=/api/superadmin/users/${userId}`, {
+      fetch(`/backend/routes/api.php?path=/api/superadmin/users/${userId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -459,27 +469,27 @@
         });
     });
 
-    // Load AI config
-    function loadAIConfig() {
-      fetch('http://localhost:8080/api.php?path=/api/superadmin/ai-config')
-        .then(response => response.json())
-        .then(data => {
-          const form = document.querySelector('#ai-config form');
-          form.querySelector('input[type="checkbox"]:nth-of-type(1)').checked = data.enabled;
-          // Update other fields if needed
-        });
-    }
+      // Load AI config
+      function loadAIConfig() {
+        fetch('/backend/routes/api.php?path=/api/superadmin/ai-config')
+          .then(response => response.json())
+          .then(data => {
+            const form = document.querySelector('#ai-config form');
+            form.querySelector('input[type="checkbox"]:nth-of-type(1)').checked = data.enabled;
+            // Update other fields if needed
+          });
+      }
 
-    // Load system settings
-    function loadSystemSettings() {
-      fetch('http://localhost:8080/api.php?path=/api/superadmin/settings')
-        .then(response => response.json())
-        .then(data => {
-          const form = document.querySelector('#settings form');
-          form.querySelector('input[type="text"]').value = data.site_name;
-          // Update other fields
-        });
-    }
+      // Load system settings
+      function loadSystemSettings() {
+        fetch('/backend/routes/api.php?path=/api/superadmin/settings')
+          .then(response => response.json())
+          .then(data => {
+            const form = document.querySelector('#settings form');
+            form.querySelector('input[type="text"]').value = data.site_name;
+            // Update other fields
+          });
+      }
 
     // Load data when sections are shown
     document.querySelector('a[href="#user-roles"]').addEventListener('click', loadUsers);
@@ -521,7 +531,7 @@
 
     function deleteUser(userId) {
       if (confirm('Are you sure you want to delete this user?')) {
-        fetch(`http://localhost:8080/api.php?path=/api/superadmin/users/${userId}`, {
+        fetch(`../../backend/routes/api.php?path=/api/superadmin/users/${userId}`, {
             method: 'DELETE'
           })
           .then(response => response.json())
@@ -542,7 +552,7 @@
         role: role !== 'Filter by Role' ? role : '',
         sort: sort !== 'Sort by' ? sort.toLowerCase().replace(' (a-z)', '').replace('date created', 'date') : 'name'
       });
-      fetch(`http://localhost:8080/api.php?path=/api/superadmin/users&${params}`)
+      fetch(`/backend/routes/api.php?path=/api/superadmin/users&${params}`)
         .then(response => response.json())
         .then(data => {
           const tbody = document.querySelector('#user-roles table tbody');
@@ -569,16 +579,16 @@
         .catch(err => console.error('Failed to load users:', err));
     }
 
-    // Backup database button
-    document.querySelector('#database .card:nth-child(3) button').addEventListener('click', () => {
-      fetch('http://localhost:8080/api.php?path=/api/superadmin/backup', {
-          method: 'POST'
-        })
-        .then(response => response.json())
-        .then(data => {
-          alert(data.success ? 'Backup created: ' + data.file : 'Backup failed');
-        });
-    });
+      // Backup database button
+      document.querySelector('#database .card:nth-child(3) button').addEventListener('click', () => {
+        fetch('/backend/routes/api.php?path=/api/superadmin/backup', {
+            method: 'POST'
+          })
+          .then(response => response.json())
+          .then(data => {
+            alert(data.success ? 'Backup created: ' + data.file : 'Backup failed');
+          });
+      });
 
     // Export logs button
     const exportBtn = document.createElement('button');
@@ -586,7 +596,7 @@
     exportBtn.className = 'btn-primary';
     document.querySelector('#audit-logs .toolbar').appendChild(exportBtn);
     exportBtn.addEventListener('click', () => {
-      fetch('http://localhost:8080/api.php?path=/api/superadmin/logs')
+      fetch('/backend/routes/api.php?path=/api/superadmin/logs')
         .then(response => response.json())
         .then(data => {
           const csv = 'Timestamp,User,Action,Status\n' + data.map(log => `${log.timestamp},${log.user_id},${log.action},${log.status}`).join('\n');
@@ -608,6 +618,22 @@
     // Load users on page load
     loadUsers();
 
+    // Refresh user list every 5 seconds for better real-time update
+    setInterval(() => {
+      loadUsers();
+    }, 5000);
+
+    // Add manual refresh button for user list
+    const userRolesToolbar = document.querySelector('#user-roles .toolbar');
+    const refreshBtn = document.createElement('button');
+    refreshBtn.textContent = 'Refresh Users';
+    refreshBtn.className = 'btn-secondary';
+    refreshBtn.style.marginLeft = '10px';
+    refreshBtn.addEventListener('click', () => {
+      loadUsers();
+    });
+    userRolesToolbar.appendChild(refreshBtn);
+
     // For AI config save
     document.querySelector('#ai-config form').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -615,7 +641,7 @@
       const config = {
         enabled: formData.get('enable_ai') === 'on'
       };
-      fetch('http://localhost:8080/ai-powered-grading-system/backend/routes/api.php/api/superadmin/ai-config', {
+      fetch('../../backend/routes/api.php?path=/api/superadmin/ai-config', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -633,7 +659,7 @@
       const settings = {
         site_name: formData.get('site_name')
       };
-      fetch('http://localhost:8080/ai-powered-grading-system/backend/routes/api.php/api/superadmin/settings', {
+      fetch('../../backend/routes/api.php?path=/api/superadmin/settings', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'

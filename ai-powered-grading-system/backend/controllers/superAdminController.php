@@ -1,22 +1,25 @@
 <?php
 require_once __DIR__ . '/../models/user.php';
 require_once __DIR__ . '/../models/course.php';
-require_once __DIR__ . '/../models/log.php'; 
+require_once __DIR__ . '/../models/log.php';
 
-class SuperAdminController {
+class SuperAdminController
+{
     private $userModel;
     private $courseModel;
     private $logModel;
     private $pdo;
 
-    public function __construct($pdo) {
+    public function __construct($pdo)
+    {
         $this->userModel = new User($pdo);
         $this->courseModel = new Course($pdo);
         $this->logModel = new Log($pdo);
         $this->pdo = $pdo;
     }
 
-    public function getAllUsers($search = '', $role = '', $sort = 'name') {
+    public function getAllUsers($search = '', $role = '', $sort = 'name')
+    {
         $query = "SELECT * FROM users WHERE 1=1";
         $params = [];
 
@@ -42,22 +45,25 @@ class SuperAdminController {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function deactivateUser($user_id) {
+    public function deactivateUser($user_id)
+    {
         $stmt = $this->pdo->prepare("UPDATE users SET active = 0 WHERE id = :id");
         return $stmt->execute(['id' => $user_id]);
     }
 
-    public function getSystemLogs($search = '', $status = '', $sort = 'newest') {
-        $query = "SELECT * FROM logs WHERE 1=1";
+    public function getSystemLogs($search = '', $status = '', $sort = 'newest')
+    {
+        $query = "SELECT id, user_id, action, details, created_at FROM logs WHERE 1=1";
         $params = [];
 
         if ($search) {
-            $query .= " AND (user_id LIKE :search OR action LIKE :search)";
+            $query .= " AND (user_id LIKE :search OR action LIKE :search OR details LIKE :search)";
             $params['search'] = '%' . $search . '%';
         }
 
         if ($status) {
-            $query .= " AND status = :status";
+            // Map status to action types (success, error, etc.)
+            $query .= " AND action = :status";
             $params['status'] = $status;
         }
 
@@ -66,15 +72,27 @@ class SuperAdminController {
 
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Transform to match frontend expectations
+        return array_map(function ($log) {
+            return [
+                'timestamp' => $log['created_at'],
+                'user_id' => $log['user_id'],
+                'action' => $log['action'],
+                'status' => $log['action'] // Use action as status for now
+            ];
+        }, $logs);
     }
 
-    public function activateUser($user_id) {
+    public function activateUser($user_id)
+    {
         $stmt = $this->pdo->prepare("UPDATE users SET active = 1 WHERE id = :id");
         return $stmt->execute(['id' => $user_id]);
     }
 
-    public function updateUser($user_id, $data) {
+    public function updateUser($user_id, $data)
+    {
         $stmt = $this->pdo->prepare("UPDATE users SET name = :name, email = :email, role_id = :role_id WHERE id = :id");
         return $stmt->execute([
             'id' => $user_id,
@@ -84,16 +102,18 @@ class SuperAdminController {
         ]);
     }
 
-    public function deleteUser($user_id) {
+    public function deleteUser($user_id)
+    {
         // Soft delete or hard delete? For now, hard delete
         $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = :id");
         return $stmt->execute(['id' => $user_id]);
     }
 
-    public function getSystemStats() {
+    public function getSystemStats()
+    {
         // Get counts of users, students, courses, grades
         $stats = [];
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM users");
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM users WHERE active = 1");
         $stmt->execute();
         $stats['users'] = $stmt->fetch()['count'];
 
@@ -110,7 +130,8 @@ class SuperAdminController {
         $stats['grades'] = $stmt->fetch()['count'];
 
         // Error logs in last 24 hours
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM logs WHERE status = 'error' AND timestamp >= DATE_SUB(NOW(), INTERVAL 24 HOUR)");
+        // Adjusted query to match actual logs table columns
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM logs WHERE action = 'error' AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)");
         $stmt->execute();
         $stats['error_logs_24h'] = $stmt->fetch()['count'];
 
@@ -126,10 +147,32 @@ class SuperAdminController {
         // Server status - assume online if API is responding
         $stats['server_status'] = 'Online';
 
+        // Calculate uptime - time since server start (simplified)
+        $uptime_seconds = time() - strtotime('today'); // Since midnight, or use a stored start time
+        $uptime_days = floor($uptime_seconds / 86400);
+        $uptime_hours = floor(($uptime_seconds % 86400) / 3600);
+        $uptime_minutes = floor(($uptime_seconds % 3600) / 60);
+        $stats['uptime'] = sprintf('%dd %dh %dm', $uptime_days, $uptime_hours, $uptime_minutes);
+
+        // Last backup time
+        $backup_dir = __DIR__ . '/../../backups/';
+        if (is_dir($backup_dir)) {
+            $files = glob($backup_dir . 'backup_*.sql');
+            if (!empty($files)) {
+                $latest_backup = max(array_map('filemtime', $files));
+                $stats['last_backup'] = date('Y-m-d H:i:s', $latest_backup);
+            } else {
+                $stats['last_backup'] = 'Never';
+            }
+        } else {
+            $stats['last_backup'] = 'Never';
+        }
+
         return $stats;
     }
 
-    public function backupDatabase() {
+    public function backupDatabase()
+    {
         // Simple backup to SQL file
         $tables = ['users', 'students', 'courses', 'grades', 'logs'];
         $backup = '';
@@ -139,7 +182,9 @@ class SuperAdminController {
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $backup .= "-- Table: $table\n";
             foreach ($rows as $row) {
-                $values = array_map(function($val) { return $this->pdo->quote($val); }, array_values($row));
+                $values = array_map(function ($val) {
+                    return $this->pdo->quote($val);
+                }, array_values($row));
                 $backup .= "INSERT INTO $table (" . implode(',', array_keys($row)) . ") VALUES (" . implode(',', $values) . ");\n";
             }
             $backup .= "\n";
@@ -149,7 +194,8 @@ class SuperAdminController {
         return ['success' => true, 'file' => $filename];
     }
 
-    public function getAIConfig() {
+    public function getAIConfig()
+    {
         // For now, return dummy config
         return [
             'ai_endpoint' => 'http://localhost:5000',
@@ -158,13 +204,15 @@ class SuperAdminController {
         ];
     }
 
-    public function updateAIConfig($config) {
+    public function updateAIConfig($config)
+    {
         // Save to a config file or database
         // For now, just return success
         return true;
     }
 
-    public function getSystemSettings() {
+    public function getSystemSettings()
+    {
         // Return system settings
         return [
             'site_name' => 'AI Powered Grading System',
@@ -173,9 +221,9 @@ class SuperAdminController {
         ];
     }
 
-    public function updateSystemSettings($settings) {
+    public function updateSystemSettings($settings)
+    {
         // Update settings
         return true;
     }
 }
-?>

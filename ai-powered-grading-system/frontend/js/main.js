@@ -46,114 +46,19 @@ function loadDashboardData() {
 }
 
 function loadSuperAdminData() {
-    // Load users, logs, etc.
-    fetch('../../backend/routes/api.php?path=/api/superadmin/users')
-        .then(response => response.json())
-        .then(data => {
-            // Populate user table
-            const userTable = document.querySelector('#user-roles table tbody');
-            if (userTable) {
-                userTable.innerHTML = data.map(user => `
-                    <tr>
-                        <td>${user.id}</td>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                        <td>${user.role_id}</td>
-                        <td><button onclick="deactivateUser(${user.id})">Deactivate</button></td>
-                    </tr>
-                `).join('');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading users:', error);
-            alert('Failed to load users.');
-        });
-
-    loadLogs();
-    loadSystemStats();
+    // Removed to avoid conflict with inline script in super-admin.php
 }
 
 function loadLogs() {
-    fetch('../../backend/routes/api.php?path=/api/superadmin/logs')
-        .then(response => response.json())
-        .then(data => {
-            const logTable = document.querySelector('#audit-logs table tbody');
-            if (logTable) {
-                logTable.innerHTML = data.map(log => `
-                    <tr>
-                        <td>${log.timestamp}</td>
-                        <td>${log.user}</td>
-                        <td>${log.action}</td>
-                        <td><span class="status-tag ${log.status === 'success' ? 'success' : 'error'}">${log.status}</span></td>
-                    </tr>
-                `).join('');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading logs:', error);
-            alert('Failed to load logs.');
-        });
+    // Removed to avoid conflict with inline script in super-admin.php
 }
 
 function loadUsers() {
-    fetch('../../backend/routes/api.php?path=/api/superadmin/users')
-        .then(response => response.json())
-        .then(data => {
-            const userTable = document.querySelector('#user-roles table tbody');
-            if (userTable) {
-                userTable.innerHTML = data.map(user => `
-                    <tr>
-                        <td>${user.id}</td>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                        <td>${user.role_id}</td>
-                        <td><button onclick="deactivateUser(${user.id})">Deactivate</button></td>
-                    </tr>
-                `).join('');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading users:', error);
-            alert('Failed to load users.');
-        });
-}
-}
-
-function loadLogs() {
-    fetch('../../backend/routes/api.php?path=/api/superadmin/logs')
-        .then(response => response.json())
-        .then(data => {
-            const logTable = document.querySelector('#audit-logs table tbody');
-            if (logTable) {
-                logTable.innerHTML = data.map(log => `
-                    <tr>
-                        <td>${log.timestamp}</td>
-                        <td>${log.user}</td>
-                        <td>${log.action}</td>
-                        <td><span class="status-tag ${log.status === 'success' ? 'success' : 'error'}">${log.status}</span></td>
-                    </tr>
-                `).join('');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading logs:', error);
-            alert('Failed to load logs.');
-        });
+    // Removed to avoid conflict with inline script in super-admin.php
 }
 
 function loadSystemStats() {
-    // Mock stats for now, in real implementation fetch from API
-    const stats = {
-        totalUsers: 50,
-        activeUsers: 45,
-        totalCourses: 20,
-        totalGrades: 500
-    };
-
-    document.querySelector('.card:nth-child(1) p').textContent = `Total Users: ${stats.totalUsers}`;
-    document.querySelector('.card:nth-child(2) p').textContent = `Active Users: ${stats.activeUsers}`;
-    document.querySelector('.card:nth-child(3) p').textContent = `Total Courses: ${stats.totalCourses}`;
-    document.querySelector('.card:nth-child(4) p').textContent = `Total Grades: ${stats.totalGrades}`;
+    // Removed to avoid conflict with inline script in super-admin.php
 }
 
 function loadAdminData() {
