@@ -1,4 +1,4 @@
 {
-    "python.defaultInterpreterPath": "ai-module/venv/Scripts/python.exe",
+    "python.defaultInterpreterPath": "c:/xampp/htdocs/ai-powered-grading-system/ai-module/venv/Scripts/python.exe",
     "python.terminal.activateEnvironment": true
 }
