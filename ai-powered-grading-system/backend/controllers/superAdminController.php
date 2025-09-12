@@ -74,12 +74,13 @@ class SuperAdminController
         $stmt->execute($params);
         $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Transform to match frontend expectations
+        // Transform to match frontend expectations with real data
         return array_map(function ($log) {
             return [
                 'timestamp' => $log['created_at'],
                 'user_id' => $log['user_id'],
                 'action' => $log['action'],
+                'details' => $log['details'],
                 'status' => $log['action'] // Use action as status for now
             ];
         }, $logs);
@@ -107,6 +108,42 @@ class SuperAdminController
         // Soft delete or hard delete? For now, hard delete
         $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = :id");
         return $stmt->execute(['id' => $user_id]);
+    }
+
+    public function bulkUpdateUsers($userIds, $action)
+    {
+        if (!is_array($userIds) || empty($userIds)) {
+            return ['success' => false, 'message' => 'Invalid user IDs provided'];
+        }
+
+        $allowedActions = ['activate', 'deactivate', 'delete'];
+        if (!in_array($action, $allowedActions)) {
+            return ['success' => false, 'message' => 'Invalid action provided'];
+        }
+
+        try {
+            $placeholders = str_repeat('?,', count($userIds) - 1) . '?';
+
+            if ($action === 'activate') {
+                $query = "UPDATE users SET active = 1 WHERE id IN ($placeholders)";
+            } elseif ($action === 'deactivate') {
+                $query = "UPDATE users SET active = 0 WHERE id IN ($placeholders)";
+            } elseif ($action === 'delete') {
+                $query = "DELETE FROM users WHERE id IN ($placeholders)";
+            }
+
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute($userIds);
+            $affectedRows = $stmt->rowCount();
+
+            return [
+                'success' => true,
+                'message' => "Successfully {$action}d {$affectedRows} user(s)",
+                'affected_rows' => $affectedRows
+            ];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
+        }
     }
 
     public function getSystemStats()
