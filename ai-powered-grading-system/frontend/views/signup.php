@@ -45,7 +45,7 @@
         }
         ?>
 
-        <form method="POST" action="../../backend/controllers/authController.php?action=signup">
+        <form id="signupForm">
           <div class="form-group">
             <label for="name">Full Name</label>
             <input
@@ -93,6 +93,37 @@
             Already have an account? <a href="login.php">Login</a>
           </p>
         </form>
+
+        <script>
+          document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const role = document.getElementById('role').value;
+            const password = document.getElementById('password').value;
+
+            fetch('../../backend/routes/api.php/api/auth/register', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ name, email, password, role })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                alert('Account created successfully! Please login.');
+                window.location.href = 'login.php';
+              } else {
+                alert(data.message || 'Signup failed');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred. Please try again.');
+            });
+          });
+        </script>
       </div>
     </div>
   </body>

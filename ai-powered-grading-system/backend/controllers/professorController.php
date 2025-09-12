@@ -38,15 +38,53 @@ class ProfessorController {
     }
 
     public function getMyStudents() {
-        return $this->studentModel->getAll();
+        if (!isset($_SESSION['user_id'])) {
+            return ['error' => 'User not logged in'];
+        }
+        $faculty_id = $_SESSION['user_id'];
+        $courses = $this->courseModel->getByFaculty($faculty_id);
+        $course_ids = array_column($courses, 'id');
+        if (empty($course_ids)) {
+            return [];
+        }
+        // Get unique students from grades
+        $students = [];
+        foreach ($course_ids as $course_id) {
+            $grades = $this->gradeModel->getByCourse($course_id);
+            foreach ($grades as $grade) {
+                $student = $this->studentModel->findById($grade['student_id']);
+                if ($student && !in_array($student, $students)) {
+                    $students[] = $student;
+                }
+            }
+        }
+        return $students;
     }
 
     public function getMyCourses() {
-        return $this->courseModel->getAll();
+        if (!isset($_SESSION['user_id'])) {
+            return ['error' => 'User not logged in'];
+        }
+        $faculty_id = $_SESSION['user_id'];
+        return $this->courseModel->getByFaculty($faculty_id);
     }
 
     public function getMyGrades() {
-        return $this->gradeModel->getAll();
+        if (!isset($_SESSION['user_id'])) {
+            return ['error' => 'User not logged in'];
+        }
+        $faculty_id = $_SESSION['user_id'];
+        $courses = $this->courseModel->getByFaculty($faculty_id);
+        $course_ids = array_column($courses, 'id');
+        if (empty($course_ids)) {
+            return [];
+        }
+        $all_grades = [];
+        foreach ($course_ids as $course_id) {
+            $grades = $this->gradeModel->getByCourse($course_id);
+            $all_grades = array_merge($all_grades, $grades);
+        }
+        return $all_grades;
     }
 
     public function addGrade($data) {

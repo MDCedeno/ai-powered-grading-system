@@ -370,6 +370,87 @@
   </script>
   <!-- Tab Highlighting & Smooth Scroll -->
   <?php include '../../components/scroll.php'; ?>
+
+  <script>
+    // Tab switching
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+    const sections = document.querySelectorAll('.tab-section');
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        sections.forEach(section => {
+          section.classList.remove('active');
+          section.classList.add('hidden');
+        });
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+          targetSection.classList.remove('hidden');
+          targetSection.classList.add('active');
+        }
+      });
+    });
+
+    // Load grades
+    function loadGrades() {
+      fetch('../../../backend/routes/api.php/api/student/grades')
+        .then(response => response.json())
+        .then(data => {
+          const tbody = document.querySelector('#grades table tbody');
+          tbody.innerHTML = '';
+          data.forEach(grade => {
+            const row = `<tr>
+              <td>${grade.subject}</td>
+              <td>${grade.activity}</td>
+              <td>${grade.score}</td>
+              <td>${grade.weight}</td>
+              <td>${grade.final}</td>
+              <td><span class="status-tag done">Done</span></td>
+            </tr>`;
+            tbody.innerHTML += row;
+          });
+        });
+    }
+
+    // Load quizzes
+    function loadQuizzes() {
+      fetch('../../../backend/routes/api.php/api/student/quizzes')
+        .then(response => response.json())
+        .then(data => {
+          const tbody = document.querySelector('#quizzes table tbody');
+          tbody.innerHTML = '';
+          data.forEach(quiz => {
+            const row = `<tr>
+              <td>${quiz.title}</td>
+              <td>${quiz.subject}</td>
+              <td><span class="status-tag ${quiz.status.toLowerCase()}">${quiz.status}</span></td>
+              <td><a href="quiz.php?id=${quiz.id}" class="btn-primary">${quiz.action}</a></td>
+            </tr>`;
+            tbody.innerHTML += row;
+          });
+        });
+    }
+
+    // Load notifications
+    function loadNotifications() {
+      fetch('../../../backend/routes/api.php/api/student/notifications')
+        .then(response => response.json())
+        .then(data => {
+          const ul = document.querySelector('#notifications ul');
+          ul.innerHTML = '';
+          data.forEach(notif => {
+            const li = `<li>${notif.message}</li>`;
+            ul.innerHTML += li;
+          });
+        });
+    }
+
+    // Load data when sections are shown
+    document.querySelector('a[href="#grades"]').addEventListener('click', loadGrades);
+    document.querySelector('a[href="#quizzes"]').addEventListener('click', loadQuizzes);
+    document.querySelector('a[href="#notifications"]').addEventListener('click', loadNotifications);
+  </script>
 </body>
 
 </html>

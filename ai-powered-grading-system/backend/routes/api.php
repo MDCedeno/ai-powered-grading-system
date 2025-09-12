@@ -39,6 +39,34 @@ if (strpos($path, '/api/superadmin') === 0) {
     } elseif ($path == '/api/superadmin/logs' && $method == 'GET') {
         $logs = $controller->getSystemLogs();
         echo json_encode($logs);
+    } elseif ($path == '/api/superadmin/users/activate' && $method == 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $result = $controller->activateUser($data['user_id']);
+        echo json_encode(['success' => $result]);
+    } elseif (preg_match('/\/api\/superadmin\/users\/(\d+)/', $path, $matches) && $method == 'DELETE') {
+        $id = $matches[1];
+        $result = $controller->deleteUser($id);
+        echo json_encode(['success' => $result]);
+    } elseif ($path == '/api/superadmin/stats' && $method == 'GET') {
+        $stats = $controller->getSystemStats();
+        echo json_encode($stats);
+    } elseif ($path == '/api/superadmin/backup' && $method == 'POST') {
+        $result = $controller->backupDatabase();
+        echo json_encode($result);
+    } elseif ($path == '/api/superadmin/ai-config' && $method == 'GET') {
+        $config = $controller->getAIConfig();
+        echo json_encode($config);
+    } elseif ($path == '/api/superadmin/ai-config' && $method == 'PUT') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $result = $controller->updateAIConfig($data);
+        echo json_encode(['success' => $result]);
+    } elseif ($path == '/api/superadmin/settings' && $method == 'GET') {
+        $settings = $controller->getSystemSettings();
+        echo json_encode($settings);
+    } elseif ($path == '/api/superadmin/settings' && $method == 'PUT') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $result = $controller->updateSystemSettings($data);
+        echo json_encode(['success' => $result]);
     } else {
         http_response_code(404);
         echo json_encode(['error' => 'SuperAdmin endpoint not found']);

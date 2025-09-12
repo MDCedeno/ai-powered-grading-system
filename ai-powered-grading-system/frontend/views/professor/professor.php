@@ -292,6 +292,105 @@
     </script>
     <!-- Tab Highlighting & Smooth Scroll -->
     <?php include '../../components/scroll.php'; ?>
+
+    <script>
+        // Tab switching
+        const navLinks = document.querySelectorAll('.sidebar-nav a');
+        const sections = document.querySelectorAll('.tab-section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                    section.classList.add('hidden');
+                });
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.remove('hidden');
+                    targetSection.classList.add('active');
+                }
+            });
+        });
+
+        // Load courses for class management
+        function loadCourses() {
+            fetch('../../../backend/routes/api.php/api/professor/courses')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('#class-management table tbody');
+                    tbody.innerHTML = '';
+                    data.forEach(course => {
+                        const row = `<tr>
+                            <td>${course.code}</td>
+                            <td>${course.name}</td>
+                            <td>${course.schedule}</td>
+                            <td>${course.enrolled || 'N/A'}</td>
+                            <td>
+                                <button class="btn-icon">View</button>
+                                <button class="btn-icon danger">Remove</button>
+                            </td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                });
+        }
+
+        // Load grades for student performance
+        function loadGrades() {
+            fetch('../../../backend/routes/api.php/api/professor/grades')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('#student-performance .grade-entry table tbody');
+                    tbody.innerHTML = '';
+                    data.forEach(grade => {
+                        const row = `<tr>
+                            <td>${grade.student_id}</td>
+                            <td>${grade.student_name || 'N/A'}</td>
+                            <td><input type="number" value="${grade.midterm_quizzes}" /></td>
+                            <td><input type="number" value="${grade.midterm_exam}" /></td>
+                            <td><input type="number" value="${grade.final_quizzes}" /></td>
+                            <td>${grade.final_grade}</td>
+                            <td><span class="status-tag done">Done</span></td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                });
+        }
+
+        // AI Quiz generation
+        document.querySelector('#ai-quizzes form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const topic = document.querySelector('#ai-quizzes select').value;
+            fetch('http://localhost:5000/quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic, num_questions: 5 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Quiz generated: ' + JSON.stringify(data.questions));
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Announcements post
+        document.querySelector('#announcements form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Announcement posted (mock).');
+        });
+
+        // Settings save
+        document.querySelector('#settings form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Settings saved (mock).');
+        });
+
+        // Load data when sections are shown
+        document.querySelector('a[href="#class-management"]').addEventListener('click', loadCourses);
+        document.querySelector('a[href="#student-performance"]').addEventListener('click', loadGrades);
+    </script>
 </body>
 
 </html>

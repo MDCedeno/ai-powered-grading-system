@@ -276,6 +276,97 @@
   </div>
   <!-- Tab Highlighting & Smooth Scroll -->
   <?php include '../../components/scroll.php'; ?>
+
+  <script>
+    // Tab switching
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+    const sections = document.querySelectorAll('.tab-section');
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        sections.forEach(section => {
+          section.classList.remove('active');
+          section.classList.add('hidden');
+        });
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+          targetSection.classList.remove('hidden');
+          targetSection.classList.add('active');
+        }
+      });
+    });
+
+    // Load data for sections
+    function loadUsers() {
+      fetch('../../../backend/routes/api.php/api/superadmin/users')
+        .then(response => response.json())
+        .then(data => {
+          const tbody = document.querySelector('#user-roles table tbody');
+          tbody.innerHTML = '';
+          data.forEach(user => {
+            const row = `<tr>
+              <td>${user.id}</td>
+              <td>${user.name}</td>
+              <td>${user.email}</td>
+              <td>${user.role_id}</td>
+              <td><button onclick="deactivateUser(${user.id})">Deactivate</button></td>
+            </tr>`;
+            tbody.innerHTML += row;
+          });
+        });
+    }
+
+    function loadLogs() {
+      fetch('../../../backend/routes/api.php/api/superadmin/logs')
+        .then(response => response.json())
+        .then(data => {
+          const tbody = document.querySelector('#audit-logs table tbody');
+          tbody.innerHTML = '';
+          data.forEach(log => {
+            const row = `<tr>
+              <td>${log.timestamp}</td>
+              <td>${log.user_id}</td>
+              <td>${log.action}</td>
+              <td>${log.details}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+          });
+        });
+    }
+
+    function deactivateUser(userId) {
+      fetch('../../../backend/routes/api.php/api/superadmin/users/deactivate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.success ? 'User deactivated' : 'Failed');
+        loadUsers();
+      });
+    }
+
+    // Load data when sections are shown
+    document.querySelector('a[href="#user-roles"]').addEventListener('click', loadUsers);
+    document.querySelector('a[href="#audit-logs"]').addEventListener('click', loadLogs);
+
+    // For AI config save
+    document.querySelector('#ai-config form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Mock save
+      alert('AI config saved');
+    });
+
+    // For settings save
+    document.querySelector('#settings form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Mock save
+      alert('Settings saved');
+    });
+  </script>
 </body>
 
 </html>

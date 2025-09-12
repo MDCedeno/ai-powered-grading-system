@@ -23,6 +23,12 @@ class Student {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function findById($id) {
+        $stmt = $this->pdo->prepare("SELECT * FROM students WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function update($id, $program, $year) {
         $stmt = $this->pdo->prepare("UPDATE students SET program = :program, year = :year WHERE id = :id");
         return $stmt->execute([
