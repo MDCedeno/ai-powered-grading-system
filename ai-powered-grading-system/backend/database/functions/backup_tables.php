@@ -2,6 +2,8 @@
 // backup_tables.php
 require_once __DIR__ . '/../../config/db.php';
 
+// $pdo is defined in db.php
+
 $backupDir = __DIR__ . '/backups';
 if (!is_dir($backupDir)) {
     mkdir($backupDir, 0777, true);
@@ -20,8 +22,8 @@ foreach ($tables as $table) {
     $data = $pdo->query("SELECT * FROM `$table`")->fetchAll(PDO::FETCH_ASSOC);
     $insertData = "";
     foreach ($data as $record) {
-        $columns = array_map(fn($col) => "`$col`", array_keys($record));
-        $values = array_map(fn($val) => $pdo->quote($val), array_values($record));
+        $columns = array_map(function($col) { return "`$col`"; }, array_keys($record));
+        $values = array_map(function($val) use ($pdo) { return $pdo->quote($val); }, array_values($record));
         $insertData .= "INSERT INTO `$table` (" . implode(',', $columns) . ") VALUES (" . implode(',', $values) . ");\n";
     }
 
