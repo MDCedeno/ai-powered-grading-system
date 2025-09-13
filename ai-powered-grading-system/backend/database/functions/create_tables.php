@@ -1,4 +1,5 @@
 <?php
+// create_tables.php
 require_once __DIR__ . '/../../config/db.php';
 
 // Include migration classes
@@ -8,15 +9,15 @@ require_once __DIR__ . '/../creations/2024_06_01_000002_create_courses_table.php
 require_once __DIR__ . '/../creations/2024_06_01_000003_create_grades_table.php';
 require_once __DIR__ . '/../creations/2024_06_01_000004_create_logs_table.php';
 
-// Instantiate migration objects
-$usersMigration    = new CreateUsersTable($pdo);
-$studentsMigration = new CreateStudentsTable($pdo);
-$coursesMigration  = new CreateCoursesTable($pdo);
-$gradesMigration   = new CreateGradesTable($pdo);
-$logsMigration     = new CreateLogsTable($pdo);
-
 try {
-    echo "Starting table creation...\n";
+    echo "Creating tables...\n";
+
+    // Instantiate migration objects
+    $usersMigration    = new CreateUsersTable($pdo);
+    $studentsMigration = new CreateStudentsTable($pdo);
+    $coursesMigration  = new CreateCoursesTable($pdo);
+    $gradesMigration   = new CreateGradesTable($pdo);
+    $logsMigration     = new CreateLogsTable($pdo);
 
     // Create tables in correct order
     $usersMigration->up();
@@ -28,6 +29,6 @@ try {
     echo "All tables created successfully.\n";
 
 } catch (Exception $e) {
-    echo "Table creation error: " . $e->getMessage() . "\n";
+    echo "Error creating tables: " . $e->getMessage() . "\n";
 }
 ?>

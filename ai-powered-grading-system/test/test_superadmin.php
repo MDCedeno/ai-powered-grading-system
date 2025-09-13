@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/config/db.php';
-require_once __DIR__ . '/controllers/superAdminController.php';
+require_once '../backend/config/db.php';
+require_once '../backend/controllers/superAdminController.php';
 
 $controller = new SuperAdminController($pdo);
 

@@ -1,12 +1,12 @@
 <?php
-require_once 'ai-powered-grading-system/backend/config/db.php';
+require_once __DIR__ . '/../backend/config/db.php';
 
-$tables = ['students', 'courses', 'grades'];
+$tables = ['users', 'students', 'courses', 'grades', 'logs'];
 foreach($tables as $table) {
     try {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM $table");
         $stmt->execute();
-        echo "$table: " . $stmt->fetch()[0] . "\n";
+        echo "$table: " . $stmt->fetch()[0] . " records\n";
     } catch(Exception $e) {
         echo "$table: does not exist\n";
     }

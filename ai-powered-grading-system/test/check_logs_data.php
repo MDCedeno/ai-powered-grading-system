@@ -1,5 +1,5 @@
 <?php
-require_once 'ai-powered-grading-system/backend/config/db.php';
+require_once '../backend/config/db.php';
 
 try {
     $stmt = $pdo->prepare("SELECT * FROM logs LIMIT 10");

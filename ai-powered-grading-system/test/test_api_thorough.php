@@ -22,7 +22,7 @@ function sendRequest($method, $url, $data = null)
     return ['code' => $httpcode, 'response' => $response];
 }
 
-$baseUrl = 'http://localhost:3000/ai-powered-grading-system/backend/routes/api.php';
+$baseUrl = 'http://localhost:8000';
 
 // SuperAdmin tests
 echo "Testing SuperAdmin endpoints...\n";

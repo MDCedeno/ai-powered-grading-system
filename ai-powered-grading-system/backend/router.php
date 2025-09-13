@@ -7,7 +7,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 $request = strtok($request, '?');
 
 // Route API requests to api.php
-if (strpos($request, '/api/') === 0) {
+// Handle both direct /api/ requests and /backend/router.php/api/ requests
+if (strpos($request, '/api/') !== false) {
     include __DIR__ . '/routes/api.php';
     exit;
 }

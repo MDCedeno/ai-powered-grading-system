@@ -26,7 +26,5 @@ class CreateLogsTable {
     }
 }
 
-// Run migration
-$migration = new CreateLogsTable($pdo);
-$migration->up();
+
 ?>

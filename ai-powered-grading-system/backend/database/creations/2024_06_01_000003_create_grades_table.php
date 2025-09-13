@@ -32,7 +32,5 @@ class CreateGradesTable {
     }
 }
 
-// Run migration
-$migration = new CreateGradesTable($pdo);
-$migration->up();
+
 ?>

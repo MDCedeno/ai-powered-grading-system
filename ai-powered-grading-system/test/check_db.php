@@ -1,5 +1,5 @@
 <?php
-require_once 'backend/config/db.php';
+require_once '../backend/config/db.php';
 
 try {
     // Check if users table exists and has data

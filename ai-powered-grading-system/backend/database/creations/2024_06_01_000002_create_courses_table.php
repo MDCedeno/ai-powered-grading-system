@@ -28,7 +28,5 @@ class CreateCoursesTable {
     }
 }
 
-// Run migration
-$migration = new CreateCoursesTable($pdo);
-$migration->up();
+
 ?>

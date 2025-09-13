@@ -6,7 +6,7 @@
         "enableSsl": "Disabled"
       },
       "ssh": "Disabled",
-      "previewLimit": 10,
+      "previewLimit": 50,
       "server": "localhost",
       "port": 3306,
       "driver": "MySQL",

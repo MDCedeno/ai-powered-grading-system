@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../config/db.php';
 
 // $pdo is defined in db.php
 
-$backupDir = __DIR__ . '/backups';
+$backupDir = __DIR__ . '/../../../backups';
 if (!is_dir($backupDir)) {
     mkdir($backupDir, 0777, true);
 }

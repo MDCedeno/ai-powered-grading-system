@@ -28,7 +28,5 @@ class CreateUsersTable {
     }
 }
 
-// Run migration
-$migration = new CreateUsersTable($pdo);
-$migration->up();
+
 ?>

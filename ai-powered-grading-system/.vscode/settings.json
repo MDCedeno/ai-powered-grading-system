@@ -1,4 +1,23 @@
 {
-    "python.defaultInterpreterPath": "c:/xampp/htdocs/ai-powered-grading-system/ai-module/venv/Scripts/python.exe",
-    "python.terminal.activateEnvironment": true
+  "python.defaultInterpreterPath": "c:/xampp/htdocs/ai-powered-grading-system/ai-module/venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default",
+        "enableSsl": "Disabled"
+      },
+      "ssh": "Disabled",
+      "previewLimit": 10,
+      "server": "localhost",
+      "port": 3306,
+      "driver": "MySQL",
+      "name": "PLMUN_Local",
+      "group": "Development",
+      "database": "plmun_portal",
+      "username": "root",
+      "connectionTimeout": 30,
+      "password": ""
+    }
+  ]
 }
