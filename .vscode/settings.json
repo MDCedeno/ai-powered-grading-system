@@ -1,0 +1,21 @@
+{
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default",
+        "enableSsl": "Disabled"
+      },
+      "ssh": "Disabled",
+      "previewLimit": 10,
+      "server": "localhost",
+      "port": 3306,
+      "driver": "MySQL",
+      "name": "PLMUN_Local",
+      "group": "Development",
+      "database": "plmun_portal",
+      "username": "root",
+      "connectionTimeout": 30,
+      "password": ""
+    }
+  ]
+}
