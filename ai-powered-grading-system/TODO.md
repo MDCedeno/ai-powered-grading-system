@@ -27,8 +27,9 @@ AI-powered grading system with PHP backend, MySQL database, and web frontend for
 
 ### Critical-Path Testing (Backend & Database)
 
-- [ ] Test SuperAdmin controller functionality
-- [ ] Verify API endpoint responses (basic functionality)
+- [x] Fixed API routing path extraction logic in backend/routes/api.php
+- [x] Verified API endpoint responses (basic functionality) - all endpoints returning HTTP 200
+- [x] Test SuperAdmin controller functionality - getAllUsers, getSystemLogs, deactivateUser all working
 
 ### Thorough Testing (Full System)
 

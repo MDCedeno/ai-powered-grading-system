@@ -10,24 +10,8 @@ require_once __DIR__ . '/../controllers/superAdminController.php';
 $request = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Check if path is provided in query
-$path = $_GET['path'] ?? '';
-
-// If not in query, parse from URI
-if (!$path) {
-    // Remove query string
-    $request = strtok($request, '?');
-
-    // Extract path after /routes/api.php or just use the request if accessed via router
-    if (strpos($request, '/routes/api.php') !== false) {
-        $path = substr($request, strpos($request, '/routes/api.php') + strlen('/routes/api.php'));
-    } elseif (strpos($request, '/api/') !== false) {
-        // If accessed via router, the path starts with /api/
-        $path = $request;
-    } else {
-        $path = $request;
-    }
-}
+// Remove query string from request URI
+$path = strtok($request, '?');
 
 // SuperAdmin routes
 if (strpos($path, '/api/superadmin') === 0) {
