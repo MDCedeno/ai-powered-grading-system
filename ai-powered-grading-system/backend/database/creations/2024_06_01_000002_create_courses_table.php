@@ -11,10 +11,11 @@ class CreateCoursesTable {
     public function up() {
         $sql = "CREATE TABLE IF NOT EXISTS courses (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            code VARCHAR(50) NOT NULL UNIQUE,
-            name VARCHAR(255) NOT NULL,
-            schedule VARCHAR(255),
-            faculty_id INT,
+            course_code VARCHAR(50) NOT NULL UNIQUE,
+            course_name VARCHAR(255) NOT NULL,
+            professor_id INT,
+            semester VARCHAR(50),
+            year INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB;";

@@ -8,30 +8,32 @@ class Course {
         $this->pdo = $pdo;
     }
 
-    public function create($code, $name, $schedule, $faculty_id) {
-        $stmt = $this->pdo->prepare("INSERT INTO courses (code, name, schedule, faculty_id) VALUES (:code, :name, :schedule, :faculty_id)");
+    public function create($course_code, $course_name, $professor_id, $semester, $year) {
+        $stmt = $this->pdo->prepare("INSERT INTO courses (course_code, course_name, professor_id, semester, year) VALUES (:course_code, :course_name, :professor_id, :semester, :year)");
         return $stmt->execute([
-            'code' => $code,
-            'name' => $name,
-            'schedule' => $schedule,
-            'faculty_id' => $faculty_id
+            'course_code' => $course_code,
+            'course_name' => $course_name,
+            'professor_id' => $professor_id,
+            'semester' => $semester,
+            'year' => $year
         ]);
     }
 
-    public function findByCode($code) {
-        $stmt = $this->pdo->prepare("SELECT * FROM courses WHERE code = :code LIMIT 1");
-        $stmt->execute(['code' => $code]);
+    public function findByCode($course_code) {
+        $stmt = $this->pdo->prepare("SELECT * FROM courses WHERE course_code = :course_code LIMIT 1");
+        $stmt->execute(['course_code' => $course_code]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function update($id, $code, $name, $schedule, $faculty_id) {
-        $stmt = $this->pdo->prepare("UPDATE courses SET code = :code, name = :name, schedule = :schedule, faculty_id = :faculty_id WHERE id = :id");
+    public function update($id, $course_code, $course_name, $professor_id, $semester, $year) {
+        $stmt = $this->pdo->prepare("UPDATE courses SET course_code = :course_code, course_name = :course_name, professor_id = :professor_id, semester = :semester, year = :year WHERE id = :id");
         return $stmt->execute([
             'id' => $id,
-            'code' => $code,
-            'name' => $name,
-            'schedule' => $schedule,
-            'faculty_id' => $faculty_id
+            'course_code' => $course_code,
+            'course_name' => $course_name,
+            'professor_id' => $professor_id,
+            'semester' => $semester,
+            'year' => $year
         ]);
     }
 
@@ -41,9 +43,9 @@ class Course {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getByFaculty($faculty_id) {
-        $stmt = $this->pdo->prepare("SELECT * FROM courses WHERE faculty_id = :faculty_id");
-        $stmt->execute(['faculty_id' => $faculty_id]);
+    public function getByProfessor($professor_id) {
+        $stmt = $this->pdo->prepare("SELECT * FROM courses WHERE professor_id = :professor_id");
+        $stmt->execute(['professor_id' => $professor_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
