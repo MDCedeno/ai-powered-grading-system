@@ -1,29 +1,7 @@
-<?php session_start(); ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PLMUN Portal</title>
-  <link rel="stylesheet" href="../../assets/css/superadmin.css" />
-  <!-- PLMUN Logo -->
-  <link
-    rel="apple-touch-icon"
-    sizes="180x180"
-    href="../../assets/images/apple-touch-icon.png" />
-  <link
-    rel="icon"
-    type="image/png"
-    sizes="32x32"
-    href="../../assets/images/favicon-32x32.png" />
-  <link
-    rel="icon"
-    type="image/png"
-    sizes="16x16"
-    href="../../assets/images/favicon-16x16.png" />
-  <link rel="manifest" href="../../assets/images/site.webmanifest" />
-</head>
+<?php
+session_start();
+include '../components/navbar.php';
+?>
 
 <body data-role="super-admin">
   <div class="dashboard-container">
@@ -155,6 +133,32 @@
               </tbody>
             </table>
           </div>
+          <!-- Hidden Edit User Panel -->
+          <div id="edit-user-panel" class="hidden-panel">
+            <h2>Edit User</h2>
+            <form id="edit-user-form">
+              <input type="hidden" id="edit-user-id" />
+
+              <label for="edit-user-name">Name:</label>
+              <input type="text" id="edit-user-name" required />
+
+              <label for="edit-user-email">Email:</label>
+              <input type="email" id="edit-user-email" required />
+
+              <label for="edit-user-role">Role:</label>
+              <select id="edit-user-role" required>
+                <option value="1">Super Admin</option>
+                <option value="2">MIS Admin</option>
+                <option value="3">Professor</option>
+                <option value="4">Student</option>
+              </select>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-primary">Save Changes</button>
+                <button type="button" id="close-edit-panel" class="btn-secondary">Cancel</button>
+              </div>
+            </form>
+          </div>
         </section>
 
         <!-- ================= DATABASE MANAGEMENT ================= -->
@@ -262,414 +266,12 @@
           </form>
         </section>
       </div>
-
-      <!-- Edit User Modal -->
-      <div id="edit-user-modal" class="modal hidden">
-        <div class="modal-content">
-          <span class="close-modal">&times;</span>
-          <h2>Edit User</h2>
-          <form id="edit-user-form">
-            <input type="hidden" id="edit-user-id" />
-            <label for="edit-user-name">Name:</label>
-            <input type="text" id="edit-user-name" required />
-            <label for="edit-user-email">Email:</label>
-            <input type="email" id="edit-user-email" required />
-            <label for="edit-user-role">Role:</label>
-            <select id="edit-user-role" required>
-              <option value="1">Super Admin</option>
-              <option value="2">MIS Admin</option>
-              <option value="3">Professor</option>
-              <option value="4">Student</option>
-            </select>
-            <button type="submit" class="btn-primary">Save Changes</button>
-          </form>
-        </div>
-      </div>
     </main>
   </div>
-  <!-- Tab Highlighting & Smooth Scroll -->
-  <?php include '../../components/scroll.php'; ?>
 
+  <!-- Main JavaScript for AI-Powered Grading System -->
   <script src="../../js/main.js"></script>
-  <script>
-    // Tab switching
-    if (!window.navLinks) {
-      window.navLinks = document.querySelectorAll('.sidebar-nav a');
-      window.sections = document.querySelectorAll('.tab-section');
 
-      window.navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const targetId = link.getAttribute('href').substring(1);
-          window.sections.forEach(section => {
-            section.classList.remove('active');
-            section.classList.add('hidden');
-          });
-          const targetSection = document.getElementById(targetId);
-          if (targetSection) {
-            targetSection.classList.remove('hidden');
-            targetSection.classList.add('active');
-          }
-          // Update nav active
-          window.navLinks.forEach((l) => l.parentElement.classList.remove("active"));
-          link.parentElement.classList.add("active");
-        });
-      });
-    }
-
-      // Load system stats for dashboard
-      function loadStats() {
-      fetch('/backend/routes/api.php?path=/api/superadmin/stats')
-          .then(response => response.json())
-          .then(data => {
-            // Update Server Status
-            const serverStatus = document.querySelector('.card:nth-child(1) p');
-            serverStatus.textContent = data.server_status;
-            serverStatus.className = data.server_status === 'Online' ? 'status-online' : 'status-offline';
-
-            // Update Uptime
-            const uptimeSpan = document.querySelector('.card:nth-child(1) span');
-            uptimeSpan.textContent = 'Uptime: ' + data.uptime;
-
-            // Update Active Users
-            const activeUsers = document.querySelector('.card:nth-child(2) .metric');
-            activeUsers.textContent = data.users;
-
-            // Update Error Logs (24h)
-            const errorLogs = document.querySelector('.card:nth-child(3) .metric');
-            errorLogs.textContent = data.error_logs_24h;
-
-            // Update Database Health
-            const dbHealth = document.querySelector('.card:nth-child(4) p');
-            dbHealth.textContent = data.db_health;
-            dbHealth.className = data.db_health === 'Healthy' ? 'status-healthy' : 'status-unhealthy';
-
-            // Update Last Backup
-            const lastBackupSpan = document.querySelector('.card:nth-child(4) span');
-            lastBackupSpan.textContent = 'Last Backup: ' + data.last_backup;
-          })
-          .catch(err => console.error('Failed to load stats:', err));
-      }
-
-      function loadLogs() {
-        const search = document.querySelector('#audit-logs input[type="text"]').value;
-        const status = document.querySelector('#audit-logs select:nth-of-type(1)').value;
-        const sort = document.querySelector('#audit-logs select:nth-of-type(2)').value;
-        const params = new URLSearchParams({
-          search: search,
-          status: status !== 'Filter by Status' ? status.toLowerCase() : '',
-          sort: sort !== 'Sort by' ? sort.toLowerCase().replace(' first', '') : 'newest'
-        });
-      fetch(`/backend/routes/api.php?path=/api/superadmin/logs&${params}`)
-          .then(response => response.json())
-          .then(data => {
-            const tbody = document.querySelector('#audit-logs table tbody');
-            tbody.innerHTML = '';
-            data.forEach(log => {
-              const row = `<tr>
-                <td>${log.timestamp}</td>
-                <td>${log.user_id}</td>
-                <td>${log.action}</td>
-                <td><span class="status-tag ${log.status === 'success' ? 'success' : 'error'}">${log.status}</span></td>
-              </tr>`;
-              tbody.innerHTML += row;
-            });
-          })
-          .catch(err => console.error('Failed to load logs:', err));
-      }
-
-    function getRoleName(role_id) {
-      const roles = {
-        1: 'Super Admin',
-        2: 'MIS Admin',
-        3: 'Professor',
-        4: 'Student'
-      };
-      return roles[role_id] || 'Unknown';
-    }
-
-      function deactivateUser(userId) {
-        fetch('/backend/routes/api.php?path=/api/superadmin/users/deactivate', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              user_id: userId
-            })
-          })
-          .then(response => response.json())
-          .then(data => {
-            alert(data.success ? 'User deactivated' : 'Failed');
-            loadUsers();
-          });
-      }
-
-      function activateUser(userId) {
-        fetch('/backend/routes/api.php?path=/api/superadmin/users/activate', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              user_id: userId
-            })
-          })
-          .then(response => response.json())
-          .then(data => {
-            alert(data.success ? 'User activated' : 'Failed');
-            loadUsers();
-          });
-      }
-
-      function editUser(userId) {
-        // Fetch user data and populate modal
-        fetch(`/backend/routes/api.php?path=/api/superadmin/users`)
-          .then(response => response.json())
-          .then(data => {
-            const user = data.find(u => u.id == userId);
-            if (user) {
-              document.getElementById('edit-user-id').value = user.id;
-              document.getElementById('edit-user-name').value = user.name;
-              document.getElementById('edit-user-email').value = user.email;
-              document.getElementById('edit-user-role').value = user.role_id;
-              document.getElementById('edit-user-modal').classList.remove('hidden');
-            }
-          });
-      }
-
-    // Close modal
-    document.querySelector('.close-modal').addEventListener('click', () => {
-      document.getElementById('edit-user-modal').classList.add('hidden');
-    });
-
-    // Edit user form submit
-    document.getElementById('edit-user-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const userId = document.getElementById('edit-user-id').value;
-      const name = document.getElementById('edit-user-name').value;
-      const email = document.getElementById('edit-user-email').value;
-      const role = document.getElementById('edit-user-role').value;
-      fetch(`/backend/routes/api.php?path=/api/superadmin/users/${userId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            role_id: role
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          alert(data.success ? 'User updated' : 'Failed');
-          document.getElementById('edit-user-modal').classList.add('hidden');
-          loadUsers();
-        });
-    });
-
-      // Load AI config
-      function loadAIConfig() {
-        fetch('/backend/routes/api.php?path=/api/superadmin/ai-config')
-          .then(response => response.json())
-          .then(data => {
-            const form = document.querySelector('#ai-config form');
-            form.querySelector('input[type="checkbox"]:nth-of-type(1)').checked = data.enabled;
-            // Update other fields if needed
-          });
-      }
-
-      // Load system settings
-      function loadSystemSettings() {
-        fetch('/backend/routes/api.php?path=/api/superadmin/settings')
-          .then(response => response.json())
-          .then(data => {
-            const form = document.querySelector('#settings form');
-            form.querySelector('input[type="text"]').value = data.site_name;
-            // Update other fields
-          });
-      }
-
-    // Load data when sections are shown
-    document.querySelector('a[href="#user-roles"]').addEventListener('click', loadUsers);
-    document.querySelector('a[href="#audit-logs"]').addEventListener('click', loadLogs);
-    document.querySelector('a[href="#ai-config"]').addEventListener('click', loadAIConfig);
-    document.querySelector('a[href="#settings"]').addEventListener('click', loadSystemSettings);
-
-    // Search functionality for users
-    document.querySelector('#user-roles input[type="text"]').addEventListener('input', (e) => {
-      loadUsers();
-    });
-
-    // Filter functionality for users
-    document.querySelector('#user-roles select:nth-of-type(1)').addEventListener('change', (e) => {
-      loadUsers();
-    });
-
-    // Sort functionality for users
-    document.querySelector('#user-roles select:nth-of-type(2)').addEventListener('change', (e) => {
-      loadUsers();
-    });
-
-    // Search functionality for logs
-    document.querySelector('#audit-logs input[type="text"]').addEventListener('input', (e) => {
-      loadLogs();
-    });
-
-    // Filter functionality for logs
-    document.querySelector('#audit-logs select:nth-of-type(1)').addEventListener('change', (e) => {
-      loadLogs();
-    });
-
-    // Sort functionality for logs
-    document.querySelector('#audit-logs select:nth-of-type(2)').addEventListener('change', (e) => {
-      loadLogs();
-    });
-
-
-
-    function deleteUser(userId) {
-      if (confirm('Are you sure you want to delete this user?')) {
-        fetch(`../../backend/routes/api.php?path=/api/superadmin/users/${userId}`, {
-            method: 'DELETE'
-          })
-          .then(response => response.json())
-          .then(data => {
-            alert(data.success ? 'User deleted' : 'Failed');
-            loadUsers();
-          });
-      }
-    }
-
-    // Update loadUsers to include delete button
-    function loadUsers() {
-      const search = document.querySelector('#user-roles input[type="text"]').value;
-      const role = document.querySelector('#user-roles select:nth-of-type(1)').value;
-      const sort = document.querySelector('#user-roles select:nth-of-type(2)').value;
-      const params = new URLSearchParams({
-        search: search,
-        role: role !== 'Filter by Role' ? role : '',
-        sort: sort !== 'Sort by' ? sort.toLowerCase().replace(' (a-z)', '').replace('date created', 'date') : 'name'
-      });
-      fetch(`/backend/routes/api.php?path=/api/superadmin/users&${params}`)
-        .then(response => response.json())
-        .then(data => {
-          const tbody = document.querySelector('#user-roles table tbody');
-          tbody.innerHTML = '';
-          data.forEach(user => {
-            const roleName = getRoleName(user.role_id);
-            const status = user.active ? 'Active' : 'Inactive';
-            const statusClass = user.active ? 'active' : 'error';
-            const row = `<tr>
-              <td>${user.name}</td>
-              <td>${user.email}</td>
-              <td>${roleName}</td>
-              <td><span class="status-tag ${statusClass}">${status}</span></td>
-              <td>${user.created_at || 'N/A'}</td>
-              <td>
-                <button class="btn-icon" onclick="editUser(${user.id})">Edit</button>
-                ${user.active ? `<button class="btn-icon danger" onclick="deactivateUser(${user.id})">Deactivate</button>` : `<button class="btn-icon" onclick="activateUser(${user.id})">Activate</button>`}
-                <button class="btn-icon danger" onclick="deleteUser(${user.id})">Delete</button>
-              </td>
-            </tr>`;
-            tbody.innerHTML += row;
-          });
-        })
-        .catch(err => console.error('Failed to load users:', err));
-    }
-
-      // Backup database button
-      document.querySelector('#database .card:nth-child(3) button').addEventListener('click', () => {
-        fetch('/backend/routes/api.php?path=/api/superadmin/backup', {
-            method: 'POST'
-          })
-          .then(response => response.json())
-          .then(data => {
-            alert(data.success ? 'Backup created: ' + data.file : 'Backup failed');
-          });
-      });
-
-    // Export logs button
-    const exportBtn = document.createElement('button');
-    exportBtn.textContent = 'Export Logs';
-    exportBtn.className = 'btn-primary';
-    document.querySelector('#audit-logs .toolbar').appendChild(exportBtn);
-    exportBtn.addEventListener('click', () => {
-      fetch('/backend/routes/api.php?path=/api/superadmin/logs')
-        .then(response => response.json())
-        .then(data => {
-          const csv = 'Timestamp,User,Action,Status\n' + data.map(log => `${log.timestamp},${log.user_id},${log.action},${log.status}`).join('\n');
-          const blob = new Blob([csv], {
-            type: 'text/csv'
-          });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'audit_logs.csv';
-          a.click();
-          window.URL.revokeObjectURL(url);
-        });
-    });
-
-    // Load dashboard stats on page load
-    loadStats();
-
-    // Load users on page load
-    loadUsers();
-
-    // Refresh user list every 5 seconds for better real-time update
-    setInterval(() => {
-      loadUsers();
-    }, 5000);
-
-    // Add manual refresh button for user list
-    const userRolesToolbar = document.querySelector('#user-roles .toolbar');
-    const refreshBtn = document.createElement('button');
-    refreshBtn.textContent = 'Refresh Users';
-    refreshBtn.className = 'btn-secondary';
-    refreshBtn.style.marginLeft = '10px';
-    refreshBtn.addEventListener('click', () => {
-      loadUsers();
-    });
-    userRolesToolbar.appendChild(refreshBtn);
-
-    // For AI config save
-    document.querySelector('#ai-config form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const config = {
-        enabled: formData.get('enable_ai') === 'on'
-      };
-      fetch('../../backend/routes/api.php?path=/api/superadmin/ai-config', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(config)
-        })
-        .then(response => response.json())
-        .then(data => alert(data.success ? 'AI config saved' : 'Failed'));
-    });
-
-    // For settings save
-    document.querySelector('#settings form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const settings = {
-        site_name: formData.get('site_name')
-      };
-      fetch('../../backend/routes/api.php?path=/api/superadmin/settings', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(settings)
-        })
-        .then(response => response.json())
-        .then(data => alert(data.success ? 'Settings saved' : 'Failed'));
-    });
-  </script>
 </body>
 
 </html>

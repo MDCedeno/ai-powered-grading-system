@@ -1,15 +1,15 @@
 <?php
-// Database connection configuration
-$host = 'localhost';
-$dbname = 'plmun_portal';
-$username = 'root';
-$password = ''; // Adjust if you have a password set for your MySQL user
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db   = "plmun_portal";
+$dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    // Set error mode to exception for better error handling
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn = new PDO($dsn, $user, $pass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // echo "Connected successfully"; // optional debug
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    error_log("Database connection failed: " . $e->getMessage());
+    die("Sorry, could not connect to the database right now.");
 }
-?>

@@ -375,3 +375,16 @@ form input[type="checkbox"] {
 .tab-section {
   margin-bottom: 30px;
 }
+
+/* .hidden-panel {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border-top: 2px solid #ddd;
+  padding: 20px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+} */
