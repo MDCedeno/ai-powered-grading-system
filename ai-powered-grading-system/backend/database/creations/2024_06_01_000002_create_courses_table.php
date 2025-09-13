@@ -17,7 +17,8 @@ class CreateCoursesTable {
             semester VARCHAR(50),
             year INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (professor_id) REFERENCES users(id) ON DELETE SET NULL
         ) ENGINE=InnoDB;";
         $this->pdo->exec($sql);
     }

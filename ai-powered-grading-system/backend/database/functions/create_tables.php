@@ -1,8 +1,7 @@
 <?php
-// create_tables.php
 require_once __DIR__ . '/../../config/db.php';
 
-// Include migration classes
+// Include creation classes
 require_once __DIR__ . '/../creations/2024_06_01_000000_create_users_table.php';
 require_once __DIR__ . '/../creations/2024_06_01_000001_create_students_table.php';
 require_once __DIR__ . '/../creations/2024_06_01_000002_create_courses_table.php';
