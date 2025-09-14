@@ -22,7 +22,7 @@ function sendRequest($method, $url, $data = null)
     return ['code' => $httpcode, 'response' => $response];
 }
 
-$baseUrl = 'http://localhost:8000';
+$baseUrl = 'http://localhost:8000/backend/router.php';
 
 // SuperAdmin tests
 echo "Testing SuperAdmin endpoints...\n";

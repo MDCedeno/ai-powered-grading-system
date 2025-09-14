@@ -15,7 +15,7 @@ class ProfessorController {
     }
 
     public function getCourses($faculty_id) {
-        return $this->courseModel->getByFaculty($faculty_id);
+        return $this->courseModel->getByProfessor($faculty_id);
     }
 
     public function getStudentsByCourse($course_id) {
@@ -66,7 +66,7 @@ class ProfessorController {
             return ['error' => 'User not logged in'];
         }
         $faculty_id = $_SESSION['user_id'];
-        return $this->courseModel->getByFaculty($faculty_id);
+        return $this->courseModel->getByProfessor($faculty_id);
     }
 
     public function getMyGrades() {

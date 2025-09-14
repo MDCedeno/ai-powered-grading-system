@@ -1,12 +1,12 @@
 <?php
 // Thorough testing script for all backend controllers (direct instantiation)
 
-require_once '../backend/config/db.php';
-require_once '../backend/controllers/superAdminController.php';
-require_once '../backend/controllers/adminController.php';
-require_once '../backend/controllers/professorController.php';
-require_once '../backend/controllers/studentController.php';
-require_once '../backend/controllers/authController.php';
+require_once __DIR__ . '/../backend/config/db.php';
+require_once __DIR__ . '/../backend/controllers/superAdminController.php';
+require_once __DIR__ . '/../backend/controllers/adminController.php';
+require_once __DIR__ . '/../backend/controllers/professorController.php';
+require_once __DIR__ . '/../backend/controllers/studentController.php';
+require_once __DIR__ . '/../backend/controllers/authController.php';
 
 // SuperAdmin tests
 echo "Testing SuperAdmin Controller...\n";
@@ -60,6 +60,9 @@ if (count($students) < 5 && count($users) > 5) {
 
 // Professor tests
 echo "\nTesting Professor Controller...\n";
+// Set mock session for professor (assuming user ID 3 is a professor)
+session_start();
+$_SESSION['user_id'] = 3; // Assuming user ID 3 is a professor
 $professorController = new ProfessorController($pdo);
 
 $professorStudents = $professorController->getMyStudents();
@@ -85,11 +88,8 @@ if (count($professorStudents) > 0 && count($courses) > 0) {
         'course_id' => $courseId,
         'midterm_quizzes' => 15,
         'midterm_exam' => 25,
-        'midterm_grade' => 40,
         'final_quizzes' => 15,
-        'final_exam' => 25,
-        'final_grade' => 40,
-        'gpa' => 3.8
+        'final_exam' => 25
     ];
     $result = $professorController->addGrade($gradeData);
     if ($result) {
@@ -124,8 +124,8 @@ $authController = new AuthController($pdo);
 // Test login with existing user
 if (count($users) > 0) {
     $testUser = $users[0];
-    $result = $authController->login($testUser['email'], 'password123');
-    if ($result) {
+    $result = $authController->apiLogin($testUser['email'], 'password123');
+    if ($result['success']) {
         echo "✓ login succeeded for user: " . $testUser['email'] . "\n";
     } else {
         echo "✗ login failed for user: " . $testUser['email'] . "\n";
@@ -137,9 +137,9 @@ $result = $authController->register([
     'name' => 'Test User',
     'email' => 'test_' . time() . '@example.com',
     'password' => 'password123',
-    'role_id' => 4
+    'role' => 'student'
 ]);
-if ($result) {
+if ($result['success']) {
     echo "✓ register succeeded.\n";
 } else {
     echo "✗ register failed.\n";

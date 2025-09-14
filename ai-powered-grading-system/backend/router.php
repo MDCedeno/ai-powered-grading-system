@@ -3,6 +3,8 @@
 $request = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Debug: Log the request (removed)
+
 // Check if path is passed as query parameter (for compatibility with existing JS)
 if (isset($_GET['path'])) {
     $request = $_GET['path'];
