@@ -3,28 +3,33 @@ require_once __DIR__ . '/../models/course.php';
 require_once __DIR__ . '/../models/grade.php';
 require_once __DIR__ . '/../models/student.php';
 
-class ProfessorController {
+class ProfessorController
+{
     private $courseModel;
     private $gradeModel;
     private $studentModel;
 
-    public function __construct($pdo) {
+    public function __construct($pdo)
+    {
         $this->courseModel = new Course($pdo);
         $this->gradeModel = new Grade($pdo);
         $this->studentModel = new Student($pdo);
     }
 
-    public function getCourses($faculty_id) {
+    public function getCourses($faculty_id)
+    {
         return $this->courseModel->getByProfessor($faculty_id);
     }
 
-    public function getStudentsByCourse($course_id) {
+    public function getStudentsByCourse($course_id)
+    {
         // Get students enrolled in the course (assuming a enrollment table or from grades)
         // For now, return all students
         return $this->studentModel->getAll();
     }
 
-    public function enterGrade($student_id, $course_id, $midterm_quizzes, $midterm_exam, $midterm_grade, $final_quizzes, $final_exam, $final_grade, $gpa) {
+    public function enterGrade($student_id, $course_id, $midterm_quizzes, $midterm_exam, $midterm_grade, $final_quizzes, $final_exam, $final_grade, $gpa)
+    {
         $existing = $this->gradeModel->findByStudentAndCourse($student_id, $course_id);
         if ($existing) {
             return $this->gradeModel->update($existing['id'], $midterm_quizzes, $midterm_exam, $midterm_grade, $final_quizzes, $final_exam, $final_grade, $gpa);
@@ -33,11 +38,13 @@ class ProfessorController {
         }
     }
 
-    public function getGrades($course_id) {
+    public function getGrades($course_id)
+    {
         return $this->gradeModel->getByCourse($course_id);
     }
 
-    public function getMyStudents() {
+    public function getMyStudents()
+    {
         if (!isset($_SESSION['user_id'])) {
             return ['error' => 'User not logged in'];
         }
@@ -61,7 +68,8 @@ class ProfessorController {
         return $students;
     }
 
-    public function getMyCourses() {
+    public function getMyCourses()
+    {
         if (!isset($_SESSION['user_id'])) {
             return ['error' => 'User not logged in'];
         }
@@ -69,7 +77,8 @@ class ProfessorController {
         return $this->courseModel->getByProfessor($faculty_id);
     }
 
-    public function getMyGrades() {
+    public function getMyGrades()
+    {
         if (!isset($_SESSION['user_id'])) {
             return ['error' => 'User not logged in'];
         }
@@ -87,7 +96,8 @@ class ProfessorController {
         return $all_grades;
     }
 
-    public function addGrade($data) {
+    public function addGrade($data)
+    {
         try {
             return $this->gradeModel->createWithAI($data['student_id'], $data['course_id'], $data['midterm_quizzes'], $data['midterm_exam'], $data['final_quizzes'], $data['final_exam']);
         } catch (Exception $e) {
@@ -96,12 +106,13 @@ class ProfessorController {
         }
     }
 
-    public function updateGrade($id, $data) {
+    public function updateGrade($id, $data)
+    {
         return $this->gradeModel->update($id, $data['midterm_quizzes'], $data['midterm_exam'], $data['midterm_grade'], $data['final_quizzes'], $data['final_exam'], $data['final_grade'], $data['gpa']);
     }
 
-    public function deleteGrade($id) {
+    public function deleteGrade($id)
+    {
         return $this->gradeModel->delete($id);
     }
 }
-?>

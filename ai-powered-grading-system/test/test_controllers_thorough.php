@@ -1,4 +1,8 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Thorough testing script for all backend controllers (direct instantiation)
 
 require_once __DIR__ . '/../backend/config/db.php';
@@ -8,8 +12,13 @@ require_once __DIR__ . '/../backend/controllers/professorController.php';
 require_once __DIR__ . '/../backend/controllers/studentController.php';
 require_once __DIR__ . '/../backend/controllers/authController.php';
 
+// Check if $pdo is set and valid
+if (!isset($pdo) || !$pdo) {
+    die("Database connection (\$pdo) is not initialized.\n");
+}
+
 // SuperAdmin tests
-echo "Testing SuperAdmin Controller...\n";
+echo "========== Testing SuperAdmin Controller ==========\n";
 $superAdminController = new SuperAdminController($pdo);
 
 $users = $superAdminController->getAllUsers();
@@ -26,7 +35,7 @@ if (is_array($logs)) {
     echo "✗ getSystemLogs failed.\n";
 }
 
-if (count($users) > 0) {
+if (is_array($users) && count($users) > 0 && isset($users[0]['id'])) {
     $userId = $users[0]['id'];
     $result = $superAdminController->deactivateUser($userId);
     if ($result) {
@@ -34,10 +43,12 @@ if (count($users) > 0) {
     } else {
         echo "✗ deactivateUser failed.\n";
     }
+} else {
+    echo "✗ No users found to test deactivateUser.\n";
 }
 
 // Admin tests
-echo "\nTesting Admin Controller...\n";
+echo "\n========== Testing Admin Controller ==========\n";
 $adminController = new AdminController($pdo);
 
 $students = $adminController->getAllStudents();
@@ -48,7 +59,7 @@ if (is_array($students)) {
 }
 
 // Test adding a student (if fewer than expected students exist)
-if (count($students) < 5 && count($users) > 5) {
+if (is_array($students) && count($students) < 5 && is_array($users) && count($users) > 5 && isset($users[5]['id'])) {
     $userId = $users[5]['id']; // Use a student user
     $result = $adminController->addStudent(['user_id' => $userId, 'program' => 'CS', 'year' => 3]);
     if ($result) {
@@ -56,12 +67,16 @@ if (count($students) < 5 && count($users) > 5) {
     } else {
         echo "✗ addStudent failed.\n";
     }
+} else {
+    echo "Skipped addStudent test (not enough users or students).\n";
 }
 
 // Professor tests
-echo "\nTesting Professor Controller...\n";
+echo "\n========== Testing Professor Controller ==========\n";
 // Set mock session for professor (assuming user ID 3 is a professor)
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $_SESSION['user_id'] = 3; // Assuming user ID 3 is a professor
 $professorController = new ProfessorController($pdo);
 
@@ -80,7 +95,7 @@ if (is_array($courses)) {
 }
 
 // Test creating a grade if students and courses exist
-if (count($professorStudents) > 0 && count($courses) > 0) {
+if (is_array($professorStudents) && count($professorStudents) > 0 && is_array($courses) && count($courses) > 0) {
     $studentId = $professorStudents[0]['id'];
     $courseId = $courses[0]['id'];
     $gradeData = [
@@ -97,10 +112,12 @@ if (count($professorStudents) > 0 && count($courses) > 0) {
     } else {
         echo "✗ addGrade failed.\n";
     }
+} else {
+    echo "Skipped addGrade test (not enough students or courses).\n";
 }
 
 // Student tests
-echo "\nTesting Student Controller...\n";
+echo "\n========== Testing Student Controller ==========\n";
 $studentController = new StudentController($pdo);
 
 $studentGrades = $studentController->getMyGrades();
@@ -118,31 +135,34 @@ if (is_array($studentCourses)) {
 }
 
 // Auth tests
-echo "\nTesting Auth Controller...\n";
+echo "\n========== Testing Auth Controller ==========\n";
 $authController = new AuthController($pdo);
 
 // Test login with existing user
-if (count($users) > 0) {
+if (is_array($users) && count($users) > 0 && isset($users[0]['email'])) {
     $testUser = $users[0];
     $result = $authController->apiLogin($testUser['email'], 'password123');
-    if ($result['success']) {
+    if (isset($result['success']) && $result['success']) {
         echo "✓ login succeeded for user: " . $testUser['email'] . "\n";
     } else {
         echo "✗ login failed for user: " . $testUser['email'] . "\n";
     }
+} else {
+    echo "Skipped login test (no users found).\n";
 }
 
 // Test registration
+$registerEmail = 'test_' . time() . '@example.com';
 $result = $authController->register([
     'name' => 'Test User',
-    'email' => 'test_' . time() . '@example.com',
+    'email' => $registerEmail,
     'password' => 'password123',
     'role' => 'student'
 ]);
-if ($result['success']) {
-    echo "✓ register succeeded.\n";
+if (isset($result['success']) && $result['success']) {
+    echo "✓ register succeeded for $registerEmail.\n";
 } else {
-    echo "✗ register failed.\n";
+    echo "✗ register failed for $registerEmail.\n";
 }
 
-echo "\nThorough controller testing completed.\n";
+echo "\n========== Thorough controller testing completed ==========\n";
