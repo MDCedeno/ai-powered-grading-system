@@ -1,6 +1,6 @@
 <?php 
 session_start();
-include '../components/navbar.php';
+include '../../components/header.php';
 ?>
 
 <body data-role="student">
@@ -373,7 +373,7 @@ include '../components/navbar.php';
 
     // Load grades
     function loadGrades() {
-      fetch('../../backend/routes/api.php/api/student/grades')
+      fetch('../../backend/router.php/api/student/grades')
         .then(response => response.json())
         .then(data => {
           const tbody = document.querySelector('#grades table tbody');
@@ -394,7 +394,7 @@ include '../components/navbar.php';
 
     // Load quizzes
     function loadQuizzes() {
-      fetch('../../backend/routes/api.php/api/student/quizzes')
+      fetch('../../backend/router.php/api/student/quizzes')
         .then(response => response.json())
         .then(data => {
           const tbody = document.querySelector('#quizzes table tbody');
@@ -413,7 +413,7 @@ include '../components/navbar.php';
 
     // Load notifications
     function loadNotifications() {
-      fetch('../../backend/routes/api.php/api/student/notifications')
+      fetch('../../backend/router.php/api/student/notifications')
         .then(response => response.json())
         .then(data => {
           const ul = document.querySelector('#notifications ul');

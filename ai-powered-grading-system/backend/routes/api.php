@@ -13,6 +13,14 @@ $method = $_SERVER['REQUEST_METHOD'];
 // Remove query string from request URI
 $path = strtok($request, '?');
 
+// Remove router.php prefix if present
+$scriptName = basename($_SERVER['SCRIPT_NAME']); // router.php
+$pos = strpos($path, '/' . $scriptName);
+if ($pos !== false) {
+    $path = substr($path, $pos + strlen($scriptName) + 1);
+    $path = '/' . ltrim($path, '/');
+}
+
 // SuperAdmin routes
 if (strpos($path, '/api/superadmin') === 0) {
     $controller = new SuperAdminController($pdo);

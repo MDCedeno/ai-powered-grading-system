@@ -3,8 +3,21 @@
 $request = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Remove query string
-$request = strtok($request, '?');
+// Check if path is passed as query parameter (for compatibility with existing JS)
+if (isset($_GET['path'])) {
+    $request = $_GET['path'];
+} else {
+    // Remove query string
+    $request = strtok($request, '?');
+
+    // Remove the router.php part from the URI if present
+    $scriptName = basename($_SERVER['SCRIPT_NAME']); // should be router.php
+    $pos = strpos($request, '/' . $scriptName);
+    if ($pos !== false) {
+        $request = substr($request, $pos + strlen($scriptName) + 1);
+        $request = '/' . ltrim($request, '/');
+    }
+}
 
 // Route API requests to api.php
 // Handle both direct /api/ requests and /backend/router.php/api/ requests

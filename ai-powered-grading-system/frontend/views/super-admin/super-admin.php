@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../components/navbar.php';
+include '../../components/header.php';
 ?>
 
 <body data-role="super-admin">

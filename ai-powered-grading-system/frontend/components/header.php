@@ -6,15 +6,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PLMUN Portal</title>
-  <link rel="stylesheet" href="../assets/css/style.css" />
+  <?php
+  if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+  }
+  $role = strtolower(str_replace(' ', '', $_SESSION['role'] ?? ''));
+  ?>
+  <link rel="stylesheet" href="../../assets/css/style.css" />
   <?php if ($role === 'superadmin'): ?>
-    <link rel="stylesheet" href="../assets/css/superadmin.css" />
+    <link rel="stylesheet" href="../../assets/css/superadmin.css" />
   <?php elseif ($role === 'student'): ?>
-    <link rel="stylesheet" href="../assets/css/student.css" />
+    <link rel="stylesheet" href="../../assets/css/student.css" />
   <?php elseif ($role === 'professor'): ?>
-    <link rel="stylesheet" href="../assets/css/professor.css" />
+    <link rel="stylesheet" href="../../assets/css/professor.css" />
   <?php elseif ($role === 'misadmin'): ?>
-    <link rel="stylesheet" href="../assets/css/misadmin.css" />
+    <link rel="stylesheet" href="../../assets/css/misadmin.css" />
   <?php endif; ?>
 
   <!-- PLMUN Logo -->

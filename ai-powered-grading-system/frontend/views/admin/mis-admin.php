@@ -1,6 +1,6 @@
 <?php 
 session_start();
-include '../components/navbar.php';
+include '../../components/header.php';
 ?>
 
 <body data-role="admin">
@@ -227,7 +227,7 @@ include '../components/navbar.php';
 
     // Load data for sections
     function loadStudents() {
-      fetch('../../../backend/routes/api.php/api/admin/students')
+      fetch('../../../backend/router.php/api/admin/students')
         .then(response => response.json())
         .then(data => {
           const tbody = document.querySelector('#student-records table tbody');
@@ -250,7 +250,7 @@ include '../components/navbar.php';
     }
 
     function loadProfessors() {
-      fetch('../../../backend/routes/api.php/api/admin/professors')
+      fetch('../../../backend/router.php/api/admin/professors')
         .then(response => response.json())
         .then(data => {
           const tbody = document.querySelector('#professor-records table tbody');

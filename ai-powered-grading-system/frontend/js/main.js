@@ -87,7 +87,7 @@ document
 
 // Load system stats for dashboard
 function loadStats() {
-  fetch("/backend/routes/api.php?path=/api/superadmin/stats")
+  fetch("/backend/router.php?path=/api/superadmin/stats")
     .then((response) => response.json())
     .then((data) => {
       // Update Server Status
@@ -135,7 +135,7 @@ function loadLogs() {
     sort:
       sort !== "Sort by" ? sort.toLowerCase().replace(" first", "") : "newest",
   });
-  fetch(`/backend/routes/api.php?path=/api/superadmin/logs&${params}`)
+  fetch(`/backend/router.php?path=/api/superadmin/logs&${params}`)
     .then((response) => response.json())
     .then((data) => {
       const tbody = document.querySelector("#audit-logs table tbody");
@@ -166,7 +166,7 @@ function getRoleName(role_id) {
 }
 
 function deactivateUser(userId) {
-  fetch("/backend/routes/api.php?path=/api/superadmin/users/deactivate", {
+  fetch("/backend/router.php?path=/api/superadmin/users/deactivate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -183,7 +183,7 @@ function deactivateUser(userId) {
 }
 
 function activateUser(userId) {
-  fetch("/backend/routes/api.php?path=/api/superadmin/users/activate", {
+  fetch("/backend/router.php?path=/api/superadmin/users/activate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -201,7 +201,7 @@ function activateUser(userId) {
 
 function editUser(userId) {
   // Fetch user data and populate modal
-  fetch(`/backend/routes/api.php?path=/api/superadmin/users`)
+  fetch(`/backend/router.php?path=/api/superadmin/users`)
     .then((response) => response.json())
     .then((data) => {
       const user = data.find((u) => u.id == userId);
@@ -227,7 +227,7 @@ document.getElementById("edit-user-form").addEventListener("submit", (e) => {
   const name = document.getElementById("edit-user-name").value;
   const email = document.getElementById("edit-user-email").value;
   const role = document.getElementById("edit-user-role").value;
-  fetch(`/backend/routes/api.php?path=/api/superadmin/users/${userId}`, {
+  fetch(`/backend/router.php?path=/api/superadmin/users/${userId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -248,7 +248,7 @@ document.getElementById("edit-user-form").addEventListener("submit", (e) => {
 
 // Load AI config
 function loadAIConfig() {
-  fetch("/backend/routes/api.php?path=/api/superadmin/ai-config")
+  fetch("/backend/router.php?path=/api/superadmin/ai-config")
     .then((response) => response.json())
     .then((data) => {
       const form = document.querySelector("#ai-config form");
@@ -260,7 +260,7 @@ function loadAIConfig() {
 
 // Load system settings
 function loadSystemSettings() {
-  fetch("/backend/routes/api.php?path=/api/superadmin/settings")
+  fetch("/backend/router.php?path=/api/superadmin/settings")
     .then((response) => response.json())
     .then((data) => {
       const form = document.querySelector("#settings form");
@@ -327,7 +327,7 @@ document
 
 function deleteUser(userId) {
   if (confirm("Are you sure you want to delete this user?")) {
-    fetch(`../../backend/routes/api.php?path=/api/superadmin/users/${userId}`, {
+    fetch(`../../backend/router.php?path=/api/superadmin/users/${userId}`, {
       method: "DELETE",
     })
       .then((response) => response.json())
@@ -362,7 +362,7 @@ function loadUsers() {
         : "name",
   });
 
-  fetch(`/backend/routes/api.php?path=/api/superadmin/users&${params}`)
+  fetch(`/backend/router.php?path=/api/superadmin/users&${params}`)
     .then((response) => response.json())
     .then((data) => {
       const tbody = document.querySelector("#user-roles table tbody");
@@ -411,7 +411,7 @@ function loadUsers() {
 document
   .querySelector("#database .card:nth-child(3) button")
   .addEventListener("click", () => {
-    fetch("/backend/routes/api.php?path=/api/superadmin/backup", {
+    fetch("/backend/router.php?path=/api/superadmin/backup", {
       method: "POST",
     })
       .then((response) => response.json())
@@ -426,7 +426,7 @@ exportBtn.textContent = "Export Logs";
 exportBtn.className = "btn-primary";
 document.querySelector("#audit-logs .toolbar").appendChild(exportBtn);
 exportBtn.addEventListener("click", () => {
-  fetch("/backend/routes/api.php?path=/api/superadmin/logs")
+  fetch("/backend/router.php?path=/api/superadmin/logs")
     .then((response) => response.json())
     .then((data) => {
       const csv =
@@ -478,7 +478,7 @@ document.querySelector("#ai-config form").addEventListener("submit", (e) => {
   const config = {
     enabled: formData.get("enable_ai") === "on",
   };
-  fetch("../../backend/routes/api.php?path=/api/superadmin/ai-config", {
+  fetch("../../backend/router.php?path=/api/superadmin/ai-config", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -496,7 +496,7 @@ document.querySelector("#settings form").addEventListener("submit", (e) => {
   const settings = {
     site_name: formData.get("site_name"),
   };
-  fetch("../../backend/routes/api.php?path=/api/superadmin/settings", {
+  fetch("../../backend/router.php?path=/api/superadmin/settings", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -538,7 +538,7 @@ function loadSystemStats() {
 
 function loadAdminData() {
   // Load students, professors, courses, grades
-  fetch("../../backend/routes/api.php?path=/api/admin/students")
+  fetch("../../backend/router.php?path=/api/admin/students")
     .then((response) => response.json())
     .then((data) => {
       // Populate student table
@@ -570,7 +570,7 @@ function loadAdminData() {
       alert("Failed to load students.");
     });
 
-  fetch("../../backend/routes/api.php?path=/api/admin/professors")
+  fetch("../../backend/router.php?path=/api/admin/professors")
     .then((response) => response.json())
     .then((data) => {
       // Populate professor table
@@ -607,7 +607,7 @@ function loadAdminData() {
 }
 
 function loadAdminLogs() {
-  fetch("../../backend/routes/api.php?path=/api/admin/audit-logs")
+  fetch("../../backend/router.php?path=/api/admin/audit-logs")
     .then((response) => response.json())
     .then((data) => {
       const logTable = document.querySelector("#audit-logs table tbody");
@@ -636,7 +636,7 @@ function loadAdminLogs() {
 
 function loadAdminStats() {
   // Load stats for admin dashboard
-  fetch("../../backend/routes/api.php?path=/api/admin/students")
+  fetch("../../backend/router.php?path=/api/admin/students")
     .then((response) => response.json())
     .then((data) => {
       const studentCount = document.querySelector(".card:nth-child(1) p");
@@ -644,7 +644,7 @@ function loadAdminStats() {
     })
     .catch((error) => console.error("Error loading student stats:", error));
 
-  fetch("../../backend/routes/api.php?path=/api/admin/professors")
+  fetch("../../backend/router.php?path=/api/admin/professors")
     .then((response) => response.json())
     .then((data) => {
       const professorCount = document.querySelector(".card:nth-child(2) p");
@@ -653,7 +653,7 @@ function loadAdminStats() {
     })
     .catch((error) => console.error("Error loading professor stats:", error));
 
-  fetch("../../backend/routes/api.php?path=/api/admin/courses")
+  fetch("../../backend/router.php?path=/api/admin/courses")
     .then((response) => response.json())
     .then((data) => {
       const courseCount = document.querySelector(".card:nth-child(3) p");
@@ -661,7 +661,7 @@ function loadAdminStats() {
     })
     .catch((error) => console.error("Error loading course stats:", error));
 
-  fetch("../../backend/routes/api.php?path=/api/admin/grades")
+  fetch("../../backend/router.php?path=/api/admin/grades")
     .then((response) => response.json())
     .then((data) => {
       const gradeCount = document.querySelector(".card:nth-child(4) p");
@@ -672,7 +672,7 @@ function loadAdminStats() {
 
 function loadProfessorData() {
   // Load courses for class management
-  fetch("../../backend/routes/api.php?path=/api/professor/courses")
+  fetch("../../backend/router.php?path=/api/professor/courses")
     .then((response) => response.json())
     .then((data) => {
       // Populate courses table
@@ -704,7 +704,7 @@ function loadProfessorData() {
     });
 
   // Load students and grades
-  fetch("../../backend/routes/api.php?path=/api/professor/students")
+  fetch("../../backend/router.php?path=/api/professor/students")
     .then((response) => response.json())
     .then((data) => {
       // Populate student list
@@ -729,7 +729,7 @@ function loadProfessorData() {
 
 function loadStudentData() {
   // Load student's grades and courses
-  fetch("../../backend/routes/api.php?path=/api/student/grades")
+  fetch("../../backend/router.php?path=/api/student/grades")
     .then((response) => response.json())
     .then((data) => {
       // Populate grades table
@@ -782,7 +782,7 @@ function loadStudentData() {
     });
 
   // Load notifications
-  fetch("../../backend/routes/api.php?path=/api/student/notifications")
+  fetch("../../backend/router.php?path=/api/student/notifications")
     .then((response) => response.json())
     .then((data) => {
       const notificationsList = document.querySelector("#notifications ul");
@@ -801,7 +801,7 @@ function loadStudentData() {
     });
 
   // Load quizzes
-  fetch("../../backend/routes/api.php?path=/api/student/quizzes")
+  fetch("../../backend/router.php?path=/api/student/quizzes")
     .then((response) => response.json())
     .then((data) => {
       const quizzesTable = document.querySelector("#quizzes table tbody");
@@ -836,7 +836,7 @@ function setupGradeForm() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
 
-    fetch("../../backend/routes/api.php?path=/api/professor/grades", {
+    fetch("../../backend/router.php?path=/api/professor/grades", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -858,7 +858,7 @@ function setupGradeForm() {
 }
 
 function loadGrades() {
-  fetch("../../backend/routes/api.php?path=/api/professor/grades")
+  fetch("../../backend/router.php?path=/api/professor/grades")
     .then((response) => response.json())
     .then((data) => {
       const gradesTable = document.querySelector("#grades-table tbody");
@@ -889,7 +889,7 @@ function loadGrades() {
 }
 
 function deactivateUser(userId) {
-  fetch("../../backend/routes/api.php?path=/api/superadmin/users/deactivate", {
+  fetch("../../backend/router.php?path=/api/superadmin/users/deactivate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId }),

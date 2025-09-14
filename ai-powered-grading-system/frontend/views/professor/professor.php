@@ -1,6 +1,6 @@
 <?php 
 session_start();
-include '../components/navbar.php';
+include '../../components/header.php';
 ?>
 
 <body data-role="professor">
@@ -279,7 +279,7 @@ include '../components/navbar.php';
 
         // Load courses for class management
         function loadCourses() {
-            fetch('../../backend/routes/api.php/api/professor/courses')
+            fetch('../../backend/router.php/api/professor/courses')
                 .then(response => response.json())
                 .then(data => {
                     const tbody = document.querySelector('#class-management table tbody');
@@ -302,7 +302,7 @@ include '../components/navbar.php';
 
         // Load grades for student performance
         function loadGrades() {
-            fetch('../../backend/routes/api.php/api/professor/grades')
+            fetch('../../backend/router.php/api/professor/grades')
                 .then(response => response.json())
                 .then(data => {
                     const tbody = document.getElementById('grades-tbody');
@@ -337,7 +337,7 @@ include '../components/navbar.php';
                 const finalExam = row.querySelector('.final-exam').value;
 
                 if (midtermQuiz && midtermExam && finalQuiz && finalExam) {
-                    fetch('../../backend/routes/api.php/api/professor/grades', {
+                    fetch('../../backend/router.php/api/professor/grades', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

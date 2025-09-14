@@ -102,7 +102,7 @@
             const role = document.getElementById('role').value;
             const password = document.getElementById('password').value;
 
-            fetch('../../backend/routes/api.php/api/auth/register', {
+            fetch('../../backend/router.php/api/auth/register', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
