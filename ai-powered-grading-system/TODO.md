@@ -1,2 +1,1 @@
-- [x] Add session handling and role normalization in header.php
-- [x] Fix API routing issue - router.php now correctly handles requests to /backend/router.php/api/...
+
