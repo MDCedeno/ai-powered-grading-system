@@ -1,11 +1,5 @@
-<?php
-include '../components/navbar.php';
-?>
-
 <!DOCTYPE html>
 <html lang="en">
-<!-- Header -->
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -28,6 +22,9 @@ include '../components/navbar.php';
     href="../assets/images/favicon-16x16.png" />
   <link rel="manifest" href="../assets/images/site.webmanifest" />
 </head>
+<body>
+<?php include '../components/navbar.php'; ?>
+
 <!-- Hero -->
 <section class="hero">
   <div class="hero-content">
@@ -64,4 +61,7 @@ include '../components/navbar.php';
     </div>
   </div>
 </section>
+
 <?php include '../components/footer.php'; ?>
+</body>
+</html>
