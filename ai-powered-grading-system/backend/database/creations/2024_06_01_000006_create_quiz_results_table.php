@@ -13,8 +13,8 @@ class CreateQuizResultsTable {
             id INT AUTO_INCREMENT PRIMARY KEY,
             quiz_id INT NOT NULL,
             student_id INT NOT NULL,
-            score FLOAT,
             answers TEXT,
+            score FLOAT,
             submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
             FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
@@ -27,4 +27,5 @@ class CreateQuizResultsTable {
         $this->pdo->exec($sql);
     }
 }
+
 ?>

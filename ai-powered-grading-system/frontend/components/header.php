@@ -39,4 +39,5 @@
     sizes="16x16"
     href="../../assets/images/favicon-16x16.png" />
   <link rel="manifest" href="../../assets/images/site.webmanifest" />
+  <script src="../../js/main.js"></script>
 </head>

@@ -18,14 +18,19 @@ class SuperAdminController
         $this->pdo = $pdo;
     }
 
-    public function getAllUsers($search = '', $role = '', $sort = 'name')
+    public function getAllUsers($search = '', $role = '', $sort = 'name', $limit = 10, $userId = '')
     {
         $query = "SELECT * FROM users WHERE 1=1";
         $params = [];
 
         if ($search) {
-            $query .= " AND (name LIKE :search OR email LIKE :search OR id LIKE :search)";
+            $query .= " AND (name LIKE :search OR email LIKE :search)";
             $params['search'] = '%' . $search . '%';
+        }
+
+        if ($userId) {
+            $query .= " AND id LIKE :userId";
+            $params['userId'] = '%' . $userId . '%';
         }
 
         if ($role) {
@@ -40,6 +45,10 @@ class SuperAdminController
         $sortField = isset($sortMap[$sort]) ? $sortMap[$sort] : 'name';
         $query .= " ORDER BY $sortField ASC";
 
+        if ($limit) {
+            $query .= " LIMIT " . (int)$limit;
+        }
+
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -51,24 +60,27 @@ class SuperAdminController
         return $stmt->execute(['id' => $user_id]);
     }
 
-    public function getSystemLogs($search = '', $status = '', $sort = 'newest')
+    public function getSystemLogs($search = '', $status = '', $sort = 'newest', $limit = 10)
     {
-        $query = "SELECT id, user_id, action, details, created_at FROM logs WHERE 1=1";
+        $query = "SELECT logs.id, users.email as user_email, logs.action, logs.details, logs.created_at FROM logs LEFT JOIN users ON logs.user_id = users.id WHERE 1=1";
         $params = [];
 
         if ($search) {
-            $query .= " AND (user_id LIKE :search OR action LIKE :search OR details LIKE :search)";
+            $query .= " AND (users.email LIKE :search OR logs.action LIKE :search OR logs.details LIKE :search)";
             $params['search'] = '%' . $search . '%';
         }
 
-        if ($status) {
-            // Map status to action types (success, error, etc.)
-            $query .= " AND action = :status";
-            $params['status'] = $status;
+        if ($status && $status !== 'Filter by Status') {
+            if ($status === 'Success') {
+                $query .= " AND logs.action = 'success'";
+            } elseif ($status === 'Failed') {
+                $query .= " AND logs.action = 'error'";
+            }
         }
 
         $sortOrder = $sort === 'oldest' ? 'ASC' : 'DESC';
-        $query .= " ORDER BY created_at $sortOrder";
+        $query .= " ORDER BY logs.created_at $sortOrder";
+        $query .= " LIMIT $limit";
 
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($params);
@@ -78,10 +90,10 @@ class SuperAdminController
         return array_map(function ($log) {
             return [
                 'timestamp' => $log['created_at'],
-                'user_id' => $log['user_id'],
+                'user' => $log['user_email'] ?? 'Unknown',
                 'action' => $log['action'],
                 'details' => $log['details'],
-                'status' => $log['action'] // Use action as status for now
+                'status' => $log['action'] === 'success' ? 'Success' : 'Failed'
             ];
         }, $logs);
     }

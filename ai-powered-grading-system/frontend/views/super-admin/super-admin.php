@@ -79,13 +79,8 @@ include '../../components/header.php';
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>2025-09-01 19:50:12</td>
-                  <td>admin_mis@plmun.edu</td>
-                  <td>Generated department report</td>
-                  <td><span class="status-tag success">Success</span></td>
-                </tr>
+              <tbody id="recent-activity">
+                <!-- Rows will be dynamically inserted here -->
               </tbody>
             </table>
             <p class="note">
@@ -98,28 +93,27 @@ include '../../components/header.php';
         <section id="user-roles" class="tab-section active">
           <h2>User Role Management</h2>
           <div class="toolbar">
-            <input
-              type="text"
-              placeholder="Search by name, email, or ID..." />
-            <select>
+            <input type="text" id="user-search" placeholder="Search by name or email..." />
+            <input type="text" id="user-id-search" placeholder="Search by User ID..." />
+            <select id="role-filter">
               <option>Filter by Role</option>
               <option>Super Admin</option>
-              <option>Admin</option>
+              <option>MIS Admin</option>
               <option>Professor</option>
               <option>Student</option>
             </select>
-            <select>
-              <option>Sort by</option>
-              <option>Name (A-Z)</option>
-              <option>Date Created</option>
+            <select id="status-filter">
+              <option>Filter by Status</option>
+              <option>Active</option>
+              <option>Inactive</option>
             </select>
-            <button class="btn-primary">Add New User</button>
           </div>
 
           <div class="user-table-container">
             <table>
               <thead>
                 <tr>
+                  <th>User ID</th>
                   <th>Name</th>
                   <th>Email</th>
                   <th>Role</th>
@@ -208,19 +202,8 @@ include '../../components/header.php';
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>2025-09-01 21:05:33</td>
-                  <td>prof_garcia@plmun.edu</td>
-                  <td>Logged in</td>
-                  <td><span class="status-tag success">Success</span></td>
-                </tr>
-                <tr>
-                  <td>2025-09-01 20:44:12</td>
-                  <td>admin_mis@plmun.edu</td>
-                  <td>Failed login attempt</td>
-                  <td><span class="status-tag error">Failed</span></td>
-                </tr>
+              <tbody id="recent-activity">
+                <!-- Data will be loaded dynamically -->
               </tbody>
             </table>
           </div>
@@ -269,8 +252,32 @@ include '../../components/header.php';
     </main>
   </div>
 
+  <!-- Edit User Modal -->
+  <div id="edit-user-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h3>Edit User</h3>
+      <form id="edit-user-form">
+        <input type="hidden" id="edit-user-id" />
+        <label for="edit-name">Name:</label>
+        <input type="text" id="edit-name" required />
+        <label for="edit-email">Email:</label>
+        <input type="email" id="edit-email" required />
+        <label for="edit-role">Role:</label>
+        <select id="edit-role" required>
+          <option value="1">Super Admin</option>
+          <option value="2">MIS Admin</option>
+          <option value="3">Professor</option>
+          <option value="4">Student</option>
+        </select>
+        <button type="submit" class="btn-primary">Save</button>
+        <button type="button" id="cancel-edit" class="btn-secondary">Cancel</button>
+      </form>
+    </div>
+  </div>
+
   <!-- Main JavaScript for AI-Powered Grading System -->
   <script src="../../js/main.js"></script>
+  <script src="../../js/superadmin.js"></script>
 
 </body>
 

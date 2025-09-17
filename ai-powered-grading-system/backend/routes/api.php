@@ -28,7 +28,9 @@ if (strpos($path, '/api/superadmin') === 0) {
         $search = $_GET['search'] ?? '';
         $role = $_GET['role'] ?? '';
         $sort = $_GET['sort'] ?? 'name';
-        $users = $controller->getAllUsers($search, $role, $sort);
+        $limit = $_GET['limit'] ?? 10;
+        $userId = $_GET['userId'] ?? '';
+        $users = $controller->getAllUsers($search, $role, $sort, $limit, $userId);
         echo json_encode($users);
     } elseif ($path == '/api/superadmin/users/deactivate' && $method == 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
@@ -38,7 +40,8 @@ if (strpos($path, '/api/superadmin') === 0) {
         $search = $_GET['search'] ?? '';
         $status = $_GET['status'] ?? '';
         $sort = $_GET['sort'] ?? 'newest';
-        $logs = $controller->getSystemLogs($search, $status, $sort);
+        $limit = $_GET['limit'] ?? 10;
+        $logs = $controller->getSystemLogs($search, $status, $sort, $limit);
         echo json_encode($logs);
     } elseif ($path == '/api/superadmin/users/activate' && $method == 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);

@@ -15,6 +15,7 @@ class CreateQuizzesTable {
             description TEXT,
             course_id INT NOT NULL,
             professor_id INT NOT NULL,
+            questions TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
@@ -28,4 +29,5 @@ class CreateQuizzesTable {
         $this->pdo->exec($sql);
     }
 }
+
 ?>
