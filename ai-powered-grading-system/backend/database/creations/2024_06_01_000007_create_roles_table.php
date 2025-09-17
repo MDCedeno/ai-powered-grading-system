@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../config/db.php';
 
-class CreateRoleAssignmentsTable {
+class CreateRolesTable {
     private $pdo;
 
     public function __construct($pdo) {
@@ -9,19 +9,18 @@ class CreateRoleAssignmentsTable {
     }
 
     public function up() {
-        $sql = "CREATE TABLE IF NOT EXISTS role_assignments (
+        $sql = "CREATE TABLE IF NOT EXISTS roles (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id INT NOT NULL,
-            role_id INT NOT NULL,
+            name VARCHAR(255) NOT NULL UNIQUE,
+            description TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB;";
         $this->pdo->exec($sql);
     }
 
     public function down() {
-        $sql = "DROP TABLE IF EXISTS role_assignments;";
+        $sql = "DROP TABLE IF EXISTS roles;";
         $this->pdo->exec($sql);
     }
 }

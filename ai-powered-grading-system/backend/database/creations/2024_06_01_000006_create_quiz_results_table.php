@@ -16,8 +16,6 @@ class CreateQuizResultsTable {
             score FLOAT,
             answers TEXT,
             submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
             FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
         ) ENGINE=InnoDB;";
