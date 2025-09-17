@@ -200,7 +200,7 @@ function addSortingButtons() {
   const userHeaders = document.querySelectorAll('#user-roles table thead th');
   userHeaders.forEach((th, index) => {
     if (index === 4 || index === 6) return; // skip status and actions
-    const columnMap = ['id', 'name', 'email', 'role', 'status', 'created_at'];
+  const columnMap = ['id', 'name', 'email', 'role_id', 'status', 'created_at'];
     const column = columnMap[index];
 
     const btnAsc = document.createElement('button');

@@ -286,7 +286,9 @@ body {
   color: #fff;
   font-weight: 600;
   position: relative;
-  padding-bottom: 80px; /* space for filter buttons */
+  white-space: nowrap;
+  vertical-align: bottom;
+  padding-bottom: 30px; /* space for filter buttons */
 }
 
 tr {
@@ -298,19 +300,13 @@ tr {
 }
 
 .user-table-container th .sort-btn {
-  position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column; /* stack vertically */
-  gap: 20px; /* spacing between buttons */
+  display: inline-block;
+  margin-left: 5px;
   background: transparent;
   border: none;
   cursor: pointer;
   font-size: 12px;
   color: #6b7280;
-  align-items: center; /* center horizontally */
 }
 
 .user-table-container th .sort-btn:hover {
