@@ -475,7 +475,7 @@ form input[type="checkbox"] {
   margin-bottom: 30px;
 }
 
-/* .hidden-panel {
+.hidden-panel {
   display: none;
   position: fixed;
   bottom: 0;
@@ -486,4 +486,36 @@ form input[type="checkbox"] {
   padding: 20px;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
   z-index: 1000;
-} */
+  transition: transform 0.3s ease;
+}
+
+.hidden-panel.show {
+  display: block;
+  transform: translateY(0);
+}
+
+.hidden-panel label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.hidden-panel input[type="text"],
+.hidden-panel input[type="email"],
+.hidden-panel select {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #4d808d;
+}
+
+.hidden-panel .form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}

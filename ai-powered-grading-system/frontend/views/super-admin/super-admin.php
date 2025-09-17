@@ -134,10 +134,10 @@ include '../../components/header.php';
               <input type="hidden" id="edit-user-id" />
 
               <label for="edit-user-name">Name:</label>
-              <input type="text" id="edit-user-name" required />
+              <input type="text" id="edit-user-name" placeholder="Enter full name" required />
 
               <label for="edit-user-email">Email:</label>
-              <input type="email" id="edit-user-email" required />
+              <input type="email" id="edit-user-email" placeholder="Enter email address" required />
 
               <label for="edit-user-role">Role:</label>
               <select id="edit-user-role" required>

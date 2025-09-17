@@ -55,7 +55,7 @@ function renderUsersTable(data) {
   document.querySelectorAll('.edit-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const userId = e.target.dataset.id;
-      openEditModal(userId);
+      openEditPanel(userId);
     });
   });
   document.querySelectorAll('.deactivate-btn').forEach(btn => {
@@ -393,34 +393,39 @@ function activateUser(userId) {
   xhr.send(JSON.stringify({ user_id: userId }));
 }
 
-// Open edit modal
-function openEditModal(userId) {
+// Open edit panel
+function openEditPanel(userId) {
   const user = usersData.find(u => u.id == userId);
   if (!user) return;
 
   document.getElementById('edit-user-id').value = user.id;
-  document.getElementById('edit-name').value = user.name;
-  document.getElementById('edit-email').value = user.email;
-  document.getElementById('edit-role').value = user.role_id;
+  document.getElementById('edit-user-name').value = user.name;
+  document.getElementById('edit-user-email').value = user.email;
+  document.getElementById('edit-user-role').value = user.role_id;
 
-  document.getElementById('edit-user-modal').style.display = 'block';
+  const panel = document.getElementById('edit-user-panel');
+  panel.classList.add('show');
 }
 
-// Close modal
 document.addEventListener('click', (e) => {
-  if (e.target.id === 'cancel-edit' || e.target.id === 'edit-user-modal') {
-    document.getElementById('edit-user-modal').style.display = 'none';
+  if (e.target.id === 'close-edit-panel') {
+    const panel = document.getElementById('edit-user-panel');
+    if (confirm('Are you sure you want to cancel editing? Changes will not be saved.')) {
+      panel.classList.remove('show');
+    }
   }
 });
 
-// Submit edit form
 document.getElementById('edit-user-form').addEventListener('submit', (e) => {
   e.preventDefault();
+  if (!confirm('Are you sure you want to save changes?')) {
+    return;
+  }
   const userId = document.getElementById('edit-user-id').value;
   const data = {
-    name: document.getElementById('edit-name').value,
-    email: document.getElementById('edit-email').value,
-    role_id: document.getElementById('edit-role').value
+    name: document.getElementById('edit-user-name').value,
+    email: document.getElementById('edit-user-email').value,
+    role_id: document.getElementById('edit-user-role').value
   };
 
   const xhr = new XMLHttpRequest();
@@ -428,8 +433,11 @@ document.getElementById('edit-user-form').addEventListener('submit', (e) => {
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onload = function() {
     if (xhr.status === 200) {
-      document.getElementById('edit-user-modal').style.display = 'none';
+      const panel = document.getElementById('edit-user-panel');
+      panel.classList.remove('show');
       loadUsers();
+    } else {
+      alert('Failed to save changes');
     }
   };
   xhr.send(JSON.stringify(data));
