@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "plmun_portal";
+$db   = "plmun_portal_system";
 $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 
 try {
