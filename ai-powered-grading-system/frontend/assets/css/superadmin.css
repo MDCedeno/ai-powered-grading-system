@@ -98,7 +98,7 @@ body {
 .main-content {
   margin-left: 240px;
   padding: 20px;
-  width: 100%;
+  width: calc(100% - 240px);
   min-height: 100vh;
   background-color: #f8f8f8;
   color: #4d808d;
@@ -808,4 +808,21 @@ form input[type="checkbox"] {
 
 #backup-files-list::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* Make audit logs table container horizontally scrollable */
+#audit-logs .user-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  cursor: grab;
+}
+
+#audit-logs .user-table-container:active {
+  cursor: grabbing;
+}
+
+/* Prevent horizontal scroll on body */
+body {
+  overflow-x: hidden;
 }

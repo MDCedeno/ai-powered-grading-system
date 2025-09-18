@@ -211,17 +211,30 @@ include '../../components/header.php';
         <section id="audit-logs" class="tab-section hidden">
           <h2>Audit Logs</h2>
           <div class="toolbar">
-            <input type="text" placeholder="Search logs..." />
-            <select>
+            <input type="text" id="audit-search" placeholder="Search logs..." />
+            <select id="audit-status-filter">
               <option>Filter by Status</option>
               <option>Success</option>
               <option>Failed</option>
             </select>
-            <select>
-              <option>Sort by</option>
-              <option>Newest First</option>
-              <option>Oldest First</option>
+            <select id="audit-log-type-filter">
+              <option>Filter by Log Type</option>
+              <option>authentication</option>
+              <option>permission_change</option>
+              <option>sensitive_data_access</option>
+              <option>data_modification</option>
+              <option>system_action</option>
+              <option>failed_operation</option>
+              <option>account_lifecycle</option>
             </select>
+            <select id="audit-log-level-filter">
+              <option>Filter by Log Level</option>
+              <option>INFO</option>
+              <option>WARNING</option>
+              <option>ERROR</option>
+              <option>SECURITY</option>
+            </select>
+            <!-- Removed audit-sort-filter as per user request -->
           </div>
           <div class="user-table-container">
             <table>
@@ -229,11 +242,14 @@ include '../../components/header.php';
                 <tr>
                   <th>Timestamp</th>
                   <th>User</th>
+                  <th>Log Type</th>
                   <th>Action</th>
+                  <th>Details</th>
                   <th>Status</th>
+                  <th>Failure Reason</th>
                 </tr>
               </thead>
-              <tbody id="recent-activity">
+              <tbody id="audit-logs-table">
                 <!-- Data will be loaded dynamically -->
               </tbody>
             </table>

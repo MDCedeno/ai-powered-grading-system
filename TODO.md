@@ -1,9 +1,0 @@
-- [x] Update super-admin.php to include superadmin.js script
-- [x] Fix API endpoint in superadmin.js for audit logs from 'auditlogs' to 'logs'
-- [x] Update SuperAdminController.php to return correct data format for audit logs (user instead of user_id, status as Success/Failed)
-- [x] Update filter logic in SuperAdminController.php for audit logs status
-- [x] Update toolbar in super-admin.php with separate search bars, remove Date Created, add refresh button
-- [x] Add modal for edit user in HTML
-- [x] Add CSS styles for buttons and modal in superadmin.css
-- [ ] Verify functionality: sorting, search, filter, real-time updates, manual refresh
-- [ ] Ensure no conflicts between main.js and superadmin.js

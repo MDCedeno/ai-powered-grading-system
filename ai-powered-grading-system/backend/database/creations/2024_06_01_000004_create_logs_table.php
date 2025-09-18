@@ -12,8 +12,11 @@ class CreateLogsTable {
         $sql = "CREATE TABLE IF NOT EXISTS logs (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
+            log_type VARCHAR(50) NOT NULL,
             action VARCHAR(255) NOT NULL,
             details TEXT,
+            success TINYINT(1) DEFAULT 1,
+            failure_reason VARCHAR(255) DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         ) ENGINE=InnoDB;";

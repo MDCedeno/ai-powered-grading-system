@@ -60,21 +60,44 @@ class SuperAdminController
         return $stmt->execute(['id' => $user_id]);
     }
 
-    public function getSystemLogs($search = '', $status = '', $sort = 'newest', $limit = 10)
+    public function getSystemLogs($search = '', $status = '', $logType = '', $logLevel = '', $sort = 'newest', $limit = 10)
     {
-        $query = "SELECT logs.id, users.email as user_email, logs.action, logs.details, logs.created_at FROM logs LEFT JOIN users ON logs.user_id = users.id WHERE 1=1";
+        $query = "SELECT logs.id, users.email as user_email, logs.log_type, logs.action, logs.details, logs.success, logs.failure_reason, logs.created_at FROM logs LEFT JOIN users ON logs.user_id = users.id WHERE 1=1";
         $params = [];
 
         if ($search) {
-            $query .= " AND (users.email LIKE :search OR logs.action LIKE :search OR logs.details LIKE :search)";
+            $query .= " AND (users.email LIKE :search OR logs.action LIKE :search OR logs.details LIKE :search OR logs.failure_reason LIKE :search)";
             $params['search'] = '%' . $search . '%';
         }
 
         if ($status && $status !== 'Filter by Status') {
             if ($status === 'Success') {
-                $query .= " AND logs.action = 'success'";
+                $query .= " AND logs.success = 1";
             } elseif ($status === 'Failed') {
-                $query .= " AND logs.action = 'error'";
+                $query .= " AND logs.success = 0";
+            }
+        }
+
+        if ($logType && $logType !== 'Filter by Log Type') {
+            $query .= " AND logs.log_type = :logType";
+            $params['logType'] = $logType;
+        }
+
+        if ($logLevel && $logLevel !== 'Filter by Log Level') {
+            // Map log levels to success/failure status and log types
+            switch ($logLevel) {
+                case 'INFO':
+                    $query .= " AND logs.success = 1 AND logs.log_type IN ('authentication', 'account_lifecycle', 'system_action')";
+                    break;
+                case 'WARNING':
+                    $query .= " AND logs.success = 1 AND logs.log_type IN ('permission_change', 'sensitive_data_access', 'data_modification')";
+                    break;
+                case 'ERROR':
+                    $query .= " AND logs.success = 0 AND logs.log_type = 'failed_operation'";
+                    break;
+                case 'SECURITY':
+                    $query .= " AND logs.log_type IN ('authentication', 'permission_change', 'sensitive_data_access') AND logs.success = 0";
+                    break;
             }
         }
 
@@ -88,12 +111,23 @@ class SuperAdminController
 
         // Transform to match frontend expectations with real data
         return array_map(function ($log) {
+            // Determine log level based on success and log_type
+            $logLevel = 'INFO'; // default
+            if ($log['success'] == 0) {
+                $logLevel = $log['log_type'] === 'authentication' || $log['log_type'] === 'permission_change' || $log['log_type'] === 'sensitive_data_access' ? 'SECURITY' : 'ERROR';
+            } elseif ($log['log_type'] === 'permission_change' || $log['log_type'] === 'sensitive_data_access' || $log['log_type'] === 'data_modification') {
+                $logLevel = 'WARNING';
+            }
+
             return [
                 'timestamp' => $log['created_at'],
                 'user' => $log['user_email'] ?? 'Unknown',
+                'log_type' => $log['log_type'],
                 'action' => $log['action'],
                 'details' => $log['details'],
-                'status' => $log['action'] === 'success' ? 'Success' : 'Failed'
+                'status' => $log['success'] == 1 ? 'Success' : 'Failed',
+                'failure_reason' => $log['failure_reason'],
+                'log_level' => $logLevel
             ];
         }, $logs);
     }

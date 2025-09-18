@@ -12,6 +12,7 @@ let auditLogSort = { column: null, ascending: true };
 
 // Utility: Case-insensitive partial match
 function matchesSearch(text, search) {
+  if (!text) return false;
   return text.toLowerCase().includes(search.toLowerCase());
 }
 
@@ -82,23 +83,27 @@ function renderUsersTable(data) {
 
 // Render table rows for audit logs
 function renderAuditLogsTable(data) {
-  const tbody = document.querySelector("#audit-logs table tbody");
+  const tbody = document.querySelector("#audit-logs-table");
   if (!tbody) return;
   tbody.innerHTML = "";
   if (data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4">No logs found</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7">No audit logs found</td></tr>';
     return;
   }
   data.forEach((log) => {
-    const statusClass =
-      log.status.toLowerCase() === "success" ? "success" : "error";
-    const row = `<tr>
+    const statusClass = log.status === 'Success' ? 'success' : 'error';
+    const failureReason = log.failure_reason ? log.failure_reason : '-';
+    const row = document.createElement('tr');
+    row.innerHTML = `
       <td>${log.timestamp}</td>
       <td>${log.user}</td>
+      <td>${log.log_type}</td>
       <td>${log.action}</td>
+      <td>${log.details || '-'}</td>
       <td><span class="status-tag ${statusClass}">${log.status}</span></td>
-    </tr>`;
-    tbody.innerHTML += row;
+      <td>${failureReason}</td>
+    `;
+    tbody.appendChild(row);
   });
 }
 
@@ -146,18 +151,27 @@ function filterUsers(search, userId, role, status) {
   return filtered;
 }
 
-function filterAuditLogs(search, status) {
+function filterAuditLogs(search, status, logType, logLevel) {
   let filtered = auditLogsData;
   if (search) {
     filtered = filtered.filter(
       (l) =>
         matchesSearch(l.user, search) ||
         matchesSearch(l.action, search) ||
-        matchesSearch(l.status, search)
+        matchesSearch(l.details, search) ||
+        matchesSearch(l.log_type, search) ||
+        matchesSearch(l.status, search) ||
+        matchesSearch(l.failure_reason, search)
     );
   }
   if (status && status !== "Filter by Status") {
     filtered = filtered.filter((l) => l.status === status);
+  }
+  if (logType && logType !== "Filter by Log Type") {
+    filtered = filtered.filter((l) => l.log_type === logType);
+  }
+  if (logLevel && logLevel !== "Filter by Log Level") {
+    filtered = filtered.filter((l) => l.log_level === logLevel);
   }
   return filtered;
 }
@@ -205,13 +219,11 @@ function applyUserFiltersAndSort() {
 }
 
 function applyAuditLogFiltersAndSort() {
-  const search =
-    document
-      .querySelector('#audit-logs .toolbar input[type="text"]')
-      ?.value.trim() || "";
-  const status =
-    document.querySelector("#audit-logs .toolbar select")?.value || "";
-  let filtered = filterAuditLogs(search, status);
+  const search = document.getElementById("audit-search")?.value.trim() || "";
+  const status = document.getElementById("audit-status-filter")?.value || "";
+  const logType = document.getElementById("audit-log-type-filter")?.value || "";
+  const logLevel = document.getElementById("audit-log-level-filter")?.value || "";
+  let filtered = filterAuditLogs(search, status, logType, logLevel);
   if (auditLogSort.column) {
     filtered = sortData(filtered, auditLogSort.column, auditLogSort.ascending);
   }
@@ -259,8 +271,8 @@ function addSortingButtons() {
   // Audit Logs
   const auditHeaders = document.querySelectorAll("#audit-logs table thead th");
   auditHeaders.forEach((th, index) => {
-    if (index === 3) return; // skip status
-    const columnMap = ["timestamp", "user", "action", "status"];
+    if (index === 3 || index === 4 || index === 5 || index === 6) return; // skip action, details, status, failure reason
+    const columnMap = ["timestamp", "user", "log_type", "action", "status", "failure_reason"];
     const column = columnMap[index];
 
     const btnAsc = document.createElement("button");
@@ -293,10 +305,10 @@ function setupEventListeners() {
   const userIdSearchInput = document.getElementById("user-id-search");
   const roleFilter = document.getElementById("role-filter");
   const statusFilter = document.getElementById("status-filter");
-  const auditInput = document.querySelector(
-    '#audit-logs .toolbar input[type="text"]'
-  );
-  const auditSelect = document.querySelector("#audit-logs .toolbar select");
+  const auditSearchInput = document.getElementById("audit-search");
+  const auditStatusFilter = document.getElementById("audit-status-filter");
+  const auditLogTypeFilter = document.getElementById("audit-log-type-filter");
+  const auditLogLevelFilter = document.getElementById("audit-log-level-filter");
   const autoBackupToggle = document.getElementById("auto-backup-toggle");
 
   if (userSearchInput)
@@ -307,10 +319,14 @@ function setupEventListeners() {
     roleFilter.addEventListener("change", applyUserFiltersAndSort);
   if (statusFilter)
     statusFilter.addEventListener("change", applyUserFiltersAndSort);
-  if (auditInput)
-    auditInput.addEventListener("input", applyAuditLogFiltersAndSort);
-  if (auditSelect)
-    auditSelect.addEventListener("change", applyAuditLogFiltersAndSort);
+  if (auditSearchInput)
+    auditSearchInput.addEventListener("input", applyAuditLogFiltersAndSort);
+  if (auditStatusFilter)
+    auditStatusFilter.addEventListener("change", applyAuditLogFiltersAndSort);
+  if (auditLogTypeFilter)
+    auditLogTypeFilter.addEventListener("change", applyAuditLogFiltersAndSort);
+  if (auditLogLevelFilter)
+    auditLogLevelFilter.addEventListener("change", applyAuditLogFiltersAndSort);
 
   if (autoBackupToggle) {
     autoBackupToggle.addEventListener("change", async (event) => {
@@ -699,6 +715,7 @@ function initSuperAdmin() {
   loadAuditLogs();
   loadStats();
   loadRecentActivity();
+  loadBackupFiles(); // Load backup files for restore functionality
   addSortingButtons();
   setupEventListeners();
   //setupScrollAndTabHighlight();
@@ -820,3 +837,40 @@ document
 
 // Load backup files on page load
 document.addEventListener("DOMContentLoaded", loadBackupFiles);
+
+// Enable draggable horizontal scroll for audit logs table
+function enableDragScroll() {
+  const container = document.querySelector("#audit-logs .user-table-container");
+  if (!container) return;
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  container.addEventListener("mousedown", (e) => {
+    isDown = true;
+    container.classList.add("active");
+    startX = e.pageX - container.offsetLeft;
+    scrollLeft = container.scrollLeft;
+  });
+
+  container.addEventListener("mouseleave", () => {
+    isDown = false;
+    container.classList.remove("active");
+  });
+
+  container.addEventListener("mouseup", () => {
+    isDown = false;
+    container.classList.remove("active");
+  });
+
+  container.addEventListener("mousemove", (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - startX) * 2; // Scroll speed multiplier
+    container.scrollLeft = scrollLeft - walk;
+  });
+}
+
+document.addEventListener("DOMContentLoaded", enableDragScroll);

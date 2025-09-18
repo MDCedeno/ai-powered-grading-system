@@ -8,12 +8,15 @@ class Log {
         $this->pdo = $pdo;
     }
 
-    public function create($user_id, $action, $details = null) {
-        $stmt = $this->pdo->prepare("INSERT INTO logs (user_id, action, details) VALUES (:user_id, :action, :details)");
+    public function create($user_id, $log_type, $action, $details = null, $success = 1, $failure_reason = null) {
+        $stmt = $this->pdo->prepare("INSERT INTO logs (user_id, log_type, action, details, success, failure_reason) VALUES (:user_id, :log_type, :action, :details, :success, :failure_reason)");
         return $stmt->execute([
             'user_id' => $user_id,
+            'log_type' => $log_type,
             'action' => $action,
-            'details' => $details
+            'details' => $details,
+            'success' => $success,
+            'failure_reason' => $failure_reason
         ]);
     }
 

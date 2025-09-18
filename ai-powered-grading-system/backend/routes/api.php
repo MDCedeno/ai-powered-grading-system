@@ -39,9 +39,11 @@ if (strpos($path, '/api/superadmin') === 0) {
     } elseif ($path == '/api/superadmin/logs' && $method == 'GET') {
         $search = $_GET['search'] ?? '';
         $status = $_GET['status'] ?? '';
+        $logType = $_GET['logType'] ?? '';
+        $logLevel = $_GET['logLevel'] ?? '';
         $sort = $_GET['sort'] ?? 'newest';
         $limit = $_GET['limit'] ?? 10;
-        $logs = $controller->getSystemLogs($search, $status, $sort, $limit);
+        $logs = $controller->getSystemLogs($search, $status, $logType, $logLevel, $sort, $limit);
         echo json_encode($logs);
     } elseif ($path == '/api/superadmin/users/activate' && $method == 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
