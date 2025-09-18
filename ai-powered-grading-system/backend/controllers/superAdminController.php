@@ -184,13 +184,33 @@ class SuperAdminController
         $stmt->execute();
         $stats['error_logs_24h'] = $stmt->fetch()['count'];
 
-        // Database health - simple connection check
-        try {
-            $stmt = $this->pdo->prepare("SELECT 1");
-            $stmt->execute();
+        // Calculate real database size
+        $stmt = $this->pdo->prepare("SELECT
+            ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb
+            FROM information_schema.TABLES
+            WHERE table_schema = DATABASE()");
+        $stmt->execute();
+        $dbSize = $stmt->fetch()['size_mb'];
+        $stats['db_size'] = $dbSize . ' MB';
+
+        // Determine database health based on size thresholds
+        $sizeGB = $dbSize / 1024;
+        if ($sizeGB < 1) {
             $stats['db_health'] = 'Healthy';
-        } catch (Exception $e) {
-            $stats['db_health'] = 'Unhealthy';
+            $stats['db_health_color'] = 'green';
+            $stats['db_health_message'] = '';
+        } elseif ($sizeGB < 2) {
+            $stats['db_health'] = 'Normal';
+            $stats['db_health_color'] = 'blue';
+            $stats['db_health_message'] = '';
+        } elseif ($sizeGB < 3) {
+            $stats['db_health'] = 'Caution';
+            $stats['db_health_color'] = 'orange';
+            $stats['db_health_message'] = 'Database size is approaching critical levels. Consider optimizing or archiving old data.';
+        } else {
+            $stats['db_health'] = 'Critical';
+            $stats['db_health_color'] = 'red';
+            $stats['db_health_message'] = 'Database size is critical. Immediate action required: backup and optimize database.';
         }
 
         // Server status - assume online if API is responding
@@ -203,21 +223,26 @@ class SuperAdminController
         $uptime_minutes = floor(($uptime_seconds % 3600) / 60);
         $stats['uptime'] = sprintf('%dd %dh %dm', $uptime_days, $uptime_hours, $uptime_minutes);
 
-        // Last backup time
-        $backup_dir = __DIR__ . '/../../backups/';
-        if (is_dir($backup_dir)) {
-            $files = glob($backup_dir . 'backup_*.sql');
-            if (!empty($files)) {
-                $latest_backup = max(array_map('filemtime', $files));
-                $stats['last_backup'] = date('Y-m-d H:i:s', $latest_backup);
-            } else {
-                $stats['last_backup'] = 'Never';
-            }
-        } else {
-            $stats['last_backup'] = 'Never';
-        }
+        // Last backup time from DB
+        $stats['last_backup'] = $this->getLastBackupTime();
+
+        // Auto-backup status
+        $stats['auto_backup_enabled'] = $this->getAutoBackupStatus();
 
         return $stats;
+    }
+
+    public function getLastBackupTime()
+    {
+        $stmt = $this->pdo->prepare("SELECT backup_time FROM backup_records ORDER BY backup_time DESC LIMIT 1");
+        $stmt->execute();
+        $result = $stmt->fetch();
+
+        if ($result && isset($result['backup_time'])) {
+            return $result['backup_time'];
+        } else {
+            return 'Never';
+        }
     }
 
     public function backupDatabase()
@@ -240,6 +265,11 @@ class SuperAdminController
         }
         $filename = 'backup_' . date('Y-m-d_H-i-s') . '.sql';
         file_put_contents(__DIR__ . '/../../backups/' . $filename, $backup);
+
+        // Record backup time in backup_records table
+        $stmt = $this->pdo->prepare("INSERT INTO backup_records (backup_time) VALUES (NOW())");
+        $stmt->execute();
+
         return ['success' => true, 'file' => $filename];
     }
 
@@ -274,5 +304,102 @@ class SuperAdminController
     {
         // Update settings
         return true;
+    }
+
+    public function getAutoBackupStatus()
+    {
+        // Check if settings table exists, if not create it
+        $this->ensureSettingsTable();
+
+        $stmt = $this->pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'auto_backup_enabled'");
+        $stmt->execute();
+        $result = $stmt->fetch();
+
+        return $result ? (bool)$result['setting_value'] : false;
+    }
+
+    public function setAutoBackupStatus($enabled)
+    {
+        // Check if settings table exists, if not create it
+        $this->ensureSettingsTable();
+
+        $stmt = $this->pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('auto_backup_enabled', :value)
+                                     ON DUPLICATE KEY UPDATE setting_value = :value");
+        return $stmt->execute(['value' => $enabled ? 1 : 0]);
+    }
+
+    public function getAutoBackupInterval()
+    {
+        $this->ensureSettingsTable();
+
+        $stmt = $this->pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'auto_backup_interval'");
+        $stmt->execute();
+        $result = $stmt->fetch();
+
+        return $result ? (int)$result['setting_value'] : 24; // default 24 hours
+    }
+
+    public function setAutoBackupInterval($hours)
+    {
+        $this->ensureSettingsTable();
+
+        $stmt = $this->pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('auto_backup_interval', :value)
+                                     ON DUPLICATE KEY UPDATE setting_value = :value");
+        return $stmt->execute(['value' => $hours]);
+    }
+
+    private function ensureSettingsTable()
+    {
+        $stmt = $this->pdo->prepare("CREATE TABLE IF NOT EXISTS settings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            setting_key VARCHAR(255) UNIQUE NOT NULL,
+            setting_value TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )");
+        $stmt->execute();
+    }
+
+    // New method to restore database from a backup file
+    public function restoreDatabase($filename)
+    {
+        $backupDir = __DIR__ . '/../../backups/';
+        $filePath = realpath($backupDir . $filename);
+
+        // Security check: ensure file is inside backup directory
+        if (!$filePath || strpos($filePath, realpath($backupDir)) !== 0) {
+            return ['success' => false, 'message' => 'Invalid backup file path'];
+        }
+
+        if (!file_exists($filePath)) {
+            return ['success' => false, 'message' => 'Backup file does not exist'];
+        }
+
+        $sql = file_get_contents($filePath);
+        try {
+            $this->pdo->exec($sql);
+            return ['success' => true, 'message' => 'Database restored successfully'];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Error restoring database: ' . $e->getMessage()];
+        }
+    }
+
+    // New method to get recent backup files (limit 4)
+    public function getBackupFiles($limit = 4)
+    {
+        $backupDir = __DIR__ . '/../../backups/';
+        $files = glob($backupDir . 'backup_*.sql');
+
+        // Sort files by modification time descending
+        usort($files, function ($a, $b) {
+            return filemtime($b) - filemtime($a);
+        });
+
+        $files = array_slice($files, 0, $limit);
+
+        // Return filenames only
+        return array_map(function ($file) use ($backupDir) {
+            return basename($file);
+        }, $files);
     }
 }

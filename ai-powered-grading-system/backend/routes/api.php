@@ -76,6 +76,25 @@ if (strpos($path, '/api/superadmin') === 0) {
         $data = json_decode(file_get_contents('php://input'), true);
         $result = $controller->updateSystemSettings($data);
         echo json_encode(['success' => $result]);
+    } elseif ($path == '/api/superadmin/auto-backup' && $method == 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $enabled = isset($data['enabled']) ? (bool)$data['enabled'] : false;
+        $result = $controller->setAutoBackupStatus($enabled);
+        echo json_encode(['success' => $result]);
+    } elseif ($path == '/api/superadmin/auto-backup-interval' && $method == 'GET') {
+        $interval = $controller->getAutoBackupInterval();
+        echo json_encode(['interval' => $interval]);
+    } elseif ($path == '/api/superadmin/auto-backup-interval' && $method == 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $result = $controller->setAutoBackupInterval($data['interval']);
+        echo json_encode(['success' => $result]);
+    } elseif ($path == '/api/superadmin/restore' && $method == 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $result = $controller->restoreDatabase($data['filename']);
+        echo json_encode($result);
+    } elseif ($path == '/api/superadmin/backup-files' && $method == 'GET') {
+        $files = $controller->getBackupFiles();
+        echo json_encode($files);
     } else {
         http_response_code(404);
         echo json_encode(['error' => 'SuperAdmin endpoint not found']);

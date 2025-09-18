@@ -11,6 +11,7 @@ require_once __DIR__ . '/../seeders/QuizSeeder.php';
 require_once __DIR__ . '/../seeders/QuizResultSeeder.php';
 require_once __DIR__ . '/../seeders/GradeSeeder.php';
 require_once __DIR__ . '/../seeders/LogSeeder.php';
+require_once __DIR__ . '/../seeders/BackupRecordSeeder.php';
 
 try {
     echo "Seeding tables...\n";
@@ -24,6 +25,7 @@ try {
     $quizResultSeeder    = new QuizResultSeeder($pdo);
     $gradeSeeder         = new GradeSeeder($pdo);
     $logSeeder           = new LogSeeder($pdo);
+    $backupRecordSeeder  = new BackupRecordSeeder($pdo);
 
     // Run seeders in correct order
     $roleSeeder->run();
@@ -34,6 +36,7 @@ try {
     $quizResultSeeder->run();
     $gradeSeeder->run();
     $logSeeder->run();
+    $backupRecordSeeder->run();
 
     echo "All tables seeded successfully.\n";
 } catch (Exception $e) {

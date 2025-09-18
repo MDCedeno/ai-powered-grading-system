@@ -49,6 +49,9 @@ $gradesMigration->up();
 $logsMigration->up();
 $quizzesMigration->up();
 $quizResultsMigration->up();
+require_once __DIR__ . '/../creations/2024_09_18_000000_create_backup_records_table.php';
+$backupRecordsMigration = new CreateBackupRecordsTable($pdo);
+$backupRecordsMigration->up();
 
 echo "All tables created successfully.\n";
     echo "Migrations completed.\n";

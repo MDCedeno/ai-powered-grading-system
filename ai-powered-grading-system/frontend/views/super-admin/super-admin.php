@@ -161,17 +161,48 @@ include '../../components/header.php';
           <div class="cards-container">
             <div class="card">
               <h4>Database Size</h4>
-              <p class="metric">1.2 GB</p>
-              <span>Updated just now</span>
+              <p class="metric" id="db-size">Loading...</p>
+              <span id="db-size-update">Updated just now</span>
             </div>
             <div class="card">
+              <h4>Database Health</h4>
+              <p class="status-healthy" id="db-health">Loading...</p>
+              <span id="db-health-message"></span>
+              <div class="db-health-progress" id="db-health-progress">
+                <div class="progress-fill healthy" id="progress-fill"></div>
+                <div class="threshold-marker" style="left: 33.33%;"><span class="threshold-label">1GB</span></div>
+                <div class="threshold-marker" style="left: 66.67%;"><span class="threshold-label">2GB</span></div>
+                <div class="threshold-marker" style="left: 100%;"><span class="threshold-label">3GB</span></div>
+              </div>
+            </div>
+            <div class="card auto-backup-card">
               <h4>Last Backup</h4>
-              <p class="status-healthy">1 hour ago</p>
-              <span>Auto-backup enabled</span>
+              <p class="status-healthy" id="last-backup">Loading...</p>
+              <div class="auto-backup-controls">
+                <div class="backup-controls-row">
+                  <label class="auto-backup-toggle">
+                    <input type="checkbox" id="auto-backup-toggle" />
+                    <span class="toggle-slider"></span>
+                    Auto-backup
+                  </label>
+                  <button id="manual-backup-btn" class="btn-primary">Backup Now</button>
+                </div>
+                <div class="interval-control">
+                  <label for="auto-backup-interval">Interval (hours):</label>
+                  <input type="number" id="auto-backup-interval" min="1" max="168" value="24" />
+                  <button id="update-interval-btn" class="btn-secondary">Update Interval</button>
+                </div>
+              </div>
             </div>
-            <div class="card">
+            <div class="card restore-point-card">
               <h4>Restore Point</h4>
-              <button class="btn-primary">Restore</button>
+              <div class="backup-files-list" id="backup-files-list">
+                <p class="loading">Loading backup files...</p>
+              </div>
+              <div class="restore-controls">
+                <button id="restore-btn" class="btn-primary" disabled>Restore</button>
+                <button id="refresh-backups-btn" class="btn-secondary">Refresh</button>
+              </div>
             </div>
           </div>
         </section>
