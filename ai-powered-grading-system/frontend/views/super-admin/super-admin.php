@@ -210,49 +210,137 @@ include '../../components/header.php';
         <!-- ================= AUDIT LOGS ================= -->
         <section id="audit-logs" class="tab-section hidden">
           <h2>Audit Logs</h2>
-          <div class="toolbar">
-            <input type="text" id="audit-search" placeholder="Search logs..." />
-            <select id="audit-status-filter">
-              <option>Filter by Status</option>
-              <option>Success</option>
-              <option>Failed</option>
-            </select>
-            <select id="audit-log-type-filter">
-              <option>Filter by Log Type</option>
-              <option>authentication</option>
-              <option>permission_change</option>
-              <option>sensitive_data_access</option>
-              <option>data_modification</option>
-              <option>system_action</option>
-              <option>failed_operation</option>
-              <option>account_lifecycle</option>
-            </select>
-            <select id="audit-log-level-filter">
-              <option>Filter by Log Level</option>
-              <option>INFO</option>
-              <option>WARNING</option>
-              <option>ERROR</option>
-              <option>SECURITY</option>
-            </select>
-            <!-- Removed audit-sort-filter as per user request -->
+
+          <!-- CSV Management Section -->
+          <div class="csv-management-section">
+            <div class="csv-controls">
+              <h3>CSV Export & Management</h3>
+              <div class="csv-buttons">
+                <button id="toggle-export-options-btn" class="btn-secondary">Export Options</button>
+                <button id="export-csv-btn" class="btn-primary">Export to CSV</button>
+                <button id="refresh-csv-files-btn" class="btn-secondary">Refresh CSV Files</button>
+                <button id="csv-settings-btn" class="btn-secondary">CSV Settings</button>
+              </div>
+            </div>
+
+            <!-- CSV Export Options -->
+            <div id="csv-export-options" class="csv-options-panel hidden">
+              <h4>Export Options</h4>
+              <div class="export-filters">
+                <div class="filter-group">
+                  <label for="export-start-date">Start Date:</label>
+                  <input type="date" id="export-start-date" />
+                </div>
+                <div class="filter-group">
+                  <label for="export-end-date">End Date:</label>
+                  <input type="date" id="export-end-date" />
+                </div>
+                <div class="filter-group">
+                  <label for="export-log-type">Log Type:</label>
+                  <select id="export-log-type">
+                    <option value="">All Types</option>
+                    <option value="authentication">Authentication</option>
+                    <option value="permission_change">Permission Change</option>
+                    <option value="sensitive_data_access">Sensitive Data Access</option>
+                    <option value="data_modification">Data Modification</option>
+                    <option value="system_action">System Action</option>
+                    <option value="failed_operation">Failed Operation</option>
+                    <option value="account_lifecycle">Account Lifecycle</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="export-status">Status:</label>
+                  <select id="export-status">
+                    <option value="">All Status</option>
+                    <option value="Success">Success</option>
+                    <option value="Failed">Failed</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- CSV Files Management -->
+            <div id="csv-files-management" class="csv-files-panel">
+              <h4>CSV Log Files</h4>
+              <div class="csv-files-list" id="csv-files-list">
+                <p class="loading">Loading CSV files...</p>
+              </div>
+            </div>
+
+            <!-- CSV Statistics -->
+            <div id="csv-statistics" class="csv-stats-panel">
+              <h4>CSV Statistics</h4>
+              <div class="stats-grid" id="csv-stats-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Total Files:</span>
+                  <span class="stat-value" id="total-files">0</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Total Records:</span>
+                  <span class="stat-value" id="total-records">0</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Total Size:</span>
+                  <span class="stat-value" id="total-size">0 MB</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Oldest File:</span>
+                  <span class="stat-value" id="oldest-file">-</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Newest File:</span>
+                  <span class="stat-value" id="newest-file">-</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="user-table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>User</th>
-                  <th>Log Type</th>
-                  <th>Action</th>
-                  <th>Details</th>
-                  <th>Status</th>
-                  <th>Failure Reason</th>
-                </tr>
-              </thead>
-              <tbody id="audit-logs-table">
-                <!-- Data will be loaded dynamically -->
-              </tbody>
-            </table>
+
+          <!-- Original Audit Logs Section -->
+          <div class="audit-logs-section">
+            <div class="toolbar">
+              <input type="text" id="audit-search" placeholder="Search logs..." />
+              <select id="audit-status-filter">
+                <option>Filter by Status</option>
+                <option>Success</option>
+                <option>Failed</option>
+              </select>
+              <select id="audit-log-type-filter">
+                <option>Filter by Log Type</option>
+                <option>authentication</option>
+                <option>permission_change</option>
+                <option>sensitive_data_access</option>
+                <option>data_modification</option>
+                <option>system_action</option>
+                <option>failed_operation</option>
+                <option>account_lifecycle</option>
+              </select>
+              <select id="audit-log-level-filter">
+                <option>Filter by Log Level</option>
+                <option>INFO</option>
+                <option>WARNING</option>
+                <option>ERROR</option>
+                <option>SECURITY</option>
+              </select>
+              <!-- Removed audit-sort-filter as per user request -->
+            </div>
+            <div class="user-table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Log Type</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th>Status</th>
+                    <th>Failure Reason</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-logs-table">
+                  <!-- Data will be loaded dynamically -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 

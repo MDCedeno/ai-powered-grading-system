@@ -97,6 +97,77 @@ if (strpos($path, '/api/superadmin') === 0) {
     } elseif ($path == '/api/superadmin/backup-files' && $method == 'GET') {
         $files = $controller->getBackupFiles();
         echo json_encode($files);
+    } elseif ($path == '/api/superadmin/logs/export-csv' && $method == 'GET') {
+        $startDate = $_GET['start_date'] ?? null;
+        $endDate = $_GET['end_date'] ?? null;
+        $logType = $_GET['log_type'] ?? null;
+        $status = $_GET['status'] ?? null;
+        $result = $controller->exportLogsToCsv($startDate, $endDate, $logType, $status);
+        echo json_encode($result);
+    } elseif ($path == '/api/superadmin/logs/csv-files' && $method == 'GET') {
+        $limit = $_GET['limit'] ?? 10;
+        $files = $controller->getCsvLogFiles($limit);
+        echo json_encode($files);
+    } elseif ($path == '/api/superadmin/logs/csv-config' && $method == 'GET') {
+        $config = $controller->getCsvConfig();
+        echo json_encode($config);
+    } elseif ($path == '/api/superadmin/logs/csv-stats' && $method == 'GET') {
+        $stats = $controller->getCsvStats();
+        echo json_encode($stats);
+    } elseif ($path == '/api/superadmin/logs/csv-cleanup' && $method == 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $retentionDays = $data['retention_days'] ?? 30;
+        $result = $controller->cleanupOldCsvLogs($retentionDays);
+        echo json_encode($result);
+    } elseif ($path == '/api/superadmin/logs/csv-settings' && $method == 'GET') {
+        $enabled = $controller->isCsvLoggingEnabled();
+        $retentionDays = $controller->getCsvRetentionDays();
+        echo json_encode([
+            'csv_logging_enabled' => $enabled,
+            'csv_retention_days' => $retentionDays
+        ]);
+    } elseif ($path == '/api/superadmin/logs/csv-settings' && $method == 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $enabled = isset($data['enabled']) ? (bool)$data['enabled'] : null;
+        $retentionDays = isset($data['retention_days']) ? (int)$data['retention_days'] : null;
+
+        $results = [];
+        if ($enabled !== null) {
+            $results['csv_logging_enabled'] = $controller->setCsvLoggingEnabled($enabled);
+        }
+        if ($retentionDays !== null) {
+            $results['csv_retention_days'] = $controller->setCsvRetentionDays($retentionDays);
+        }
+
+        echo json_encode(['success' => true, 'results' => $results]);
+    } elseif ($path == '/api/superadmin/logs/csv-download' && $method == 'GET') {
+        $filename = $_GET['filename'] ?? '';
+        if (empty($filename)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Filename is required']);
+        } else {
+            $result = $controller->downloadCsvFile($filename);
+            if ($result['success']) {
+                // Set headers for file download
+                header('Content-Type: text/csv');
+                header('Content-Disposition: attachment; filename="' . $result['filename'] . '"');
+                header('Content-Length: ' . $result['size']);
+                readfile($result['file_path']);
+                exit;
+            } else {
+                http_response_code(404);
+                echo json_encode($result);
+            }
+        }
+    } elseif ($path == '/api/superadmin/logs/csv-delete' && $method == 'DELETE') {
+        $filename = $_GET['filename'] ?? '';
+        if (empty($filename)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Filename is required']);
+        } else {
+            $result = $controller->deleteCsvFile($filename);
+            echo json_encode($result);
+        }
     } else {
         http_response_code(404);
         echo json_encode(['error' => 'SuperAdmin endpoint not found']);

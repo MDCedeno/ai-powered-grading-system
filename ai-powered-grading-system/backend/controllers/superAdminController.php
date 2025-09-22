@@ -436,4 +436,157 @@ class SuperAdminController
             return basename($file);
         }, $files);
     }
+
+    // CSV Logging Methods
+
+    /**
+     * Export logs to CSV file
+     */
+    public function exportLogsToCsv($startDate = null, $endDate = null, $logType = null, $status = null)
+    {
+        return $this->logModel->exportToCsv($startDate, $endDate, $logType, $status);
+    }
+
+    /**
+     * Get list of CSV log files
+     */
+    public function getCsvLogFiles($limit = 10)
+    {
+        return $this->logModel->getCsvFiles($limit);
+    }
+
+    /**
+     * Get CSV logging configuration
+     */
+    public function getCsvConfig()
+    {
+        return $this->logModel->getCsvConfig();
+    }
+
+    /**
+     * Get CSV log statistics
+     */
+    public function getCsvStats()
+    {
+        return $this->logModel->getCsvStats();
+    }
+
+    /**
+     * Clean up old CSV log files
+     */
+    public function cleanupOldCsvLogs($retentionDays = 30)
+    {
+        return $this->logModel->cleanupOldCsvLogs($retentionDays);
+    }
+
+    /**
+     * Check if CSV logging is enabled
+     */
+    public function isCsvLoggingEnabled()
+    {
+        return $this->logModel->isCsvLoggingEnabled();
+    }
+
+    /**
+     * Set CSV logging enabled/disabled
+     */
+    public function setCsvLoggingEnabled($enabled)
+    {
+        $this->ensureSettingsTable();
+
+        $stmt = $this->pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('csv_logging_enabled', :value)
+                                     ON DUPLICATE KEY UPDATE setting_value = :value");
+        return $stmt->execute(['value' => $enabled ? 1 : 0]);
+    }
+
+    /**
+     * Set CSV log retention days
+     */
+    public function setCsvRetentionDays($days)
+    {
+        $this->ensureSettingsTable();
+
+        $stmt = $this->pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('csv_retention_days', :value)
+                                     ON DUPLICATE KEY UPDATE setting_value = :value");
+        return $stmt->execute(['value' => $days]);
+    }
+
+    /**
+     * Get CSV log retention days
+     */
+    public function getCsvRetentionDays()
+    {
+        $this->ensureSettingsTable();
+
+        $stmt = $this->pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'csv_retention_days'");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ? (int)$result['setting_value'] : 30; // Default 30 days
+    }
+
+    /**
+     * Download CSV log file
+     */
+    public function downloadCsvFile($filename)
+    {
+        $logDir = __DIR__ . '/../../logs/csv/';
+
+        // Search for the file in all subdirectories
+        $filePath = $this->findCsvFile($logDir, $filename);
+
+        if (!$filePath) {
+            return ['success' => false, 'message' => 'File does not exist'];
+        }
+
+        return [
+            'success' => true,
+            'file_path' => $filePath,
+            'filename' => $filename,
+            'size' => filesize($filePath)
+        ];
+    }
+
+    /**
+     * Find CSV file in directory structure
+     */
+    private function findCsvFile($baseDir, $filename)
+    {
+        // First check if file exists directly in base directory
+        $directPath = $baseDir . $filename;
+        if (file_exists($directPath)) {
+            return $directPath;
+        }
+
+        // Search in subdirectories
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($baseDir));
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getFilename() === $filename) {
+                return $file->getPathname();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Delete CSV log file
+     */
+    public function deleteCsvFile($filename)
+    {
+        $logDir = __DIR__ . '/../../logs/csv/';
+
+        // Search for the file in all subdirectories
+        $filePath = $this->findCsvFile($logDir, $filename);
+
+        if (!$filePath) {
+            return ['success' => false, 'message' => 'File does not exist'];
+        }
+
+        if (unlink($filePath)) {
+            return ['success' => true, 'message' => 'File deleted successfully'];
+        } else {
+            return ['success' => false, 'message' => 'Failed to delete file'];
+        }
+    }
 }

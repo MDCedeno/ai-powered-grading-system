@@ -874,3 +874,366 @@ function enableDragScroll() {
 }
 
 document.addEventListener("DOMContentLoaded", enableDragScroll);
+
+// CSV Management functionality
+let csvFilesData = [];
+let csvStatsData = {};
+
+// Toggle CSV export options panel
+function toggleCsvExportOptions() {
+  const optionsPanel = document.getElementById('csv-export-options');
+  if (optionsPanel) {
+    optionsPanel.classList.toggle('hidden');
+  }
+}
+
+// CSV Export functionality
+function exportLogsToCsv() {
+  const startDate = document.getElementById('export-start-date')?.value || '';
+  const endDate = document.getElementById('export-end-date')?.value || '';
+  const logType = document.getElementById('export-log-type')?.value || '';
+  const status = document.getElementById('export-status')?.value || '';
+
+  const params = new URLSearchParams();
+  if (startDate) params.append('start_date', startDate);
+  if (endDate) params.append('end_date', endDate);
+  if (logType) params.append('log_type', logType);
+  if (status) params.append('status', status);
+
+  const url = `../../../backend/router.php/api/superadmin/logs/export-csv?${params.toString()}`;
+
+  fetch(url)
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert('CSV export initiated successfully! File: ' + result.filename);
+        loadCsvFiles(); // Refresh CSV files list
+        loadCsvStats(); // Refresh statistics
+        // Hide export options panel after successful export
+        const optionsPanel = document.getElementById('csv-export-options');
+        if (optionsPanel) {
+          optionsPanel.classList.add('hidden');
+        }
+      } else {
+        alert('Export failed: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      alert('Export failed due to network or server error.');
+    });
+}
+
+// Load CSV files list
+function loadCsvFiles() {
+  const csvFilesList = document.getElementById('csv-files-list');
+  if (!csvFilesList) return;
+
+  csvFilesList.innerHTML = '<p class="loading">Loading CSV files...</p>';
+
+  fetch('../../../backend/router.php/api/superadmin/logs/csv-files')
+    .then(response => response.json())
+    .then(files => {
+      csvFilesData = files;
+      if (!files || files.length === 0) {
+        csvFilesList.innerHTML = '<p>No CSV files found.</p>';
+        return;
+      }
+
+      csvFilesList.innerHTML = '';
+      files.forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'csv-file-item';
+
+        const fileInfo = document.createElement('div');
+        fileInfo.className = 'file-info';
+        fileInfo.innerHTML = `
+          <div class="file-name">${file.filename}</div>
+          <div class="file-details">
+            <span>Size: ${file.size}</span>
+            <span>Created: ${file.created_at}</span>
+            <span>Records: ${file.record_count}</span>
+          </div>
+        `;
+
+        const fileActions = document.createElement('div');
+        fileActions.className = 'file-actions';
+
+        const downloadBtn = document.createElement('button');
+        downloadBtn.textContent = 'Download';
+        downloadBtn.className = 'btn-secondary btn-small';
+        downloadBtn.addEventListener('click', () => downloadCsvFile(file.filename));
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'btn-danger btn-small';
+        deleteBtn.addEventListener('click', () => deleteCsvFile(file.filename));
+
+        fileActions.appendChild(downloadBtn);
+        fileActions.appendChild(deleteBtn);
+
+        fileItem.appendChild(fileInfo);
+        fileItem.appendChild(fileActions);
+        csvFilesList.appendChild(fileItem);
+      });
+    })
+    .catch(error => {
+      csvFilesList.innerHTML = '<p>Error loading CSV files.</p>';
+    });
+}
+
+// Download CSV file
+function downloadCsvFile(filename) {
+  const link = document.createElement('a');
+  link.href = `../../../backend/router.php/api/superadmin/logs/csv-download?filename=${encodeURIComponent(filename)}`;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Delete CSV file
+function deleteCsvFile(filename) {
+  if (!confirm(`Are you sure you want to delete "${filename}"? This action cannot be undone.`)) {
+    return;
+  }
+
+  fetch(`../../../backend/router.php/api/superadmin/logs/csv-delete?filename=${encodeURIComponent(filename)}`, {
+    method: 'DELETE'
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert('CSV file deleted successfully!');
+        loadCsvFiles(); // Refresh the list
+        loadCsvStats(); // Refresh statistics
+      } else {
+        alert('Delete failed: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      alert('Delete failed due to network or server error.');
+    });
+}
+
+// Load CSV statistics
+function loadCsvStats() {
+  const statsGrid = document.getElementById('csv-stats-grid');
+  if (!statsGrid) return;
+
+  fetch('../../../backend/router.php/api/superadmin/logs/csv-stats')
+    .then(response => response.json())
+    .then(stats => {
+      csvStatsData = stats;
+
+      document.getElementById('total-files').textContent = stats.total_files || 0;
+      document.getElementById('total-records').textContent = stats.total_records || 0;
+      document.getElementById('total-size').textContent = stats.total_size || '0 MB';
+      document.getElementById('oldest-file').textContent = stats.oldest_file || '-';
+      document.getElementById('newest-file').textContent = stats.newest_file || '-';
+    })
+    .catch(error => {
+      console.error('Error loading CSV stats:', error);
+    });
+}
+
+// Load CSV configuration
+function loadCsvConfig() {
+  fetch('../../../backend/router.php/api/superadmin/logs/csv-config')
+    .then(response => response.json())
+    .then(config => {
+      // Update any config display if needed
+      console.log('CSV Config:', config);
+    })
+    .catch(error => {
+      console.error('Error loading CSV config:', error);
+    });
+}
+
+// CSV Settings functionality
+function openCsvSettings() {
+  // Create settings modal if it doesn't exist
+  let settingsModal = document.getElementById('csv-settings-modal');
+  if (!settingsModal) {
+    settingsModal = document.createElement('div');
+    settingsModal.id = 'csv-settings-modal';
+    settingsModal.className = 'modal';
+    settingsModal.innerHTML = `
+      <div class="modal-content">
+        <h3>CSV Logging Settings</h3>
+        <form id="csv-settings-form">
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="csv-logging-enabled" />
+              Enable CSV Logging
+            </label>
+          </div>
+          <div class="form-group">
+            <label for="csv-retention-days">Retention Period (days):</label>
+            <input type="number" id="csv-retention-days" min="1" max="365" />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Settings</button>
+            <button type="button" id="close-csv-settings" class="btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(settingsModal);
+
+    // Load current settings
+    loadCsvSettings();
+
+    // Event listeners
+    settingsModal.querySelector('#close-csv-settings').addEventListener('click', () => {
+      settingsModal.style.display = 'none';
+    });
+
+    settingsModal.querySelector('#csv-settings-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveCsvSettings();
+    });
+  }
+
+  settingsModal.style.display = 'block';
+}
+
+// Load CSV settings
+function loadCsvSettings() {
+  fetch('../../../backend/router.php/api/superadmin/logs/csv-settings')
+    .then(response => response.json())
+    .then(settings => {
+      document.getElementById('csv-logging-enabled').checked = settings.csv_logging_enabled || false;
+      document.getElementById('csv-retention-days').value = settings.csv_retention_days || 30;
+    })
+    .catch(error => {
+      console.error('Error loading CSV settings:', error);
+    });
+}
+
+// Save CSV settings
+function saveCsvSettings() {
+  const enabled = document.getElementById('csv-logging-enabled').checked;
+  const retentionDays = document.getElementById('csv-retention-days').value;
+
+  fetch('../../../backend/router.php/api/superadmin/logs/csv-settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      enabled: enabled,
+      retention_days: parseInt(retentionDays)
+    })
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert('CSV settings saved successfully!');
+        document.getElementById('csv-settings-modal').style.display = 'none';
+        loadCsvStats(); // Refresh stats
+      } else {
+        alert('Failed to save settings: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      alert('Failed to save settings due to network or server error.');
+    });
+}
+
+// Cleanup old CSV logs
+function cleanupOldCsvLogs() {
+  const retentionDays = prompt('Enter retention period in days (default: 30):', '30');
+  if (retentionDays === null) return;
+
+  const days = parseInt(retentionDays) || 30;
+
+  if (!confirm(`Are you sure you want to delete CSV files older than ${days} days?`)) {
+    return;
+  }
+
+  fetch('../../../backend/router.php/api/superadmin/logs/csv-cleanup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ retention_days: days })
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert(`Cleanup completed! ${result.deleted_files_count || 0} files deleted.`);
+        loadCsvFiles(); // Refresh the list
+        loadCsvStats(); // Refresh statistics
+      } else {
+        alert('Cleanup failed: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      alert('Cleanup failed due to network or server error.');
+    });
+}
+
+// Event listeners for CSV functionality
+function setupCsvEventListeners() {
+  // Toggle CSV export options panel
+  const toggleExportOptionsBtn = document.getElementById('toggle-export-options-btn');
+  if (toggleExportOptionsBtn) {
+    toggleExportOptionsBtn.addEventListener('click', toggleCsvExportOptions);
+  }
+
+  // Export CSV button
+  const exportCsvBtn = document.getElementById('export-csv-btn');
+  if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', exportLogsToCsv);
+  }
+
+  // Refresh CSV files button
+  const refreshCsvFilesBtn = document.getElementById('refresh-csv-files-btn');
+  if (refreshCsvFilesBtn) {
+    refreshCsvFilesBtn.addEventListener('click', loadCsvFiles);
+  }
+
+  // CSV Settings button
+  const csvSettingsBtn = document.getElementById('csv-settings-btn');
+  if (csvSettingsBtn) {
+    csvSettingsBtn.addEventListener('click', openCsvSettings);
+  }
+
+  // Cleanup CSV logs button
+  const cleanupCsvBtn = document.getElementById('cleanup-csv-btn');
+  if (cleanupCsvBtn) {
+    cleanupCsvBtn.addEventListener('click', cleanupOldCsvLogs);
+  }
+
+  // Close modal when clicking outside
+  document.addEventListener('click', (e) => {
+    const modal = document.getElementById('csv-settings-modal');
+    if (modal && e.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+}
+
+// Initialize CSV functionality
+function initCsvManagement() {
+  setupCsvEventListeners();
+  loadCsvFiles();
+  loadCsvStats();
+  loadCsvConfig();
+}
+
+// Update the main init function to include CSV management
+function initSuperAdmin() {
+  loadUsers();
+  loadAuditLogs();
+  loadStats();
+  loadRecentActivity();
+  loadBackupFiles();
+  addSortingButtons();
+  setupEventListeners();
+  initCsvManagement(); // Initialize CSV management
+  // Auto refresh every 5 seconds
+  setInterval(() => {
+    loadUsers();
+    loadAuditLogs();
+    loadStats();
+    loadRecentActivity();
+    loadCsvStats(); // Refresh CSV stats
+  }, 5000);
+}

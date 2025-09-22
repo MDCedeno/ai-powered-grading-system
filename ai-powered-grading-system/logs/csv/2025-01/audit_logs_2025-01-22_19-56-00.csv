@@ -1,0 +1,11 @@
+timestamp,user,log_type,action,details,status,failure_reason
+2025-01-22 19:56:00,admin,authentication,login,"Successful login from IP 192.168.1.100",Success,
+2025-01-22 19:55:30,professor_john,permission_change,role_updated,"Changed student role from 'Student' to 'Advanced'",Success,
+2025-01-22 19:54:15,student_mary,sensitive_data_access,grade_viewed,"Viewed quiz results for 'Math 101'",Success,
+2025-01-22 19:53:45,admin,data_modification,user_created,"Created new user account for student_jane",Success,
+2025-01-22 19:52:30,system,system_action,database_backup,"Automated database backup completed",Success,
+2025-01-22 19:51:20,professor_bob,failed_operation,grade_submission,"Failed to submit grades: Database connection timeout",Failed,Database connection timeout
+2025-01-22 19:50:10,student_tom,account_lifecycle,profile_updated,"Updated email address and phone number",Success,
+2025-01-22 19:49:00,admin,authentication,logout,"User logged out successfully",Success,
+2025-01-22 19:48:30,professor_sara,permission_change,access_granted,"Granted access to student records",Success,
+2025-01-22 19:47:15,student_alex,sensitive_data_access,report_generated,"Generated performance report for semester",Success,
