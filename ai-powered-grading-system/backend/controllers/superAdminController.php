@@ -287,6 +287,24 @@ class SuperAdminController
         // In a real application, this should come from session/authentication
         $currentUserId = $this->getCurrentUserId();
 
+        // Check if user exists first
+        $userExistsStmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM users WHERE id = :id");
+        $userExistsStmt->execute(['id' => $user_id]);
+        $userExists = $userExistsStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($userExists['count'] == 0) {
+            // User doesn't exist, log the error
+            $this->logModel->create(
+                $currentUserId,
+                'account_lifecycle',
+                'user_deletion_failed',
+                "Failed to delete user ID {$user_id} - User does not exist",
+                0,
+                'User not found in database'
+            );
+            return false;
+        }
+
         // Get user details before deletion for better logging
         $userDetails = $this->getUserDetails($user_id);
 

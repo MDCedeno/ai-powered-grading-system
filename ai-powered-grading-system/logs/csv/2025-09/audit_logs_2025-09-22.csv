@@ -51,3 +51,30 @@ timestamp,user_email,log_type,action,details,status,failure_reason
 "2025-09-22 16:43:25",john.doe@plmun.edu.ph,data_modification,user_update_failed,"Failed to update user ID 99999 - User does not exist",Failed,"User not found in database"
 "2025-09-22 16:48:00",john.doe@plmun.edu.ph,data_modification,user_updated,"User 'Alice Johnson' (ID: 3) was updated by Super Admin. Changes: name: 'Alice Johnson (Updated) (Updated) (Updated)' → 'Alice Johnson'",Success,
 "2025-09-22 16:48:28",john.doe@plmun.edu.ph,permission_change,user_deactivated,"""User 'Charlie Pogi' (ID: 6, Email: charlie.pogi@plmun.edu.ph) was deactivated by Super Admin""",Success,
+"2025-09-22 16:58:09",john.doe@plmun.edu.ph,data_modification,user_updated,"""User 'Updated Test User' (ID: 11) was updated by Super Admin. Changes: name: 'Test User' → 'Updated Test User', email: 'test@example.com' → 'updated@example.com', role: 'Professor' → 'Student'""",Success,
+"2025-09-22 16:58:09",john.doe@plmun.edu.ph,account_lifecycle,user_deleted,"""User 'User to Delete' (ID: 12, Email: delete@example.com) was permanently deleted by Super Admin""",Success,
+"2025-09-22 16:58:09",john.doe@plmun.edu.ph,system_action,database_backup_created,"Database backup created successfully: backup_2025-09-22_16-58-09.sql",Success,
+"2025-09-22 16:58:09",john.doe@plmun.edu.ph,data_modification,user_update_failed,"Failed to update user ID 999999 - User does not exist",Failed,"User not found in database"
+"2025-09-22 16:58:09",john.doe@plmun.edu.ph,account_lifecycle,user_deleted,"""User 'Unknown' (ID: 999999, Email: Unknown) was permanently deleted by Super Admin""",Success,
+"2025-09-22 17:06:30",john.doe@plmun.edu.ph,data_modification,user_updated,"""User 'Updated Test User' (ID: 13) was updated by Super Admin. Changes: name: 'Test User' → 'Updated Test User', email: 'test@example.com' → 'updated@example.com', role: 'Professor' → 'Student'""",Success,
+"2025-09-22 17:06:30",john.doe@plmun.edu.ph,account_lifecycle,user_deleted,"""User 'User to Delete' (ID: 14, Email: delete@example.com) was permanently deleted by Super Admin""",Success,
+"2025-09-22 17:06:31",john.doe@plmun.edu.ph,system_action,database_backup_created,"Database backup created successfully: backup_2025-09-22_17-06-30.sql",Success,
+"2025-09-22 17:06:31",john.doe@plmun.edu.ph,data_modification,user_update_failed,"Failed to update user ID 999999 - User does not exist",Failed,"User not found in database"
+"2025-09-22 17:06:31",john.doe@plmun.edu.ph,account_lifecycle,user_deleted,"""User 'Unknown' (ID: 999999, Email: Unknown) was permanently deleted by Super Admin""",Success,
+"2025-09-22 17:08:30",john.doe@plmun.edu.ph,data_modification,user_update_failed,"Failed to update user ID 999999 - User does not exist",Failed,"User not found in database"
+"2025-09-22 17:09:08",john.doe@plmun.edu.ph,data_modification,user_update_failed,"Failed to update user ID 999999 - User does not exist",Failed,"User not found in database"
+"2025-09-22 17:09:15",john.doe@plmun.edu.ph,data_modification,user_updated,"""User 'Updated Test User' (ID: 15) was updated by Super Admin. Changes: name: 'Test User' → 'Updated Test User', email: 'test@example.com' → 'updated@example.com', role: 'Professor' → 'Student'""",Success,
+"2025-09-22 17:09:15",john.doe@plmun.edu.ph,account_lifecycle,user_deleted,"""User 'User to Delete' (ID: 16, Email: delete@example.com) was permanently deleted by Super Admin""",Success,
+"2025-09-22 17:09:15",john.doe@plmun.edu.ph,system_action,database_backup_created,"Database backup created successfully: backup_2025-09-22_17-09-15.sql",Success,
+"2025-09-22 17:09:15",john.doe@plmun.edu.ph,data_modification,user_update_failed,"Failed to update user ID 999999 - User does not exist",Failed,"User not found in database"
+"2025-09-22 17:09:15",john.doe@plmun.edu.ph,account_lifecycle,user_deleted,"""User 'Unknown' (ID: 999999, Email: Unknown) was permanently deleted by Super Admin""",Success,
+"2025-09-22 17:09:56",john.doe@plmun.edu.ph,data_modification,user_updated,"""User 'Updated Test User' (ID: 17) was updated by Super Admin. Changes: name: 'Test User' → 'Updated Test User', email: 'test@example.com' → 'updated@example.com', role: 'Professor' → 'Student'""",Success,
+"2025-09-22 17:09:56",john.doe@plmun.edu.ph,account_lifecycle,user_deleted,"""User 'User to Delete' (ID: 18, Email: delete@example.com) was permanently deleted by Super Admin""",Success,
+"2025-09-22 17:09:56",john.doe@plmun.edu.ph,system_action,database_backup_created,"Database backup created successfully: backup_2025-09-22_17-09-56.sql",Success,
+"2025-09-22 17:09:56",john.doe@plmun.edu.ph,data_modification,user_update_failed,"Failed to update user ID 999999 - User does not exist",Failed,"User not found in database"
+"2025-09-22 17:09:56",john.doe@plmun.edu.ph,account_lifecycle,user_deletion_failed,"Failed to delete user ID 999999 - User does not exist",Failed,"User not found in database"
+"2025-09-22 17:12:54",john.doe@plmun.edu.ph,data_modification,user_updated,"""User 'Updated Test User' (ID: 19) was updated by Super Admin. Changes: name: 'Test User' → 'Updated Test User', email: 'test@example.com' → 'updated@example.com', role: 'Professor' → 'Student'""",Success,
+"2025-09-22 17:12:54",john.doe@plmun.edu.ph,account_lifecycle,user_deleted,"""User 'User to Delete' (ID: 20, Email: delete@example.com) was permanently deleted by Super Admin""",Success,
+"2025-09-22 17:12:54",john.doe@plmun.edu.ph,system_action,database_backup_created,"Database backup created successfully: backup_2025-09-22_17-12-54.sql",Success,
+"2025-09-22 17:12:54",john.doe@plmun.edu.ph,data_modification,user_update_failed,"Failed to update user ID 999999 - User does not exist",Failed,"User not found in database"
+"2025-09-22 17:12:54",john.doe@plmun.edu.ph,account_lifecycle,user_deletion_failed,"Failed to delete user ID 999999 - User does not exist",Failed,"User not found in database"

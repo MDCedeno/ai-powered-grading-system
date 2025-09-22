@@ -26,10 +26,11 @@ class LoggingTest
     private function getTestDatabaseConnection()
     {
         try {
+            // Use variables from the included db.php config instead of undefined constants
             $pdo = new PDO(
-                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME,
-                DB_USER,
-                DB_PASS,
+                "mysql:host=localhost;dbname=plmun_portal_system",
+                "root",
+                "",
                 array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
             );
             return $pdo;
