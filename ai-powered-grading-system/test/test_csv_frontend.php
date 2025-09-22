@@ -94,7 +94,13 @@ if (file_exists($configFile)) {
         echo "   ✅ Configuration file is valid JSON\n";
         echo "   📊 Configuration settings:\n";
         foreach ($config as $key => $value) {
-            echo "      - " . $key . ": " . (is_bool($value) ? ($value ? 'true' : 'false') : $value) . "\n";
+            if (is_array($value)) {
+                echo "      - " . $key . ": Array (" . count($value) . " items)\n";
+            } elseif (is_bool($value)) {
+                echo "      - " . $key . ": " . ($value ? 'true' : 'false') . "\n";
+            } else {
+                echo "      - " . $key . ": " . $value . "\n";
+            }
         }
     } else {
         echo "   ❌ Configuration file contains invalid JSON\n";

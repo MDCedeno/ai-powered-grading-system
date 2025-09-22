@@ -1063,6 +1063,54 @@ form input[type="checkbox"] {
   border-color: #dc2626;
 }
 
+/* ========= File Actions (for CSV file management) ========= */
+.file-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 0;
+}
+
+.file-actions .btn-small {
+  background: #e5e7eb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.file-actions .btn-small:hover {
+  background: #d1d5db;
+  border-color: #9ca3af;
+}
+
+.file-actions .btn-small.download {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #3b82f6;
+}
+
+.file-actions .btn-small.download:hover {
+  background: #bfdbfe;
+  border-color: #2563eb;
+}
+
+.file-actions .btn-small.delete {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #ef4444;
+}
+
+.file-actions .btn-small.delete:hover {
+  background: #fecaca;
+  border-color: #dc2626;
+}
+
 /* ========= CSV Statistics Panel ========= */
 .csv-stats-panel {
   background: #f8f9fa;

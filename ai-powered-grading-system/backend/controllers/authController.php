@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../models/user.php';
+require_once __DIR__ . '/../models/CsvLogger.php';
 
 $authController = new AuthController($pdo);
 
@@ -16,9 +17,11 @@ if (isset($_GET['action'])) {
 
 class AuthController {
     private $userModel;
+    private $csvLogger;
 
     public function __construct($pdo) {
         $this->userModel = new User($pdo);
+        $this->csvLogger = new CsvLogger($pdo);
     }
 
     public function login() {
@@ -34,9 +37,30 @@ class AuthController {
                 $_SESSION['role_id'] = $user['role_id'];
                 $_SESSION['role'] = $this->getRoleName($user['role_id']);
 
+                // Log successful login
+                $roleName = $this->getRoleName($user['role_id']);
+                $this->csvLogger->writeLog(
+                    $user['id'],
+                    'authentication',
+                    'login',
+                    "Successful login for {$roleName}",
+                    1,
+                    null
+                );
+
                 // Redirect based on role
                 $this->redirectBasedOnRole($user['role_id']);
             } else {
+                // Log failed login attempt
+                $this->csvLogger->writeLog(
+                    null,
+                    'authentication',
+                    'login_failed',
+                    "Failed login attempt for email: {$email}",
+                    0,
+                    'Invalid email or password'
+                );
+
                 $_SESSION['error'] = 'Invalid email or password';
                 header('Location: ../frontend/views/login.php');
                 exit;
@@ -82,10 +106,31 @@ class AuthController {
             }
 
             if ($this->userModel->create($name, $email, $password, $role_id)) {
+                // Log successful account creation
+                $roleName = $this->getRoleName($role_id);
+                $this->csvLogger->writeLog(
+                    null, // No user_id yet for new accounts
+                    'account_lifecycle',
+                    'account_created',
+                    "New {$roleName} account created: {$email}",
+                    1,
+                    null
+                );
+
                 $_SESSION['success'] = 'Account created successfully. Please login.';
                 header('Location: ../frontend/views/login.php');
                 exit;
             } else {
+                // Log failed account creation
+                $this->csvLogger->writeLog(
+                    null,
+                    'account_lifecycle',
+                    'account_creation_failed',
+                    "Failed to create account for email: {$email}",
+                    0,
+                    'Database error during account creation'
+                );
+
                 $_SESSION['error'] = 'Failed to create account';
                 header('Location: ../frontend/views/signup.php');
                 exit;

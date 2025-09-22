@@ -212,7 +212,7 @@ include '../../components/header.php';
           <h2>Audit Logs</h2>
 
           <!-- CSV Management Section -->
-          <div class="csv-management-section">
+          <div id="csv-management-section" class="csv-management-section">
             <div class="csv-controls">
               <h3>CSV Export & Management</h3>
               <div class="csv-buttons">

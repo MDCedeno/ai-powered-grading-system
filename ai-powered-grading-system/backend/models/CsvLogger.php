@@ -224,8 +224,8 @@ class CsvLogger {
                 'filename' => $filename,
                 'path' => $file,
                 'size' => filesize($file),
-                'modified' => date('Y-m-d H:i:s', filemtime($file)),
-                'records' => $this->countRecordsInFile($file)
+                'created_at' => date('Y-m-d H:i:s', filemtime($file)),
+                'record_count' => $this->countRecordsInFile($file)
             ];
         }
 
@@ -238,13 +238,19 @@ class CsvLogger {
     private function countRecordsInFile($file) {
         $lineCount = 0;
         if (($handle = fopen($file, 'r')) !== false) {
-            while (!feof($handle)) {
-                fgets($handle);
-                $lineCount++;
+            // Skip header row
+            fgetcsv($handle);
+
+            // Count actual data rows
+            while (($data = fgetcsv($handle)) !== false) {
+                // Only count non-empty rows
+                if (!empty(array_filter($data))) {
+                    $lineCount++;
+                }
             }
             fclose($handle);
         }
-        return $lineCount - 1; // Subtract 1 for header row
+        return $lineCount;
     }
 
     /**
@@ -310,7 +316,7 @@ class CsvLogger {
         $totalSize = 0;
 
         foreach ($files as $file) {
-            $totalRecords += $file['records'];
+            $totalRecords += $file['record_count'];
             $totalSize += $file['size'];
         }
 
@@ -319,8 +325,8 @@ class CsvLogger {
             'total_records' => $totalRecords,
             'total_size' => round($totalSize / 1024 / 1024, 2) . ' MB',
             'total_size_mb' => round($totalSize / 1024 / 1024, 2),
-            'oldest_file' => !empty($files) ? $files[count($files)-1]['modified'] : null,
-            'newest_file' => !empty($files) ? $files[0]['modified'] : null
+            'oldest_file' => !empty($files) ? $files[count($files)-1]['created_at'] : null,
+            'newest_file' => !empty($files) ? $files[0]['created_at'] : null
         ];
     }
 }

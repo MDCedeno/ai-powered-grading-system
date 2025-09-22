@@ -2,12 +2,14 @@
 require_once __DIR__ . '/../models/user.php';
 require_once __DIR__ . '/../models/course.php';
 require_once __DIR__ . '/../models/log.php';
+require_once __DIR__ . '/../models/CsvLogger.php';
 
 class SuperAdminController
 {
     private $userModel;
     private $courseModel;
     private $logModel;
+    private $csvLogger;
     private $pdo;
 
     public function __construct($pdo)
@@ -15,6 +17,7 @@ class SuperAdminController
         $this->userModel = new User($pdo);
         $this->courseModel = new Course($pdo);
         $this->logModel = new Log($pdo);
+        $this->csvLogger = new CsvLogger($pdo);
         $this->pdo = $pdo;
     }
 
@@ -56,8 +59,37 @@ class SuperAdminController
 
     public function deactivateUser($user_id)
     {
+        // Get current user ID for logging (assuming Super Admin is user ID 1 for now)
+        // In a real application, this should come from session/authentication
+        $currentUserId = $this->getCurrentUserId();
+
         $stmt = $this->pdo->prepare("UPDATE users SET active = 0 WHERE id = :id");
-        return $stmt->execute(['id' => $user_id]);
+        $success = $stmt->execute(['id' => $user_id]);
+
+        // Log the user deactivation using unified Log model
+        if ($success) {
+            // Get user details for better logging
+            $userDetails = $this->getUserDetails($user_id);
+            $this->logModel->create(
+                $currentUserId,
+                'permission_change',
+                'user_deactivated',
+                "User '{$userDetails['name']}' (ID: {$user_id}, Email: {$userDetails['email']}) was deactivated by Super Admin",
+                1,
+                null
+            );
+        } else {
+            $this->logModel->create(
+                $currentUserId,
+                'permission_change',
+                'user_deactivation_failed',
+                "Failed to deactivate user ID {$user_id}",
+                0,
+                'Database error during user deactivation'
+            );
+        }
+
+        return $success;
     }
 
     public function getSystemLogs($search = '', $status = '', $logType = '', $logLevel = '', $sort = 'newest', $limit = 10)
@@ -134,26 +166,156 @@ class SuperAdminController
 
     public function activateUser($user_id)
     {
+        // Get current user ID for logging (assuming Super Admin is user ID 1 for now)
+        // In a real application, this should come from session/authentication
+        $currentUserId = $this->getCurrentUserId();
+
         $stmt = $this->pdo->prepare("UPDATE users SET active = 1 WHERE id = :id");
-        return $stmt->execute(['id' => $user_id]);
+        $success = $stmt->execute(['id' => $user_id]);
+
+        // Log the user activation using unified Log model
+        if ($success) {
+            // Get user details for better logging
+            $userDetails = $this->getUserDetails($user_id);
+            $this->logModel->create(
+                $currentUserId,
+                'permission_change',
+                'user_activated',
+                "User '{$userDetails['name']}' (ID: {$user_id}, Email: {$userDetails['email']}) was activated by Super Admin",
+                1,
+                null
+            );
+        } else {
+            $this->logModel->create(
+                $currentUserId,
+                'permission_change',
+                'user_activation_failed',
+                "Failed to activate user ID {$user_id}",
+                0,
+                'Database error during user activation'
+            );
+        }
+
+        return $success;
     }
 
     public function updateUser($user_id, $data)
     {
+        // Get current user ID for logging (assuming Super Admin is user ID 1 for now)
+        // In a real application, this should come from session/authentication
+        $currentUserId = $this->getCurrentUserId();
+
+        // Check if user exists first
+        $userExistsStmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM users WHERE id = :id");
+        $userExistsStmt->execute(['id' => $user_id]);
+        $userExists = $userExistsStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($userExists['count'] == 0) {
+            // User doesn't exist, log the error
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'user_update_failed',
+                "Failed to update user ID {$user_id} - User does not exist",
+                0,
+                'User not found in database'
+            );
+            return false;
+        }
+
+        // Get original user data for comparison
+        $originalData = $this->getUserDetails($user_id);
+
         $stmt = $this->pdo->prepare("UPDATE users SET name = :name, email = :email, role_id = :role_id WHERE id = :id");
-        return $stmt->execute([
+        $success = $stmt->execute([
             'id' => $user_id,
             'name' => $data['name'],
             'email' => $data['email'],
             'role_id' => $data['role_id']
         ]);
+
+        // Check if any rows were actually affected
+        $affectedRows = $stmt->rowCount();
+
+        // Log the user update using unified Log model
+        if ($success && $affectedRows > 0) {
+            // Get updated user details for better logging
+            $updatedData = $this->getUserDetails($user_id);
+
+            // Create detailed change description
+            $changes = [];
+            if ($originalData['name'] !== $updatedData['name']) {
+                $changes[] = "name: '{$originalData['name']}' → '{$updatedData['name']}'";
+            }
+            if ($originalData['email'] !== $updatedData['email']) {
+                $changes[] = "email: '{$originalData['email']}' → '{$updatedData['email']}'";
+            }
+            if ($originalData['role_id'] !== $updatedData['role_id']) {
+                $roleMap = [1 => 'Super Admin', 2 => 'MIS Admin', 3 => 'Professor', 4 => 'Student'];
+                $oldRole = $roleMap[$originalData['role_id']] ?? 'Unknown';
+                $newRole = $roleMap[$updatedData['role_id']] ?? 'Unknown';
+                $changes[] = "role: '{$oldRole}' → '{$newRole}'";
+            }
+
+            $changeDescription = empty($changes) ? "No changes detected" : implode(', ', $changes);
+
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'user_updated',
+                "User '{$updatedData['name']}' (ID: {$user_id}) was updated by Super Admin. Changes: {$changeDescription}",
+                1,
+                null
+            );
+        } else {
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'user_update_failed',
+                "Failed to update user ID {$user_id} - No rows affected",
+                0,
+                'No database rows were updated'
+            );
+        }
+
+        return $success && $affectedRows > 0;
     }
 
     public function deleteUser($user_id)
     {
+        // Get current user ID for logging (assuming Super Admin is user ID 1 for now)
+        // In a real application, this should come from session/authentication
+        $currentUserId = $this->getCurrentUserId();
+
+        // Get user details before deletion for better logging
+        $userDetails = $this->getUserDetails($user_id);
+
         // Soft delete or hard delete? For now, hard delete
         $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = :id");
-        return $stmt->execute(['id' => $user_id]);
+        $success = $stmt->execute(['id' => $user_id]);
+
+        // Log the user deletion using unified Log model
+        if ($success) {
+            $this->logModel->create(
+                $currentUserId,
+                'account_lifecycle',
+                'user_deleted',
+                "User '{$userDetails['name']}' (ID: {$user_id}, Email: {$userDetails['email']}) was permanently deleted by Super Admin",
+                1,
+                null
+            );
+        } else {
+            $this->logModel->create(
+                $currentUserId,
+                'account_lifecycle',
+                'user_deletion_failed',
+                "Failed to delete user ID {$user_id}",
+                0,
+                'Database error during user deletion'
+            );
+        }
+
+        return $success;
     }
 
     public function bulkUpdateUsers($userIds, $action)
@@ -298,13 +460,34 @@ class SuperAdminController
             $backup .= "\n";
         }
         $filename = 'backup_' . date('Y-m-d_H-i-s') . '.sql';
-        file_put_contents(__DIR__ . '/../../backups/' . $filename, $backup);
+        $success = file_put_contents(__DIR__ . '/../../backups/' . $filename, $backup);
 
         // Record backup time in backup_records table
         $stmt = $this->pdo->prepare("INSERT INTO backup_records (backup_time) VALUES (NOW())");
-        $stmt->execute();
+        $backupRecorded = $stmt->execute();
 
-        return ['success' => true, 'file' => $filename];
+        // Log the database backup using the Log model (writes to both DB and CSV)
+        if ($success && $backupRecorded) {
+            $this->logModel->create(
+                1, // Use Super Admin user_id for system actions
+                'system_action',
+                'database_backup_created',
+                "Database backup created successfully: {$filename}",
+                1,
+                null
+            );
+        } else {
+            $this->logModel->create(
+                1, // Use Super Admin user_id for system actions
+                'system_action',
+                'database_backup_failed',
+                "Failed to create database backup. File write: " . ($success ? 'Success' : 'Failed') . ", DB record: " . ($backupRecorded ? 'Success' : 'Failed'),
+                0,
+                'Database backup creation failed'
+            );
+        }
+
+        return ['success' => $success && $backupRecorded, 'file' => $filename];
     }
 
     public function getAIConfig()
@@ -588,5 +771,28 @@ class SuperAdminController
         } else {
             return ['success' => false, 'message' => 'Failed to delete file'];
         }
+    }
+
+    /**
+     * Get current user ID for logging purposes
+     * In a real application, this should come from session/authentication
+     */
+    private function getCurrentUserId()
+    {
+        // For now, assume Super Admin is user ID 1
+        // In production, this should be retrieved from session or authentication context
+        return 1;
+    }
+
+    /**
+     * Get user details by user ID for logging purposes
+     */
+    private function getUserDetails($user_id)
+    {
+        $stmt = $this->pdo->prepare("SELECT id, name, email, role_id FROM users WHERE id = :id");
+        $stmt->execute(['id' => $user_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ?: ['id' => $user_id, 'name' => 'Unknown', 'email' => 'Unknown', 'role_id' => 0];
     }
 }
