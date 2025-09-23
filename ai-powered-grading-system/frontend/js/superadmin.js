@@ -357,32 +357,22 @@ function setupEventListeners() {
     });
   }
 
-  // Update interval button
-  const updateIntervalBtn = document.getElementById("update-interval-btn");
-  if (updateIntervalBtn) {
-    updateIntervalBtn.addEventListener("click", async () => {
-      const interval = document.getElementById("auto-backup-interval").value;
-      try {
-        const response = await fetch(
-          "../../../backend/router.php/api/superadmin/auto-backup-interval",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ interval: parseInt(interval) }),
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Failed to update auto-backup interval");
-        }
-        const result = await response.json();
-        if (!result.success) {
-          throw new Error("Failed to update auto-backup interval");
-        }
-        alert("Auto-backup interval updated successfully");
-      } catch (error) {
-        alert("Failed to update auto-backup interval");
-      }
-    });
+  // Auto-backup interval button
+  const autoBackupIntervalBtn = document.getElementById("auto-backup-interval-btn");
+  if (autoBackupIntervalBtn) {
+    autoBackupIntervalBtn.addEventListener("click", openAutoBackupIntervalModal);
+  }
+
+  // Close auto-backup interval modal
+  const closeAutoBackupIntervalBtn = document.getElementById("close-auto-backup-interval");
+  if (closeAutoBackupIntervalBtn) {
+    closeAutoBackupIntervalBtn.addEventListener("click", closeAutoBackupIntervalModal);
+  }
+
+  // Auto-backup interval form submission
+  const autoBackupIntervalForm = document.getElementById("auto-backup-interval-form");
+  if (autoBackupIntervalForm) {
+    autoBackupIntervalForm.addEventListener("submit", saveAutoBackupInterval);
   }
 
   // Manual backup button
@@ -586,12 +576,91 @@ function loadAutoBackupInterval() {
     if (xhr.status === 200) {
       const data = JSON.parse(xhr.responseText);
       const intervalInput = document.getElementById("auto-backup-interval");
+      const modalIntervalInput = document.getElementById("modal-auto-backup-interval");
       if (intervalInput) {
         intervalInput.value = data.interval;
+      }
+      if (modalIntervalInput) {
+        modalIntervalInput.value = data.interval;
       }
     }
   };
   xhr.send();
+}
+
+// Open auto-backup interval modal
+function openAutoBackupIntervalModal() {
+  // Create modal if it doesn't exist
+  let modal = document.getElementById('auto-backup-interval-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'auto-backup-interval-modal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h3>Auto-backup Interval Settings</h3>
+        <form id="auto-backup-interval-form">
+          <div class="form-group">
+            <label for="modal-auto-backup-interval">Interval (hours):</label>
+            <input type="number" id="modal-auto-backup-interval" min="1" max="168" value="24" />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Interval</button>
+            <button type="button" id="close-auto-backup-interval" class="btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Load current interval into modal
+    loadAutoBackupInterval();
+
+    // Event listeners
+    modal.querySelector('#close-auto-backup-interval').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    modal.querySelector('#auto-backup-interval-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveAutoBackupInterval(e);
+    });
+  }
+
+  modal.style.display = 'block';
+}
+
+// Close auto-backup interval modal
+function closeAutoBackupIntervalModal() {
+  const modal = document.getElementById('auto-backup-interval-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+// Save auto-backup interval
+function saveAutoBackupInterval(e) {
+  e.preventDefault();
+  const interval = document.getElementById('modal-auto-backup-interval').value;
+
+  fetch('../../../backend/router.php/api/superadmin/auto-backup-interval', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ interval: parseInt(interval) })
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert('Auto-backup interval updated successfully!');
+        document.getElementById('auto-backup-interval-modal').style.display = 'none';
+        loadStats(); // Refresh stats to update UI
+      } else {
+        alert('Failed to update auto-backup interval: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      alert('Failed to update auto-backup interval due to network or server error.');
+    });
 }
 
 function loadRecentActivity() {

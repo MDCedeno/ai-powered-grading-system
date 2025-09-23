@@ -187,11 +187,7 @@ include '../../components/header.php';
                   </label>
                   <button id="manual-backup-btn" class="btn-primary">Backup Now</button>
                 </div>
-                <div class="interval-control">
-                  <label for="auto-backup-interval">Interval (hours):</label>
-                  <input type="number" id="auto-backup-interval" min="1" max="168" value="24" />
-                  <button id="update-interval-btn" class="btn-secondary">Update Interval</button>
-                </div>
+                <button id="auto-backup-interval-btn" class="btn-secondary">Auto-backup Interval</button>
               </div>
             </div>
             <div class="card restore-point-card">
@@ -409,6 +405,8 @@ include '../../components/header.php';
       </form>
     </div>
   </div>
+
+
 
   <!-- Main JavaScript for AI-Powered Grading System -->
   <script src="../../js/main.js"></script>
