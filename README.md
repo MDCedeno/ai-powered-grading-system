@@ -212,6 +212,10 @@ For support and questions:
 - **v1.1.0** - Added AI-powered analytics
 - **v1.2.0** - Enhanced user interface and responsive design
 
+## 👨‍💻 About the Author
+
+This project was developed by [Your Name], a passionate software developer with a focus on educational technology and web development. The system demonstrates expertise in full-stack PHP development, database design, and user experience design.
+
 ---
 
 **Built with ❤️ for educational excellence**

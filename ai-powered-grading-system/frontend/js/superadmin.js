@@ -5,6 +5,7 @@ let usersData = [];
 let auditLogsData = [];
 let statsData = {};
 let recentActivityData = [];
+let gradingScalesData = [];
 
 // Current sort state
 let userSort = { column: null, ascending: true };
@@ -1425,6 +1426,7 @@ function loadGradingScales() {
   fetch('../../../backend/router.php/api/superadmin/grading-scales')
     .then(response => response.json())
     .then(scales => {
+      gradingScalesData = scales || []; // Cache the data
       if (!scales || scales.length === 0) {
         listContainer.innerHTML = '<p>No grading scales found.</p>';
         return;
@@ -1551,21 +1553,18 @@ function openGradingScaleModal(mode, id = null) {
   document.getElementById('modal-title').textContent = mode === 'add' ? 'Add New Grading Scale' : 'Edit Grading Scale';
 
   if (mode === 'edit') {
-    // Load existing data
-    fetch(`../../../backend/router.php/api/superadmin/grading-scales/${id}`)
-      .then(response => response.json())
-      .then(scale => {
-        document.getElementById('scale-id').value = scale.id;
-        document.getElementById('scale-name').value = scale.name;
-        document.getElementById('scale-min-score').value = scale.min_score;
-        document.getElementById('scale-max-score').value = scale.max_score;
-        document.getElementById('scale-grade-letter').value = scale.grade_letter;
-        document.getElementById('scale-active').checked = scale.is_active;
-      })
-      .catch(error => {
-        console.error('Error loading scale:', error);
-        alert('Failed to load grading scale.');
-      });
+    // Load existing data from cache
+    const scale = gradingScalesData.find(s => s.id == id);
+    if (scale) {
+      document.getElementById('scale-id').value = scale.id;
+      document.getElementById('scale-name').value = scale.name;
+      document.getElementById('scale-min-score').value = scale.min_score;
+      document.getElementById('scale-max-score').value = scale.max_score;
+      document.getElementById('scale-grade-letter').value = scale.grade_letter;
+      document.getElementById('scale-active').checked = scale.is_active;
+    } else {
+      alert('Grading scale not found in cache.');
+    }
   } else {
     // Reset form for add
     document.getElementById('scale-id').value = '';

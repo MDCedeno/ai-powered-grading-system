@@ -1,3 +1,5 @@
 timestamp,user_email,log_type,action,details,status,failure_reason
 "2025-09-29 14:11:23",john.doe@plmun.edu.ph,permission_change,user_deactivated,"""User 'Alice Johnson' (ID: 3, Email: alice.johnson@plmun.edu.ph) was deactivated by Super Admin""",Success,
 "2025-09-29 14:12:53",john.doe@plmun.edu.ph,permission_change,user_deactivated,"""User 'John Doe' (ID: 1, Email: john.doe@plmun.edu.ph) was deactivated by Super Admin""",Success,
+"2025-09-29 15:05:07",john.doe@plmun.edu.ph,system_action,encryption_status_checked,"Encryption status was checked by Super Admin",Success,
+"2025-09-29 15:16:46",john.doe@plmun.edu.ph,permission_change,user_deactivated,"""User 'John Doe' (ID: 1, Email: john.doe@plmun.edu.ph) was deactivated by Super Admin""",Success,

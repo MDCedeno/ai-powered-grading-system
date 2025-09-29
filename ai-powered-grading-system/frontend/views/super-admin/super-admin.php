@@ -360,7 +360,7 @@ include '../../components/header.php';
           </form>
         </section>
 
-        <!-- ================= SYSTEM SETTINGS ================= -->
+<!-- ================= SYSTEM SETTINGS ================= -->
         <section id="settings" class="tab-section hidden">
           <h2>System Settings</h2>
 
@@ -535,14 +535,14 @@ include '../../components/header.php';
   <div id="edit-user-modal" class="modal" style="display: none;">
     <div class="modal-content">
       <h3>Edit User</h3>
-      <form id="edit-user-form">
-        <input type="hidden" id="edit-user-id" />
-        <label for="edit-name">Name:</label>
-        <input type="text" id="edit-name" required />
-        <label for="edit-email">Email:</label>
-        <input type="email" id="edit-email" required />
-        <label for="edit-role">Role:</label>
-        <select id="edit-role" required>
+      <form id="modal-edit-user-form">
+        <input type="hidden" id="modal-edit-user-id" />
+        <label for="modal-edit-name">Name:</label>
+        <input type="text" id="modal-edit-name" required />
+        <label for="modal-edit-email">Email:</label>
+        <input type="email" id="modal-edit-email" required />
+        <label for="modal-edit-role">Role:</label>
+        <select id="modal-edit-role" required>
           <option value="1">Super Admin</option>
           <option value="2">MIS Admin</option>
           <option value="3">Professor</option>
