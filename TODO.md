@@ -39,6 +39,7 @@
   - Add loadSystemSettings() to fetch /api/superadmin/settings and populate #general-settings-form and #security-policies-form inputs/checkboxes/selects.
   - Add saveGeneralSettings() on #general-settings-form submit: collect form data, POST to /api/superadmin/settings, show success/error, reload settings.
   - Add saveSecurityPolicies() on #security-policies-form submit: similar, handle checkbox states (e.g., if password-min-length-enabled checked, include value).
+  - [x] **HTML Form Fix**: Added name attributes to all form inputs in super-admin.php to match JavaScript selectors (e.g., name="system_name", name="password_min_length_enabled", etc.).
 
 - [x] **Frontend: Add Grading Scales Functionality** in superadmin.js:
   - Add loadGradingScales() to fetch /api/superadmin/grading-scales, render in #grading-scales-list as table/cards with columns: Name, Range, Grade, Active, Actions (Edit/Delete/Activate).

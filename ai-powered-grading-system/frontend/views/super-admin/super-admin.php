@@ -371,21 +371,21 @@ include '../../components/header.php';
               <div class="form-row">
                 <label>
                   System Name:
-                  <input type="text" id="system-name" value="PLMUN Portal" />
+                  <input type="text" name="system_name" id="system-name" value="PLMUN Portal" />
                 </label>
                 <label>
                   Theme Color:
-                  <input type="color" id="theme-color" value="#217589" />
+                  <input type="color" name="theme_color" id="theme-color" value="#217589" />
                 </label>
               </div>
               <div class="form-row">
                 <label>
                   Default Password Reset:
-                  <input type="text" id="default-password" value="changeme123" />
+                  <input type="text" name="default_password_reset" id="default-password" value="changeme123" />
                 </label>
                 <label>
                   Session Timeout (minutes):
-                  <input type="number" id="session-timeout" min="5" max="480" value="60" />
+                  <input type="number" name="session_timeout" id="session-timeout" min="5" max="480" value="60" />
                 </label>
               </div>
               <button type="submit" class="btn-primary">Update General Settings</button>
@@ -414,33 +414,33 @@ include '../../components/header.php';
                 <h4>Password Requirements</h4>
                 <div class="form-row">
                   <label>
-                    <input type="checkbox" id="password-min-length-enabled" checked />
+                    <input type="checkbox" name="password_min_length_enabled" id="password-min-length-enabled" checked />
                     Minimum Length:
-                    <input type="number" id="password-min-length" min="6" max="32" value="8" />
+                    <input type="number" name="password_min_length" id="password-min-length" min="6" max="32" value="8" />
                   </label>
                   <label>
-                    <input type="checkbox" id="password-uppercase-required" />
+                    <input type="checkbox" name="password_uppercase_required" id="password-uppercase-required" />
                     Require Uppercase Letters
                   </label>
                 </div>
                 <div class="form-row">
                   <label>
-                    <input type="checkbox" id="password-lowercase-required" />
+                    <input type="checkbox" name="password_lowercase_required" id="password-lowercase-required" />
                     Require Lowercase Letters
                   </label>
                   <label>
-                    <input type="checkbox" id="password-numbers-required" />
+                    <input type="checkbox" name="password_numbers_required" id="password-numbers-required" />
                     Require Numbers
                   </label>
                 </div>
                 <div class="form-row">
                   <label>
-                    <input type="checkbox" id="password-special-chars-required" />
+                    <input type="checkbox" name="password_special_chars_required" id="password-special-chars-required" />
                     Require Special Characters
                   </label>
                   <label>
                     Password History (prevent reuse of last N passwords):
-                    <input type="number" id="password-history-count" min="0" max="10" value="3" />
+                    <input type="number" name="password_history_count" id="password-history-count" min="0" max="10" value="3" />
                   </label>
                 </div>
               </div>
@@ -450,21 +450,21 @@ include '../../components/header.php';
                 <div class="form-row">
                   <label>
                     Maximum Login Attempts:
-                    <input type="number" id="max-login-attempts" min="3" max="10" value="5" />
+                    <input type="number" name="max_login_attempts" id="max-login-attempts" min="3" max="10" value="5" />
                   </label>
                   <label>
                     Account Lockout Duration (minutes):
-                    <input type="number" id="lockout-duration" min="5" max="1440" value="30" />
+                    <input type="number" name="lockout_duration" id="lockout-duration" min="5" max="1440" value="30" />
                   </label>
                 </div>
                 <div class="form-row">
                   <label>
                     Password Expiration (days, 0 = never):
-                    <input type="number" id="password-expiration-days" min="0" max="365" value="90" />
+                    <input type="number" name="password_expiration_days" id="password-expiration-days" min="0" max="365" value="90" />
                   </label>
                   <label>
                     Two-Factor Authentication:
-                    <select id="two-factor-required">
+                    <select name="two_factor_required" id="two-factor-required">
                       <option value="disabled">Disabled</option>
                       <option value="optional">Optional</option>
                       <option value="required">Required for All</option>
