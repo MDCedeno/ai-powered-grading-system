@@ -363,21 +363,169 @@ include '../../components/header.php';
         <!-- ================= SYSTEM SETTINGS ================= -->
         <section id="settings" class="tab-section hidden">
           <h2>System Settings</h2>
-          <form class="settings-form">
-            <label>
-              System Name:
-              <input type="text" value="PLMUN Portal" />
-            </label>
-            <label>
-              Theme Color:
-              <input type="color" value="#217589" />
-            </label>
-            <label>
-              Default Password Reset:
-              <input type="text" value="changeme123" />
-            </label>
-            <button class="btn-primary">Update Settings</button>
-          </form>
+
+          <!-- General Settings -->
+          <div class="settings-section">
+            <h3>General Settings</h3>
+            <form class="settings-form" id="general-settings-form">
+              <div class="form-row">
+                <label>
+                  System Name:
+                  <input type="text" id="system-name" value="PLMUN Portal" />
+                </label>
+                <label>
+                  Theme Color:
+                  <input type="color" id="theme-color" value="#217589" />
+                </label>
+              </div>
+              <div class="form-row">
+                <label>
+                  Default Password Reset:
+                  <input type="text" id="default-password" value="changeme123" />
+                </label>
+                <label>
+                  Session Timeout (minutes):
+                  <input type="number" id="session-timeout" min="5" max="480" value="60" />
+                </label>
+              </div>
+              <button type="submit" class="btn-primary">Update General Settings</button>
+            </form>
+          </div>
+
+          <!-- Grading Scales Configuration -->
+          <div class="settings-section">
+            <h3>Grading Scales Configuration</h3>
+            <div class="grading-scales-container">
+              <div class="grading-scale-controls">
+                <button id="add-grading-scale-btn" class="btn-secondary">Add New Grading Scale</button>
+                <button id="refresh-grading-scales-btn" class="btn-secondary">Refresh Scales</button>
+              </div>
+              <div class="grading-scales-list" id="grading-scales-list">
+                <p class="loading">Loading grading scales...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Security Policies Configuration -->
+          <div class="settings-section">
+            <h3>Security Policies</h3>
+            <form class="settings-form" id="security-policies-form">
+              <div class="policy-section">
+                <h4>Password Requirements</h4>
+                <div class="form-row">
+                  <label>
+                    <input type="checkbox" id="password-min-length-enabled" checked />
+                    Minimum Length:
+                    <input type="number" id="password-min-length" min="6" max="32" value="8" />
+                  </label>
+                  <label>
+                    <input type="checkbox" id="password-uppercase-required" />
+                    Require Uppercase Letters
+                  </label>
+                </div>
+                <div class="form-row">
+                  <label>
+                    <input type="checkbox" id="password-lowercase-required" />
+                    Require Lowercase Letters
+                  </label>
+                  <label>
+                    <input type="checkbox" id="password-numbers-required" />
+                    Require Numbers
+                  </label>
+                </div>
+                <div class="form-row">
+                  <label>
+                    <input type="checkbox" id="password-special-chars-required" />
+                    Require Special Characters
+                  </label>
+                  <label>
+                    Password History (prevent reuse of last N passwords):
+                    <input type="number" id="password-history-count" min="0" max="10" value="3" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="policy-section">
+                <h4>Account Security</h4>
+                <div class="form-row">
+                  <label>
+                    Maximum Login Attempts:
+                    <input type="number" id="max-login-attempts" min="3" max="10" value="5" />
+                  </label>
+                  <label>
+                    Account Lockout Duration (minutes):
+                    <input type="number" id="lockout-duration" min="5" max="1440" value="30" />
+                  </label>
+                </div>
+                <div class="form-row">
+                  <label>
+                    Password Expiration (days, 0 = never):
+                    <input type="number" id="password-expiration-days" min="0" max="365" value="90" />
+                  </label>
+                  <label>
+                    Two-Factor Authentication:
+                    <select id="two-factor-required">
+                      <option value="disabled">Disabled</option>
+                      <option value="optional">Optional</option>
+                      <option value="required">Required for All</option>
+                      <option value="required-admin">Required for Admins Only</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-primary">Update Security Policies</button>
+            </form>
+          </div>
+
+          <!-- Encryption Methods Verification -->
+          <div class="settings-section">
+            <h3>Encryption & Security Status</h3>
+            <div class="encryption-status-container">
+              <div class="encryption-status-grid" id="encryption-status-grid">
+                <div class="status-card">
+                  <h4>Database Encryption</h4>
+                  <div class="status-indicator" id="db-encryption-status">
+                    <span class="status-icon">🔒</span>
+                    <span class="status-text">Checking...</span>
+                  </div>
+                  <p class="status-details" id="db-encryption-details">Loading encryption details...</p>
+                </div>
+
+                <div class="status-card">
+                  <h4>File Storage Encryption</h4>
+                  <div class="status-indicator" id="file-encryption-status">
+                    <span class="status-icon">📁</span>
+                    <span class="status-text">Checking...</span>
+                  </div>
+                  <p class="status-details" id="file-encryption-details">Loading encryption details...</p>
+                </div>
+
+                <div class="status-card">
+                  <h4>SSL/TLS Certificate</h4>
+                  <div class="status-indicator" id="ssl-status">
+                    <span class="status-icon">🔐</span>
+                    <span class="status-text">Checking...</span>
+                  </div>
+                  <p class="status-details" id="ssl-details">Loading SSL certificate details...</p>
+                </div>
+
+                <div class="status-card">
+                  <h4>API Security</h4>
+                  <div class="status-indicator" id="api-security-status">
+                    <span class="status-icon">🌐</span>
+                    <span class="status-text">Checking...</span>
+                  </div>
+                  <p class="status-details" id="api-security-details">Loading API security details...</p>
+                </div>
+              </div>
+
+              <div class="encryption-actions">
+                <button id="refresh-encryption-status-btn" class="btn-secondary">Refresh Status</button>
+                <button id="view-encryption-logs-btn" class="btn-secondary">View Security Logs</button>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </main>

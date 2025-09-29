@@ -168,6 +168,29 @@ if (strpos($path, '/api/superadmin') === 0) {
             $result = $controller->deleteCsvFile($filename);
             echo json_encode($result);
         }
+    } elseif ($path == '/api/superadmin/grading-scales' && $method == 'GET') {
+        $scales = $controller->getGradingScales();
+        echo json_encode($scales);
+    } elseif ($path == '/api/superadmin/grading-scales' && $method == 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $result = $controller->createGradingScale($data);
+        echo json_encode(['success' => $result]);
+    } elseif (preg_match('/\/api\/superadmin\/grading-scales\/(\d+)/', $path, $matches) && $method == 'PUT') {
+        $id = $matches[1];
+        $data = json_decode(file_get_contents('php://input'), true);
+        $result = $controller->updateGradingScale($id, $data);
+        echo json_encode(['success' => $result]);
+    } elseif (preg_match('/\/api\/superadmin\/grading-scales\/(\d+)/', $path, $matches) && $method == 'DELETE') {
+        $id = $matches[1];
+        $result = $controller->deleteGradingScale($id);
+        echo json_encode(['success' => $result]);
+    } elseif (preg_match('/\/api\/superadmin\/grading-scales\/(\d+)\/activate/', $path, $matches) && $method == 'PATCH') {
+        $id = $matches[1];
+        $result = $controller->activateGradingScale($id);
+        echo json_encode(['success' => $result]);
+    } elseif ($path == '/api/superadmin/encryption-status' && $method == 'GET') {
+        $status = $controller->getEncryptionStatus();
+        echo json_encode($status);
     } else {
         http_response_code(404);
         echo json_encode(['error' => 'SuperAdmin endpoint not found']);

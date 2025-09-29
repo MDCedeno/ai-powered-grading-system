@@ -820,23 +820,30 @@ function loadBackupFiles() {
         return;
       }
       backupListEl.innerHTML = "";
-      files.forEach((filename) => {
+      files.forEach((fileObj) => {
         const fileItem = document.createElement("div");
         fileItem.className = "backup-file-item";
-        fileItem.textContent = filename;
+
+        // Display filename and snapshot date
+        const fileInfo = document.createElement("div");
+        fileInfo.className = "file-info";
+        fileInfo.innerHTML = `
+          <div class="file-name">${fileObj.filename}</div>
+          <div class="file-date">Snapshot: ${fileObj.snapshot_date}</div>
+        `;
 
         const openBtn = document.createElement("button");
         openBtn.textContent = "Open";
         openBtn.className = "btn-secondary btn-small";
         openBtn.addEventListener("click", () => {
-          window.open(`../../../../backups/${filename}`, "_blank");
+          window.open(`../../../../backups/${fileObj.filename}`, "_blank");
         });
 
         const copyBtn = document.createElement("button");
         copyBtn.textContent = "Copy";
         copyBtn.className = "btn-secondary btn-small";
         copyBtn.addEventListener("click", () => {
-          navigator.clipboard.writeText(filename).then(() => {
+          navigator.clipboard.writeText(fileObj.filename).then(() => {
             alert("Filename copied to clipboard");
           });
         });
@@ -846,6 +853,7 @@ function loadBackupFiles() {
         btnGroup.className = "btn-group";
         btnGroup.appendChild(openBtn);
         btnGroup.appendChild(copyBtn);
+        fileItem.appendChild(fileInfo);
         fileItem.appendChild(btnGroup);
 
         fileItem.addEventListener("click", () => {
@@ -854,7 +862,7 @@ function loadBackupFiles() {
             .querySelectorAll(".backup-file-item")
             .forEach((el) => el.classList.remove("selected"));
           fileItem.classList.add("selected");
-          selectedBackupFile = filename;
+          selectedBackupFile = fileObj.filename;
           restoreBtn.disabled = false;
         });
 
@@ -1287,7 +1295,499 @@ function initCsvManagement() {
   loadCsvConfig();
 }
 
-// Update the main init function to include CSV management
+function loadSystemSettings() {
+  fetch('../../../backend/router.php/api/superadmin/settings')
+    .then(response => response.json())
+    .then(settings => {
+      // Populate general settings form
+      const generalForm = document.getElementById('general-settings-form');
+      if (generalForm) {
+        const systemNameInput = generalForm.querySelector('input[name="system_name"]');
+        const themeColorInput = generalForm.querySelector('input[name="theme_color"]');
+        const defaultPasswordResetInput = generalForm.querySelector('input[name="default_password_reset"]');
+        const sessionTimeoutInput = generalForm.querySelector('input[name="session_timeout"]');
+
+        if (systemNameInput) systemNameInput.value = settings.system_name || '';
+        if (themeColorInput) themeColorInput.value = settings.theme_color || '#007bff';
+        if (defaultPasswordResetInput) defaultPasswordResetInput.value = settings.default_password_reset || '';
+        if (sessionTimeoutInput) sessionTimeoutInput.value = settings.session_timeout || 30;
+      }
+
+      // Populate security policies form
+      const securityForm = document.getElementById('security-policies-form');
+      if (securityForm) {
+        const passwordMinLengthEnabled = securityForm.querySelector('input[name="password_min_length_enabled"]');
+        const passwordMinLengthInput = securityForm.querySelector('input[name="password_min_length"]');
+        const passwordUppercaseRequired = securityForm.querySelector('input[name="password_uppercase_required"]');
+        const passwordLowercaseRequired = securityForm.querySelector('input[name="password_lowercase_required"]');
+        const passwordNumbersRequired = securityForm.querySelector('input[name="password_numbers_required"]');
+        const passwordSpecialCharsRequired = securityForm.querySelector('input[name="password_special_chars_required"]');
+        const passwordHistoryCountInput = securityForm.querySelector('input[name="password_history_count"]');
+        const maxLoginAttemptsInput = securityForm.querySelector('input[name="max_login_attempts"]');
+        const lockoutDurationInput = securityForm.querySelector('input[name="lockout_duration"]');
+        const passwordExpirationDaysInput = securityForm.querySelector('input[name="password_expiration_days"]');
+        const twoFactorRequired = securityForm.querySelector('input[name="two_factor_required"]');
+
+        if (passwordMinLengthEnabled) passwordMinLengthEnabled.checked = settings.password_min_length_enabled === '1' || settings.password_min_length_enabled === true;
+        if (passwordMinLengthInput) passwordMinLengthInput.value = settings.password_min_length || 8;
+        if (passwordUppercaseRequired) passwordUppercaseRequired.checked = settings.password_uppercase_required === '1' || settings.password_uppercase_required === true;
+        if (passwordLowercaseRequired) passwordLowercaseRequired.checked = settings.password_lowercase_required === '1' || settings.password_lowercase_required === true;
+        if (passwordNumbersRequired) passwordNumbersRequired.checked = settings.password_numbers_required === '1' || settings.password_numbers_required === true;
+        if (passwordSpecialCharsRequired) passwordSpecialCharsRequired.checked = settings.password_special_chars_required === '1' || settings.password_special_chars_required === true;
+        if (passwordHistoryCountInput) passwordHistoryCountInput.value = settings.password_history_count || 5;
+        if (maxLoginAttemptsInput) maxLoginAttemptsInput.value = settings.max_login_attempts || 5;
+        if (lockoutDurationInput) lockoutDurationInput.value = settings.lockout_duration || 15;
+        if (passwordExpirationDaysInput) passwordExpirationDaysInput.value = settings.password_expiration_days || 90;
+        if (twoFactorRequired) twoFactorRequired.checked = settings.two_factor_required === '1' || settings.two_factor_required === true;
+      }
+    })
+    .catch(error => {
+      console.error('Error loading system settings:', error);
+      alert('Failed to load system settings.');
+    });
+}
+
+function saveGeneralSettings() {
+  const generalForm = document.getElementById('general-settings-form');
+  if (!generalForm) return;
+
+  const formData = new FormData(generalForm);
+  const settings = {};
+  for (let [key, value] of formData.entries()) {
+    settings[key] = value;
+  }
+
+  fetch('../../../backend/router.php/api/superadmin/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(settings)
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert('General settings saved successfully!');
+        loadSystemSettings(); // Reload to confirm
+      } else {
+        alert('Failed to save general settings: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error saving general settings:', error);
+      alert('Failed to save general settings.');
+    });
+}
+
+function saveSecurityPolicies() {
+  const securityForm = document.getElementById('security-policies-form');
+  if (!securityForm) return;
+
+  const formData = new FormData(securityForm);
+  const settings = {};
+  for (let [key, value] of formData.entries()) {
+    if (key.endsWith('_enabled') || key.endsWith('_required')) {
+      settings[key] = formData.get(key) === 'on' ? '1' : '0';
+    } else {
+      settings[key] = value;
+    }
+  }
+
+  // Only include password_min_length if enabled
+  if (!settings.password_min_length_enabled || settings.password_min_length_enabled === '0') {
+    delete settings.password_min_length;
+  }
+
+  fetch('../../../backend/router.php/api/superadmin/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(settings)
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert('Security policies saved successfully!');
+        loadSystemSettings(); // Reload to confirm
+      } else {
+        alert('Failed to save security policies: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error saving security policies:', error);
+      alert('Failed to save security policies.');
+    });
+}
+
+function loadGradingScales() {
+  const listContainer = document.getElementById('grading-scales-list');
+  if (!listContainer) return;
+
+  listContainer.innerHTML = '<p class="loading">Loading grading scales...</p>';
+
+  fetch('../../../backend/router.php/api/superadmin/grading-scales')
+    .then(response => response.json())
+    .then(scales => {
+      if (!scales || scales.length === 0) {
+        listContainer.innerHTML = '<p>No grading scales found.</p>';
+        return;
+      }
+
+      listContainer.innerHTML = '';
+      scales.forEach(scale => {
+        const scaleItem = document.createElement('div');
+        scaleItem.className = 'grading-scale-item';
+        const activeClass = scale.is_active ? 'active' : 'inactive';
+        const range = `${scale.min_score}-${scale.max_score}`;
+        scaleItem.innerHTML = `
+          <div class="scale-info">
+            <div class="scale-name">${scale.name}</div>
+            <div class="scale-range">Range: ${range}</div>
+            <div class="scale-grade">Grade: ${scale.grade_letter}</div>
+            <div class="scale-status ${activeClass}">Active: ${scale.is_active ? 'Yes' : 'No'}</div>
+          </div>
+          <div class="scale-actions">
+            <button class="btn-icon edit-scale-btn" data-id="${scale.id}">Edit</button>
+            <button class="btn-icon delete-scale-btn" data-id="${scale.id}">Delete</button>
+            <button class="btn-icon ${activeClass}-btn activate-scale-btn" data-id="${scale.id}">
+              ${scale.is_active ? 'Deactivate' : 'Activate'}
+            </button>
+          </div>
+        `;
+        listContainer.appendChild(scaleItem);
+      });
+
+      // Add event listeners
+      document.querySelectorAll('.edit-scale-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.target.dataset.id;
+          openGradingScaleModal('edit', id);
+        });
+      });
+
+      document.querySelectorAll('.delete-scale-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.target.dataset.id;
+          if (confirm('Are you sure you want to delete this grading scale?')) {
+            deleteGradingScale(id);
+          }
+        });
+      });
+
+      document.querySelectorAll('.activate-scale-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.target.dataset.id;
+          activateGradingScale(id);
+        });
+      });
+    })
+    .catch(error => {
+      console.error('Error loading grading scales:', error);
+      listContainer.innerHTML = '<p>Error loading grading scales.</p>';
+    });
+}
+
+function openGradingScaleModal(mode, id = null) {
+  const modal = document.getElementById('grading-scale-modal');
+  if (!modal) {
+    // Create modal if it doesn't exist
+    const modalHtml = `
+      <div id="grading-scale-modal" class="modal">
+        <div class="modal-content">
+          <h3 id="modal-title">${mode === 'add' ? 'Add New Grading Scale' : 'Edit Grading Scale'}</h3>
+          <form id="grading-scale-form">
+            <input type="hidden" id="scale-id" value="${id || ''}">
+            <div class="form-group">
+              <label for="scale-name">Name:</label>
+              <input type="text" id="scale-name" required>
+            </div>
+            <div class="form-group">
+              <label for="scale-min-score">Min Score:</label>
+              <input type="number" id="scale-min-score" step="0.01" min="0" max="100" required>
+            </div>
+            <div class="form-group">
+              <label for="scale-max-score">Max Score:</label>
+              <input type="number" id="scale-max-score" step="0.01" min="0" max="100" required>
+            </div>
+            <div class="form-group">
+              <label for="scale-grade-letter">Grade Letter:</label>
+              <input type="text" id="scale-grade-letter" maxlength="5" required>
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="scale-active"> Set as Active
+              </label>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Save</button>
+              <button type="button" id="close-grading-modal" class="btn-secondary">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Event listeners for modal
+    document.getElementById('close-grading-modal').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    document.getElementById('grading-scale-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (mode === 'add') {
+        createGradingScale();
+      } else {
+        updateGradingScale(id);
+      }
+    });
+
+    // Close on outside click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  }
+
+  modal.style.display = 'block';
+  document.getElementById('modal-title').textContent = mode === 'add' ? 'Add New Grading Scale' : 'Edit Grading Scale';
+
+  if (mode === 'edit') {
+    // Load existing data
+    fetch(`../../../backend/router.php/api/superadmin/grading-scales/${id}`)
+      .then(response => response.json())
+      .then(scale => {
+        document.getElementById('scale-id').value = scale.id;
+        document.getElementById('scale-name').value = scale.name;
+        document.getElementById('scale-min-score').value = scale.min_score;
+        document.getElementById('scale-max-score').value = scale.max_score;
+        document.getElementById('scale-grade-letter').value = scale.grade_letter;
+        document.getElementById('scale-active').checked = scale.is_active;
+      })
+      .catch(error => {
+        console.error('Error loading scale:', error);
+        alert('Failed to load grading scale.');
+      });
+  } else {
+    // Reset form for add
+    document.getElementById('scale-id').value = '';
+    document.getElementById('scale-name').value = '';
+    document.getElementById('scale-min-score').value = '';
+    document.getElementById('scale-max-score').value = '';
+    document.getElementById('scale-grade-letter').value = '';
+    document.getElementById('scale-active').checked = false;
+  }
+}
+
+function createGradingScale() {
+  const formData = {
+    name: document.getElementById('scale-name').value,
+    min_score: parseFloat(document.getElementById('scale-min-score').value),
+    max_score: parseFloat(document.getElementById('scale-max-score').value),
+    grade_letter: document.getElementById('scale-grade-letter').value,
+    is_active: document.getElementById('scale-active').checked
+  };
+
+  fetch('../../../backend/router.php/api/superadmin/grading-scales', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData)
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert('Grading scale created successfully!');
+        document.getElementById('grading-scale-modal').style.display = 'none';
+        loadGradingScales();
+      } else {
+        alert('Failed to create grading scale: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error creating scale:', error);
+      alert('Failed to create grading scale.');
+    });
+}
+
+function updateGradingScale(id) {
+  const formData = {
+    name: document.getElementById('scale-name').value,
+    min_score: parseFloat(document.getElementById('scale-min-score').value),
+    max_score: parseFloat(document.getElementById('scale-max-score').value),
+    grade_letter: document.getElementById('scale-grade-letter').value,
+    is_active: document.getElementById('scale-active').checked
+  };
+
+  fetch(`../../../backend/router.php/api/superadmin/grading-scales/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData)
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert('Grading scale updated successfully!');
+        document.getElementById('grading-scale-modal').style.display = 'none';
+        loadGradingScales();
+      } else {
+        alert('Failed to update grading scale: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error updating scale:', error);
+      alert('Failed to update grading scale.');
+    });
+}
+
+function deleteGradingScale(id) {
+  fetch(`../../../backend/router.php/api/superadmin/grading-scales/${id}`, {
+    method: 'DELETE'
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert('Grading scale deleted successfully!');
+        loadGradingScales();
+      } else {
+        alert('Failed to delete grading scale: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error deleting scale:', error);
+      alert('Failed to delete grading scale.');
+    });
+}
+
+function activateGradingScale(id) {
+  fetch(`../../../backend/router.php/api/superadmin/grading-scales/${id}/activate`, {
+    method: 'PATCH'
+  })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert('Grading scale activated successfully!');
+        loadGradingScales();
+      } else {
+        alert('Failed to activate grading scale: ' + (result.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error activating scale:', error);
+      alert('Failed to activate grading scale.');
+    });
+}
+
+function loadEncryptionStatus() {
+  const statusContainer = document.getElementById('encryption-status-container');
+  if (!statusContainer) return;
+
+  fetch('../../../backend/router.php/api/superadmin/encryption-status')
+    .then(response => response.json())
+    .then(status => {
+      // Update DB Encryption
+      const dbStatusEl = document.getElementById('db-encryption-status');
+      if (dbStatusEl) {
+        const statusClass = status.db_encryption.status === 'enabled' ? 'healthy' : 'error';
+        dbStatusEl.className = `status-indicator ${statusClass}`;
+        dbStatusEl.innerHTML = `
+          <i class="icon ${statusClass}"></i>
+          <span>${status.db_encryption.status}</span>
+          <small>${status.db_encryption.details}</small>
+        `;
+      }
+
+      // Update File Encryption
+      const fileStatusEl = document.getElementById('file-encryption-status');
+      if (fileStatusEl) {
+        const statusClass = status.file_encryption.status === 'enabled' ? 'healthy' : 'warning';
+        fileStatusEl.className = `status-indicator ${statusClass}`;
+        fileStatusEl.innerHTML = `
+          <i class="icon ${statusClass}"></i>
+          <span>${status.file_encryption.status}</span>
+          <small>${status.file_encryption.details}</small>
+        `;
+      }
+
+      // Update SSL Status
+      const sslStatusEl = document.getElementById('ssl-status');
+      if (sslStatusEl) {
+        const statusClass = status.ssl_status.status === 'valid' ? 'healthy' : 'warning';
+        sslStatusEl.className = `status-indicator ${statusClass}`;
+        sslStatusEl.innerHTML = `
+          <i class="icon ${statusClass}"></i>
+          <span>${status.ssl_status.status}</span>
+          <small>${status.ssl_status.details}</small>
+        `;
+      }
+
+      // Update API Security
+      const apiStatusEl = document.getElementById('api-security-status');
+      if (apiStatusEl) {
+        const statusClass = status.api_security.status === 'secure' ? 'healthy' : 'error';
+        apiStatusEl.className = `status-indicator ${statusClass}`;
+        apiStatusEl.innerHTML = `
+          <i class="icon ${statusClass}"></i>
+          <span>${status.api_security.status}</span>
+          <small>${status.api_security.details}</small>
+        `;
+      }
+    })
+    .catch(error => {
+      console.error('Error loading encryption status:', error);
+      alert('Failed to load encryption status.');
+    });
+}
+
+// Event listeners for settings and grading scales
+function setupSettingsAndScalesEventListeners() {
+  // General settings form
+  const generalForm = document.getElementById('general-settings-form');
+  if (generalForm) {
+    generalForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveGeneralSettings();
+    });
+  }
+
+  // Security policies form
+  const securityForm = document.getElementById('security-policies-form');
+  if (securityForm) {
+    securityForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveSecurityPolicies();
+    });
+  }
+
+  // Add grading scale button
+  const addScaleBtn = document.getElementById('add-grading-scale-btn');
+  if (addScaleBtn) {
+    addScaleBtn.addEventListener('click', () => openGradingScaleModal('add'));
+  }
+
+  // Refresh encryption status button
+  const refreshStatusBtn = document.getElementById('refresh-encryption-status-btn');
+  if (refreshStatusBtn) {
+    refreshStatusBtn.addEventListener('click', loadEncryptionStatus);
+  }
+
+  // View encryption logs button
+  const viewLogsBtn = document.getElementById('view-encryption-logs-btn');
+  if (viewLogsBtn) {
+    viewLogsBtn.addEventListener('click', () => {
+      // Navigate to audit logs section
+      const auditSection = document.getElementById('audit-logs-section');
+      if (auditSection) {
+        auditSection.scrollIntoView({ behavior: 'smooth' });
+        // Filter for security logs
+        const logTypeFilter = document.getElementById('audit-log-type-filter');
+        if (logTypeFilter) {
+          logTypeFilter.value = 'security';
+          applyAuditLogFiltersAndSort();
+        }
+      }
+    });
+  }
+}
+
+// Initialize Super Admin functionality including CSV management, system settings, grading scales, and encryption status
 function initSuperAdmin() {
   loadUsers();
   loadAuditLogs();
@@ -1297,6 +1797,10 @@ function initSuperAdmin() {
   addSortingButtons();
   setupEventListeners();
   initCsvManagement(); // Initialize CSV management
+  loadSystemSettings();
+  loadGradingScales();
+  loadEncryptionStatus();
+  setupSettingsAndScalesEventListeners();
   // Auto refresh every 5 seconds
   setInterval(() => {
     loadUsers();
@@ -1304,5 +1808,7 @@ function initSuperAdmin() {
     loadStats();
     loadRecentActivity();
     loadCsvStats(); // Refresh CSV stats
+    loadGradingScales();
+    loadEncryptionStatus();
   }, 5000);
 }

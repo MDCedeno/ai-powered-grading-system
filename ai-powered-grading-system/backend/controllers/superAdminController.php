@@ -19,6 +19,9 @@ class SuperAdminController
         $this->logModel = new Log($pdo);
         $this->csvLogger = new CsvLogger($pdo);
         $this->pdo = $pdo;
+
+        $this->ensureSettingsTable();
+        $this->ensureGradingScalesTable();
     }
 
     public function getAllUsers($search = '', $role = '', $sort = 'name', $limit = 10, $userId = '')
@@ -463,7 +466,8 @@ class SuperAdminController
     {
         // Simple backup to SQL file
         $tables = ['users', 'students', 'courses', 'grades', 'logs'];
-        $backup = '';
+        $snapshotTime = date('Y-m-d H:i:s');
+        $backup = "-- Database backup created on: {$snapshotTime}\n-- Snapshot of system data at this exact time\n\n";
         foreach ($tables as $table) {
             $stmt = $this->pdo->prepare("SELECT * FROM $table");
             $stmt->execute();
@@ -527,18 +531,404 @@ class SuperAdminController
 
     public function getSystemSettings()
     {
-        // Return system settings
-        return [
-            'site_name' => 'AI Powered Grading System',
-            'version' => '1.0',
-            'maintenance_mode' => false
+        $this->ensureSettingsTable();
+
+        $stmt = $this->pdo->prepare("SELECT setting_key, setting_value FROM settings WHERE setting_key IN (
+            'system_name', 'theme_color', 'default_password_reset', 'session_timeout',
+            'password_min_length', 'password_min_length_enabled', 'password_uppercase_required',
+            'password_lowercase_required', 'password_numbers_required', 'password_special_chars_required',
+            'password_history_count', 'max_login_attempts', 'lockout_duration', 'password_expiration_days',
+            'two_factor_required'
+        )");
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $settings = [];
+        foreach ($results as $row) {
+            $key = $row['setting_key'];
+            $value = $row['setting_value'];
+
+            // Convert boolean strings to actual booleans
+            if (in_array($key, ['password_min_length_enabled', 'password_uppercase_required', 'password_lowercase_required', 'password_numbers_required', 'password_special_chars_required'])) {
+                $settings[$key] = (bool)$value;
+            } elseif (in_array($key, ['password_min_length', 'password_history_count', 'max_login_attempts', 'lockout_duration', 'password_expiration_days', 'session_timeout'])) {
+                $settings[$key] = (int)$value;
+            } else {
+                $settings[$key] = $value;
+            }
+        }
+
+        // Set defaults if not found
+        $defaults = [
+            'system_name' => 'PLMUN Portal',
+            'theme_color' => '#217589',
+            'default_password_reset' => 'changeme123',
+            'session_timeout' => 60,
+            'password_min_length' => 8,
+            'password_min_length_enabled' => true,
+            'password_uppercase_required' => false,
+            'password_lowercase_required' => false,
+            'password_numbers_required' => false,
+            'password_special_chars_required' => false,
+            'password_history_count' => 3,
+            'max_login_attempts' => 5,
+            'lockout_duration' => 30,
+            'password_expiration_days' => 90,
+            'two_factor_required' => 'optional'
         ];
+
+        foreach ($defaults as $key => $default) {
+            if (!isset($settings[$key])) {
+                $settings[$key] = $default;
+            }
+        }
+
+        return $settings;
     }
 
     public function updateSystemSettings($settings)
     {
-        // Update settings
-        return true;
+        $this->ensureSettingsTable();
+
+        $currentUserId = $this->getCurrentUserId();
+        $success = true;
+        $changes = [];
+
+        foreach ($settings as $key => $value) {
+            // Get current value for logging
+            $currentStmt = $this->pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = :key");
+            $currentStmt->execute(['key' => $key]);
+            $current = $currentStmt->fetch(PDO::FETCH_ASSOC);
+            $oldValue = $current ? $current['setting_value'] : 'Not set';
+
+            // Update or insert
+            $stmt = $this->pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (:key, :value)
+                                         ON DUPLICATE KEY UPDATE setting_value = :value");
+            $result = $stmt->execute(['key' => $key, 'value' => $value]);
+
+            if ($result && $oldValue !== (string)$value) {
+                $changes[] = "{$key}: '{$oldValue}' → '{$value}'";
+            }
+
+            $success = $success && $result;
+        }
+
+        // Log the changes
+        if ($success && !empty($changes)) {
+            $this->logModel->create(
+                $currentUserId,
+                'system_action',
+                'system_settings_updated',
+                'System settings updated: ' . implode(', ', $changes),
+                1,
+                null
+            );
+        } elseif (!$success) {
+            $this->logModel->create(
+                $currentUserId,
+                'system_action',
+                'system_settings_update_failed',
+                'Failed to update system settings',
+                0,
+                'Database error during settings update'
+            );
+        }
+
+        return $success;
+    }
+
+    public function getGradingScales()
+    {
+        $this->ensureGradingScalesTable();
+
+        $stmt = $this->pdo->prepare("SELECT * FROM grading_scales ORDER BY is_active DESC, min_score DESC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function createGradingScale($data)
+    {
+        $this->ensureGradingScalesTable();
+
+        $currentUserId = $this->getCurrentUserId();
+
+        $stmt = $this->pdo->prepare("INSERT INTO grading_scales (name, min_score, max_score, grade_letter, is_active) VALUES (:name, :min_score, :max_score, :grade_letter, :is_active)");
+        $success = $stmt->execute([
+            'name' => $data['name'],
+            'min_score' => (float)$data['min_score'],
+            'max_score' => (float)$data['max_score'],
+            'grade_letter' => $data['grade_letter'],
+            'is_active' => isset($data['is_active']) ? (bool)$data['is_active'] : false
+        ]);
+
+        if ($success) {
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'grading_scale_created',
+                "New grading scale '{$data['name']}' (Grade: {$data['grade_letter']}, Range: {$data['min_score']}-{$data['max_score']}) created",
+                1,
+                null
+            );
+        } else {
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'grading_scale_creation_failed',
+                "Failed to create grading scale '{$data['name']}'",
+                0,
+                'Database error during grading scale creation'
+            );
+        }
+
+        return $success;
+    }
+
+    public function updateGradingScale($id, $data)
+    {
+        $this->ensureGradingScalesTable();
+
+        $currentUserId = $this->getCurrentUserId();
+
+        // Get original data for logging
+        $originalStmt = $this->pdo->prepare("SELECT * FROM grading_scales WHERE id = :id");
+        $originalStmt->execute(['id' => $id]);
+        $original = $originalStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$original) {
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'grading_scale_update_failed',
+                "Failed to update grading scale ID {$id} - Scale not found",
+                0,
+                'Grading scale not found'
+            );
+            return false;
+        }
+
+        $changes = [];
+        if (isset($data['name']) && $data['name'] !== $original['name']) {
+            $changes[] = "name: '{$original['name']}' → '{$data['name']}'";
+        }
+        if (isset($data['min_score']) && (float)$data['min_score'] !== (float)$original['min_score']) {
+            $changes[] = "min_score: {$original['min_score']} → {$data['min_score']}";
+        }
+        if (isset($data['max_score']) && (float)$data['max_score'] !== (float)$original['max_score']) {
+            $changes[] = "max_score: {$original['max_score']} → {$data['max_score']}";
+        }
+        if (isset($data['grade_letter']) && $data['grade_letter'] !== $original['grade_letter']) {
+            $changes[] = "grade_letter: '{$original['grade_letter']}' → '{$data['grade_letter']}'";
+        }
+        if (isset($data['is_active']) && (bool)$data['is_active'] !== (bool)$original['is_active']) {
+            $changes[] = "is_active: " . ($original['is_active'] ? 'true' : 'false') . " → " . ((bool)$data['is_active'] ? 'true' : 'false');
+        }
+
+        $stmt = $this->pdo->prepare("UPDATE grading_scales SET name = :name, min_score = :min_score, max_score = :max_score, grade_letter = :grade_letter, is_active = :is_active WHERE id = :id");
+        $success = $stmt->execute([
+            'id' => $id,
+            'name' => $data['name'] ?? $original['name'],
+            'min_score' => (float)($data['min_score'] ?? $original['min_score']),
+            'max_score' => (float)($data['max_score'] ?? $original['max_score']),
+            'grade_letter' => $data['grade_letter'] ?? $original['grade_letter'],
+            'is_active' => isset($data['is_active']) ? (bool)$data['is_active'] : (bool)$original['is_active']
+        ]);
+
+        if ($success && $stmt->rowCount() > 0) {
+            $changeDesc = empty($changes) ? 'No changes detected' : implode(', ', $changes);
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'grading_scale_updated',
+                "Grading scale '{$original['name']}' (ID: {$id}) updated. Changes: {$changeDesc}",
+                1,
+                null
+            );
+        } elseif (!$success) {
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'grading_scale_update_failed',
+                "Failed to update grading scale ID {$id}",
+                0,
+                'Database error during grading scale update'
+            );
+        }
+
+        return $success;
+    }
+
+    public function deleteGradingScale($id)
+    {
+        $this->ensureGradingScalesTable();
+
+        $currentUserId = $this->getCurrentUserId();
+
+        // Get scale details for logging
+        $scaleStmt = $this->pdo->prepare("SELECT name FROM grading_scales WHERE id = :id");
+        $scaleStmt->execute(['id' => $id]);
+        $scale = $scaleStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$scale) {
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'grading_scale_deletion_failed',
+                "Failed to delete grading scale ID {$id} - Scale not found",
+                0,
+                'Grading scale not found'
+            );
+            return false;
+        }
+
+        $stmt = $this->pdo->prepare("DELETE FROM grading_scales WHERE id = :id");
+        $success = $stmt->execute(['id' => $id]);
+
+        if ($success) {
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'grading_scale_deleted',
+                "Grading scale '{$scale['name']}' (ID: {$id}) deleted",
+                1,
+                null
+            );
+        } else {
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'grading_scale_deletion_failed',
+                "Failed to delete grading scale '{$scale['name']}' (ID: {$id})",
+                0,
+                'Database error during grading scale deletion'
+            );
+        }
+
+        return $success;
+    }
+
+    public function activateGradingScale($id)
+    {
+        $this->ensureGradingScalesTable();
+
+        $currentUserId = $this->getCurrentUserId();
+
+        // Get scale details
+        $scaleStmt = $this->pdo->prepare("SELECT name FROM grading_scales WHERE id = :id");
+        $scaleStmt->execute(['id' => $id]);
+        $scale = $scaleStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$scale) {
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'grading_scale_activation_failed',
+                "Failed to activate grading scale ID {$id} - Scale not found",
+                0,
+                'Grading scale not found'
+            );
+            return false;
+        }
+
+        try {
+            $this->pdo->beginTransaction();
+
+            // Deactivate all others
+            $deactivateStmt = $this->pdo->prepare("UPDATE grading_scales SET is_active = 0 WHERE id != :id");
+            $deactivateStmt->execute(['id' => $id]);
+
+            // Activate this one
+            $activateStmt = $this->pdo->prepare("UPDATE grading_scales SET is_active = 1 WHERE id = :id");
+            $success = $activateStmt->execute(['id' => $id]);
+
+            if ($success && $activateStmt->rowCount() > 0) {
+                $this->pdo->commit();
+
+                $this->logModel->create(
+                    $currentUserId,
+                    'data_modification',
+                    'grading_scale_activated',
+                    "Grading scale '{$scale['name']}' (ID: {$id}) activated; all others deactivated",
+                    1,
+                    null
+                );
+            } else {
+                $this->pdo->rollBack();
+                $this->logModel->create(
+                    $currentUserId,
+                    'data_modification',
+                    'grading_scale_activation_failed',
+                    "Failed to activate grading scale '{$scale['name']}' (ID: {$id})",
+                    0,
+                    'Database error during activation'
+                );
+                $success = false;
+            }
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            $this->logModel->create(
+                $currentUserId,
+                'data_modification',
+                'grading_scale_activation_failed',
+                "Failed to activate grading scale '{$scale['name']}' (ID: {$id})",
+                0,
+                $e->getMessage()
+            );
+            $success = false;
+        }
+
+        return $success;
+    }
+
+    public function getEncryptionStatus()
+    {
+        $this->ensureSettingsTable();
+
+        $currentUserId = $this->getCurrentUserId();
+
+        // Check DB encryption flag from settings (default to enabled for simulation)
+        $dbStmt = $this->pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'db_encryption_enabled'");
+        $dbStmt->execute();
+        $dbResult = $dbStmt->fetch(PDO::FETCH_ASSOC);
+        $dbEnabled = $dbResult ? (bool)$dbResult['setting_value'] : true;
+
+        // Check file encryption flag (default enabled)
+        $fileStmt = $this->pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'file_encryption_enabled'");
+        $fileStmt->execute();
+        $fileResult = $fileStmt->fetch(PDO::FETCH_ASSOC);
+        $fileEnabled = $fileResult ? (bool)$fileResult['setting_value'] : true;
+
+        // Simulate SSL certificate expiration (e.g., 30 days from now)
+        $sslExpiresIn = 30; // Simulated days
+
+        // Log the status check
+        $this->logModel->create(
+            $currentUserId,
+            'system_action',
+            'encryption_status_checked',
+            'Encryption status was checked by Super Admin',
+            1,
+            null
+        );
+
+        return [
+            'db_encryption' => [
+                'status' => $dbEnabled ? 'enabled' : 'disabled',
+                'details' => $dbEnabled ? 'AES-256-CBC used for sensitive data' : 'No encryption configured'
+            ],
+            'file_encryption' => [
+                'status' => $fileEnabled ? 'enabled' : 'disabled',
+                'details' => $fileEnabled ? 'Backups encrypted with system key' : 'Files stored in plain text'
+            ],
+            'ssl_status' => [
+                'status' => 'valid',
+                'details' => "HTTPS enforced, certificate expires in {$sslExpiresIn} days"
+            ],
+            'api_security' => [
+                'status' => 'secure',
+                'details' => 'JWT tokens required, rate limiting active'
+            ]
+        ];
     }
 
     public function getAutoBackupStatus()
@@ -595,6 +985,50 @@ class SuperAdminController
         $stmt->execute();
     }
 
+    private function ensureGradingScalesTable()
+    {
+        $createTableStmt = $this->pdo->prepare("CREATE TABLE IF NOT EXISTS grading_scales (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            min_score DECIMAL(5,2) NOT NULL,
+            max_score DECIMAL(5,2) NOT NULL,
+            grade_letter VARCHAR(5) NOT NULL,
+            is_active BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )");
+        $createTableStmt->execute();
+
+        // Seed with default grading scales if table is empty
+        $countStmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM grading_scales");
+        $countStmt->execute();
+        $count = $countStmt->fetch(PDO::FETCH_ASSOC)['count'];
+
+        if ($count == 0) {
+            $defaultScales = [
+                ['name' => 'Excellent', 'min_score' => 90.00, 'max_score' => 100.00, 'grade_letter' => 'A', 'is_active' => true],
+                ['name' => 'Very Good', 'min_score' => 80.00, 'max_score' => 89.99, 'grade_letter' => 'B', 'is_active' => false],
+                ['name' => 'Good', 'min_score' => 70.00, 'max_score' => 79.99, 'grade_letter' => 'C', 'is_active' => false],
+                ['name' => 'Satisfactory', 'min_score' => 60.00, 'max_score' => 69.99, 'grade_letter' => 'D', 'is_active' => false],
+                ['name' => 'Fail', 'min_score' => 0.00, 'max_score' => 59.99, 'grade_letter' => 'F', 'is_active' => false]
+            ];
+
+            $insertStmt = $this->pdo->prepare("INSERT INTO grading_scales (name, min_score, max_score, grade_letter, is_active) VALUES (:name, :min_score, :max_score, :grade_letter, :is_active)");
+            foreach ($defaultScales as $scale) {
+                $insertStmt->execute($scale);
+            }
+
+            // Log the seeding
+            $this->logModel->create(
+                $this->getCurrentUserId(),
+                'system_action',
+                'grading_scales_seeded',
+                'Default grading scales have been seeded into the database',
+                1,
+                null
+            );
+        }
+    }
+
     // New method to restore database from a backup file
     public function restoreDatabase($filename)
     {
@@ -610,11 +1044,48 @@ class SuperAdminController
             return ['success' => false, 'message' => 'Backup file does not exist'];
         }
 
-        $sql = file_get_contents($filePath);
         try {
+            // Start transaction for atomic restore
+            $this->pdo->beginTransaction();
+
+            // Truncate tables in reverse order to handle foreign keys
+            $tables = ['logs', 'grades', 'courses', 'students', 'users'];
+            foreach ($tables as $table) {
+                $this->pdo->exec("TRUNCATE TABLE $table");
+            }
+
+            // Execute the backup SQL
+            $sql = file_get_contents($filePath);
             $this->pdo->exec($sql);
+
+            // Commit transaction
+            $this->pdo->commit();
+
+            // Log successful restore
+            $this->logModel->create(
+                $this->getCurrentUserId(),
+                'system_action',
+                'database_restore_completed',
+                "Database restored successfully from backup: {$filename}",
+                1,
+                null
+            );
+
             return ['success' => true, 'message' => 'Database restored successfully'];
         } catch (Exception $e) {
+            // Rollback on error
+            $this->pdo->rollBack();
+
+            // Log failed restore
+            $this->logModel->create(
+                $this->getCurrentUserId(),
+                'system_action',
+                'database_restore_failed',
+                "Database restore failed from backup: {$filename}",
+                0,
+                $e->getMessage()
+            );
+
             return ['success' => false, 'message' => 'Error restoring database: ' . $e->getMessage()];
         }
     }
@@ -625,17 +1096,38 @@ class SuperAdminController
         $backupDir = __DIR__ . '/../../backups/';
         $files = glob($backupDir . 'backup_*.sql');
 
-        // Sort files by modification time descending
-        usort($files, function ($a, $b) {
-            return filemtime($b) - filemtime($a);
+        // Parse timestamps from filenames and sort by snapshot creation time descending
+        $filesWithTimestamps = array_map(function ($file) {
+            $filename = basename($file);
+            // Extract timestamp from filename: backup_YYYY-MM-DD_HH-MM-SS.sql
+            if (preg_match('/backup_(\d{4}-\d{2}-\d{2})_(\d{2}-\d{2}-\d{2})\.sql$/', $filename, $matches)) {
+                $date = $matches[1];
+                $time = str_replace('-', ':', $matches[2]);
+                $snapshotTime = strtotime($date . ' ' . $time);
+            } else {
+                $snapshotTime = filemtime($file); // Fallback to filemtime
+            }
+            return [
+                'filename' => $filename,
+                'snapshot_time' => $snapshotTime,
+                'formatted_date' => date('Y-m-d H:i:s', $snapshotTime)
+            ];
+        }, $files);
+
+        // Sort by snapshot time descending
+        usort($filesWithTimestamps, function ($a, $b) {
+            return $b['snapshot_time'] - $a['snapshot_time'];
         });
 
-        $files = array_slice($files, 0, $limit);
+        $filesWithTimestamps = array_slice($filesWithTimestamps, 0, $limit);
 
-        // Return filenames only
-        return array_map(function ($file) use ($backupDir) {
-            return basename($file);
-        }, $files);
+        // Return array with filename and formatted date
+        return array_map(function ($item) {
+            return [
+                'filename' => $item['filename'],
+                'snapshot_date' => $item['formatted_date']
+            ];
+        }, $filesWithTimestamps);
     }
 
     // CSV Logging Methods

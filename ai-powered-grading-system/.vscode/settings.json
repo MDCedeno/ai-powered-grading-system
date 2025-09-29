@@ -10,7 +10,7 @@
       "ssh": "Disabled",
       "previewLimit": 10,
       "server": "localhost",
-      "port": 3306,
+      "port": 3307,
       "driver": "MySQL",
       "name": "PLMUN_Local",
       "group": "Development",
